@@ -1,0 +1,14 @@
+第一步：IP主机
+马尼拉
+ssh ubuntu@165.154.233.55
+洛杉矶
+ssh ubuntu@165.154.254.99
+用户名
+ubuntu
+第二步：密码
+Along2025!!!
+同时看两个窗口
+实时日志
+sudo journalctl -u nginx -f &
+错误日志
+sudo tail -f /var/log/nginx/error.log &

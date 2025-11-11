@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+  <div>
+    <h1 class="text-xl font-semibold">{{ t('admin.public_groups.insights_title') }}</h1>
+    <p class="text-sm text-gray-500">{{ t('admin.public_groups.insights_subtitle') }}</p>
+  </div>
+  <div class="flex flex-wrap items-center gap-3">
+    <label class="text-sm text-gray-600">
+      {{ t('admin.public_groups.insights_filter_range') }}
+      <input id="startInput" type="date" class="ml-2 border rounded px-2 py-1 text-sm" value="{{ range_start }}">
+      <span class="mx-1 text-gray-400">→</span>
+      <input id="endInput" type="date" class="border rounded px-2 py-1 text-sm" value="{{ range_end }}">
+    </label>
+    <label class="text-sm text-gray-600">
+      {{ t('admin.public_groups.insights_filter_activity') }}
+      <select id="activitySelect" class="ml-2 border rounded px-2 py-1 text-sm min-w-[160px]">
+        <option value="">{{ t('admin.public_groups.insights_filter_all') }}</option>
+        {% for activity in activities %}
+        <option value="{{ activity.id }}" {% if activity_id and activity.id == activity_id %}selected{% endif %}>
+          {{ activity.name }}
+        </option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="text-sm text-gray-600">
+      {{ t('admin.public_groups.insights_filter_days') }}
+      <select id="daysSelect" class="ml-2 border rounded px-2 py-1 text-sm">
+        {% for option in [7, 14, 30, 60, 90] %}
+        <option value="{{ option }}" {% if option == days %}selected{% endif %}>{{ option }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button id="applyBtn" class="px-3 py-1 rounded bg-blue-500 text-white text-sm hover:bg-blue-600">
+      {{ t('admin.public_groups.insights_filter_apply') }}
+    </button>
+  </div>
+</div>
+
+<div id="insightsCards" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6"></div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="bg-white border rounded-md p-4 shadow-sm lg:col-span-2">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-sm font-semibold">{{ t('admin.public_groups.insights_chart_title') }}</h2>
+      <p class="text-xs text-gray-400" id="rangeLabel"></p>
+    </div>
+    <canvas id="trendChart" height="220"></canvas>
+  </div>
+
+  <div class="bg-white border rounded-md p-4 shadow-sm">
+    <h2 class="text-sm font-semibold mb-3">{{ t('admin.public_groups.insights_top_title') }}</h2>
+    <table class="w-full text-sm text-left">
+      <thead class="border-b text-gray-500">
+        <tr>
+          <th class="py-2">{{ t('admin.public_groups.insights_table_activity') }}</th>
+          <th class="py-2 text-right">{{ t('admin.public_groups.insights_table_conversions') }}</th>
+          <th class="py-2 text-right">{{ t('admin.public_groups.insights_table_points') }}</th>
+          <th class="py-2 text-right">{{ t('admin.public_groups.insights_table_success') }}</th>
+          <th class="py-2 text-right">{{ t('admin.public_groups.insights_table_slack') }}</th>
+        </tr>
+      </thead>
+      <tbody id="topTableBody" class="divide-y"></tbody>
+    </table>
+  </div>
+
+  <div class="bg-white border rounded-md p-4 shadow-sm lg:col-span-3">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-sm font-semibold">{{ t('admin.public_groups.insights_alerts_title') }}</h2>
+      <span class="text-xs text-gray-400" id="alertsMeta"></span>
+    </div>
+    <table class="w-full text-sm text-left">
+      <thead class="border-b text-gray-500">
+        <tr>
+          <th class="py-2">{{ t('admin.public_groups.insights_table_activity') }}</th>
+          <th class="py-2 text-right">{{ t('admin.public_groups.insights_table_conversions') }}</th>
+          <th class="py-2 text-right">{{ t('admin.public_groups.insights_table_points') }}</th>
+          <th class="py-2 text-right">{{ t('admin.public_groups.insights_table_success') }}</th>
+          <th class="py-2 text-right">{{ t('admin.public_groups.insights_table_slack') }}</th>
+        </tr>
+      </thead>
+      <tbody id="alertsTableBody" class="divide-y"></tbody>
+    </table>
+    <p id="alertsEmpty" class="text-sm text-gray-500 py-4 hidden">{{ t('admin.public_groups.insights_alerts_empty') }}</p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+<script type="application/json" id="insightsData">{{ insights_json | safe }}</script>
+<script>
+(function () {
+  const dataEl = document.getElementById('insightsData');
+  const startInput = document.getElementById('startInput');
+  const endInput = document.getElementById('endInput');
+  const daysSelect = document.getElementById('daysSelect');
+  const activitySelect = document.getElementById('activitySelect');
+  const applyBtn = document.getElementById('applyBtn');
+  const cardsContainer = document.getElementById('insightsCards');
+  const topTableBody = document.getElementById('topTableBody');
+  const alertsTableBody = document.getElementById('alertsTableBody');
+  const alertsEmpty = document.getElementById('alertsEmpty');
+  const rangeLabel = document.getElementById('rangeLabel');
+  const alertsMeta = document.getElementById('alertsMeta');
+  let chart;
+  let state = {};
+
+  function loadInitial() {
+    try {
+      state = JSON.parse(dataEl.textContent || '{}');
+    } catch (err) {
+      state = {};
+    }
+  }
+
+  function renderCards(summary) {
+    const cards = [
+      { label: "{{ t('admin.public_groups.insights_card_conversions') }}", value: summary.total_conversions || 0 },
+      { label: "{{ t('admin.public_groups.insights_card_points') }}", value: summary.total_points || 0 },
+      { label: "{{ t('admin.public_groups.insights_card_success') }}", value: ((summary.webhook_success_rate || 0) * 100).toFixed(2) + '%' },
+      { label: "{{ t('admin.public_groups.insights_card_slack') }}", value: summary.slack_failures || 0 },
+    ];
+    cardsContainer.innerHTML = '';
+    cards.forEach(card => {
+      const div = document.createElement('div');
+      div.className = 'bg-white border rounded-md p-4 shadow-sm';
+      div.innerHTML = `
+        <p class="text-xs uppercase text-gray-500">${card.label}</p>
+        <p class="text-2xl font-semibold mt-2">${card.value}</p>
+      `;
+      cardsContainer.appendChild(div);
+    });
+  }
+
+  function renderChart(trend) {
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    const labels = trend.map(item => item.date);
+    const conversions = trend.map(item => item.conversions || 0);
+    const points = trend.map(item => item.points || 0);
+    if (chart) {
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = conversions;
+      chart.data.datasets[1].data = points;
+      chart.update();
+      return;
+    }
+    chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "{{ t('admin.public_groups.insights_chart_series_conversions') }}",
+            data: conversions,
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+            tension: 0.3,
+            fill: true,
+            yAxisID: 'y',
+          },
+          {
+            label: "{{ t('admin.public_groups.insights_chart_series_points') }}",
+            data: points,
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            tension: 0.3,
+            fill: true,
+            yAxisID: 'y1',
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        stacked: false,
+        scales: {
+          y: {
+            type: 'linear',
+            display: true,
+            position: 'left',
+            beginAtZero: true,
+            title: { display: true, text: "{{ t('admin.public_groups.insights_chart_series_conversions') }}" }
+          },
+          y1: {
+            type: 'linear',
+            display: true,
+            position: 'right',
+            beginAtZero: true,
+            grid: { drawOnChartArea: false },
+            title: { display: true, text: "{{ t('admin.public_groups.insights_chart_series_points') }}" }
+          },
+        },
+      },
+    });
+  }
+
+  function renderTables(top, alerts) {
+    topTableBody.innerHTML = '';
+    top.forEach(item => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="py-2">${item.name || ('#' + item.activity_id)}</td>
+        <td class="py-2 text-right">${item.conversions || 0}</td>
+        <td class="py-2 text-right">${item.points || 0}</td>
+        <td class="py-2 text-right">${((item.webhook_success_rate || 0) * 100).toFixed(2)}%</td>
+        <td class="py-2 text-right">${item.slack_failures || 0}</td>
+      `;
+      topTableBody.appendChild(row);
+    });
+
+    alertsTableBody.innerHTML = '';
+    alertsEmpty.classList.add('hidden');
+    if (!alerts.length) {
+      alertsEmpty.classList.remove('hidden');
+      return;
+    }
+    alerts.forEach(item => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="py-2">${item.name || ('#' + item.activity_id)}</td>
+        <td class="py-2 text-right">${item.conversions || 0}</td>
+        <td class="py-2 text-right">${item.points || 0}</td>
+        <td class="py-2 text-right">${((item.webhook_success_rate || 0) * 100).toFixed(2)}%</td>
+        <td class="py-2 text-right">${item.slack_failures || 0}</td>
+      `;
+      alertsTableBody.appendChild(row);
+    });
+  }
+
+  function render() {
+    const summary = state.summary || {};
+    renderCards(summary);
+    renderChart(state.daily_trend || []);
+    renderTables(state.top_activities || [], state.alerts || []);
+    const range = state.range || {};
+    rangeLabel.textContent = `${(range.start || '').substring(0, 10)} → ${(range.end || '').substring(0, 10)}`;
+    alertsMeta.textContent = `${(state.alerts || []).length} {{ t('admin.public_groups.insights_alerts_count') }}`;
+  }
+
+  async function reload() {
+    const params = new URLSearchParams();
+    if (startInput.value && endInput.value) {
+      params.append('start', `${startInput.value}T00:00:00`);
+      params.append('end', `${endInput.value}T23:59:59`);
+    } else if (daysSelect.value) {
+      params.append('days', daysSelect.value);
+    }
+    if (activitySelect.value) {
+      params.append('activity_id', activitySelect.value);
+    }
+    applyBtn.disabled = true;
+    applyBtn.textContent = '{{ t("admin.public_groups.insights_loading") }}';
+    try {
+      const resp = await fetch(`/admin/public-groups/activities/insights/data?${params.toString()}`, { credentials: 'same-origin' });
+      if (!resp.ok) {
+        throw new Error('failed');
+      }
+      state = await resp.json();
+      if (state.range) {
+        startInput.value = (state.range.start || '').substring(0, 10);
+        endInput.value = (state.range.end || '').substring(0, 10);
+      }
+      render();
+    } catch (err) {
+      alert('{{ t("admin.public_groups.insights_error") }}');
+    } finally {
+      applyBtn.disabled = false;
+      applyBtn.textContent = '{{ t("admin.public_groups.insights_filter_apply") }}';
+    }
+  }
+
+  loadInitial();
+  render();
+  applyBtn.addEventListener('click', reload);
+})();
+</script>
+{% endblock %}
+

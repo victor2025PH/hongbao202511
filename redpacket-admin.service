@@ -1,0 +1,33 @@
+[Unit]
+Description=Redpacket Admin (FastAPI + Uvicorn)
+After=network.target
+
+[Service]
+# 运行目录（改成你的项目根目录）
+WorkingDirectory=/home/ubuntu
+
+# 环境变量（可选）——如果你有 .env，就取消下一行注释
+# EnvironmentFile=/home/ubuntu/.env
+
+# 基础环境变量
+Environment=PYTHONUNBUFFERED=1
+Environment=PORT=8080
+
+# Uvicorn 启动命令（按你的入口调整）
+# 只监听本机 127.0.0.1，交给 Nginx 反代
+ExecStart=/home/ubuntu/.venv/bin/uvicorn web_admin.main:app --host 127.0.0.1 --port 8080
+
+# 进程意外退出自动重启
+Restart=always
+RestartSec=3
+
+# 用普通用户运行，避免权限过大
+User=ubuntu
+Group=ubuntu
+
+#（可选加强）限制权限，生产环境可以逐步打开
+# NoNewPrivileges=true
+# PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

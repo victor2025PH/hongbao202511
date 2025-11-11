@@ -1,0 +1,28 @@
+# Python venv & caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+.python-version
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+.ipynb_checkpoints/
+
+# Node/Build/IDE
+node_modules/
+dist/
+build/
+coverage/
+.DS_Store
+.idea/
+.vscode/
+
+# Logs/Artifacts
+*.log
+*.sqlite
+*.xlsx
+*.xls

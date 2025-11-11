@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">{{ t("admin.adjust.title") }}</h1>
+
+<form id="adjust-form" method="post" action="/admin/adjust/preview" class="bg-white shadow rounded-xl p-4 space-y-4">
+  <!-- ✅ CSRF：由 GET /admin/adjust 下发 -->
+  <input type="hidden" name="csrf_token" value="{{ csrf_token or '' }}"/>
+
+  <div>
+    <label class="block text-sm text-gray-600 mb-1">{{ t("admin.adjust.users") }}</label>
+    <!-- 支持 ID、@用户名，逗号/空格/换行分隔；控制器会统一解析 -->
+    <textarea name="users" rows="4" class="w-full border rounded-md p-2" placeholder="12345678, @alice, @bob" required></textarea>
+    <p class="mt-1 text-xs text-gray-400">{{ t("admin.common.hint") or "" }}</p>
+  </div>
+
+  <div class="grid md:grid-cols-3 gap-4">
+    <div>
+      <label class="block text-sm text-gray-600 mb-1">{{ t("admin.adjust.asset") }}</label>
+      <select name="asset" class="w-full border rounded-md p-2">
+        <option value="USDT">USDT</option>
+        <option value="TON">TON</option>
+        <option value="POINT">POINT</option>
+        <option value="ENERGY">ENERGY</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-sm text-gray-600 mb-1">{{ t("admin.adjust.amount") }}</label>
+      <!-- 正数加，负数减；POINT/ENERGY 收敛为整数，其他资产最多 6 位小数 -->
+      <input name="amount" class="w-full border rounded-md p-2" placeholder="+10 或 -10" required />
+    </div>
+
+    <div>
+      <label class="block text-sm text-gray-600 mb-1">{{ t("admin.adjust.note") }}</label>
+      <input name="note" class="w-full border rounded-md p-2" maxlength="120" />
+    </div>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <button id="btn-preview" class="px-4 py-2 bg-black text-white rounded-md">{{ t("admin.adjust.preview") }}</button>
+    <a href="/admin" class="text-sm text-gray-700 underline">{{ t("admin.common.back") or 'Back' }}</a>
+  </div>
+</form>
+
+<!-- 防重复提交（轻量）：提交后禁用按钮并更换文案 -->
+<script>
+  (function () {
+    const form = document.getElementById('adjust-form');
+    const btn = document.getElementById('btn-preview');
+    if (!form || !btn) return;
+    form.addEventListener('submit', function () {
+      btn.disabled = true;
+      btn.textContent = '{{ (t("admin.common.processing") or "处理中…")|e }}';
+      // 如果你希望更激进：也可以给整个表单控件加 disabled，这里先保持按钮级别即可
+    });
+  })();
+</script>
+{% endblock %}

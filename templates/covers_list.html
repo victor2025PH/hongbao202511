@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">{{ t("admin.covers.title") }}</h1>
+
+<!-- 顶部工具条：搜索 + 仅显示上架 + 每页条数 -->
+<form method="get" action="" class="flex flex-wrap items-center gap-3 mb-4">
+  <input type="text" name="q" value="{{ q or '' }}" placeholder="标题/#标签 搜索"
+         class="px-3 py-2 border rounded-md text-sm w-64" />
+  <label class="flex items-center gap-2 text-sm">
+    <input type="checkbox" name="enabled" value="1" {% if only_enabled %}checked{% endif %} />
+    仅显示上架
+  </label>
+  <label class="flex items-center gap-2 text-sm">
+    <span>每页</span>
+    <select name="per_page" class="border rounded-md px-2 py-1 text-sm">
+      {% for n in [12, 24, 48, 96] %}
+        <option value="{{ n }}" {% if per_page==n %}selected{% endif %}>{{ n }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button class="px-3 py-2 border rounded-md text-sm">{{ t("admin.common.search") }}</button>
+</form>
+
+<!-- 上传入口（控制器将把文件发到 Telegram 频道，然后保存 file_id/preview_url） -->
+<div class="p-4 bg-white rounded-xl shadow mb-6">
+  <form method="post" action="/admin/covers/upload" enctype="multipart/form-data" class="grid md:grid-cols-3 gap-4">
+    <div>
+      <div class="text-sm text-gray-500 mb-1">{{ t("admin.covers.title_label") }}</div>
+      <input name="title" placeholder="标题 与 #标签（可选，#tag 多个）"
+             class="w-full border rounded-md px-3 py-2 text-sm" />
+    </div>
+    <div>
+      <div class="text-sm text-gray-500 mb-1">{{ t("admin.covers.file_label") }}</div>
+      <input type="file" name="file" accept="image/*" class="w-full text-sm" required />
+    </div>
+    <div class="flex items-end">
+      <button class="px-4 py-2 border rounded-md text-sm">{{ t("admin.covers.upload") }}</button>
+    </div>
+  </form>
+  <div class="text-xs text-gray-500 mt-2">
+    图片会先上传到配置的 Telegram 素材频道（通过机器人），随后在这里显示可预览的小图与操作按钮。
+  </div>
+</div>
+
+<!-- 封面列表 -->
+<div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+  {% for c in rows %}
+  <div class="bg-white rounded-xl shadow overflow-hidden">
+    <a
+      {% set _preview = c.preview_url or c.file_url %}
+      {% if not _preview and c.id %}{% set _preview = '/admin/covers/preview/' ~ c.id %}{% endif %}
+      href="{{ _preview or 'javascript:void(0);' }}"
+      target="_blank"
+      class="block relative"
+      title="{{ c.title or ('#' ~ (c.id or '')) }}"
+      >
+      <!-- 固定比例盒子，避免 CLS -->
+      <div class="w-full" style="aspect-ratio: 1/1; background:#f4f4f5;">
+        {% if _preview %}
+          <img
+            src="{{ _preview }}"
+            alt="{{ c.title or '' }}"
+            loading="lazy"
+            decoding="async"
+            referrerpolicy="no-referrer"
+            class="w-full h-full object-cover"
+            onerror="this.onerror=null; this.src='/static/placeholder.svg';"
+          />
+        {% else %}
+          <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">无预览</div>
+        {% endif %}
+      </div>
+    </a>
+
+    <div class="p-3">
+      <div class="text-sm font-semibold truncate" title="{{ c.title or '' }}">
+        {{ c.title or ('#' ~ (c.id or '')) }}
+      </div>
+      <div class="text-xs text-gray-500 truncate mt-1" title="{{ c.tags or '' }}">
+        {{ c.tags or '' }}
+      </div>
+
+      <div class="mt-3 flex items-center gap-2">
+        <form method="post" action="/admin/covers/{{ c.id }}/toggle" class="inline">
+          <button class="px-2 py-1 border rounded-md text-xs">
+            {% if c.enabled %}下架{% else %}上架{% endif %}
+          </button>
+        </form>
+
+        <form method="post" action="/admin/covers/{{ c.id }}/delete" class="inline"
+              onsubmit="return confirm('确认删除该封面？');">
+          <button class="px-2 py-1 border rounded-md text-xs">{{ t("admin.common.delete") }}</button>
+        </form>
+
+        {% if c.id %}
+          <a class="px-2 py-1 border rounded-md text-xs" target="_blank" href="/admin/covers/preview/{{ c.id }}">
+            预览
+          </a>
+        {% endif %}
+
+        {% if c.file_url %}
+          <a class="px-2 py-1 border rounded-md text-xs" target="_blank" href="{{ c.file_url }}">
+            原图
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+  {% if rows|length == 0 %}
+  <div class="col-span-full p-8 text-center text-gray-400">暂无封面</div>
+  {% endif %}
+</div>
+
+<!-- 分页 -->
+<div class="flex justify-between mt-6">
+  {% if page > 1 %}
+    <a class="text-sm text-gray-700" href="?page={{ page - 1 }}&per_page={{ per_page }}&enabled={{ 1 if only_enabled else 0 }}&q={{ q or '' }}">
+      {{ t("admin.pagination.prev") }}
+    </a>
+  {% else %}
+    <span></span>
+  {% endif %}
+
+  {% if page < total_pages %}
+    <a class="text-sm text-gray-700" href="?page={{ page + 1 }}&per_page={{ per_page }}&enabled={{ 1 if only_enabled else 0 }}&q={{ q or '' }}">
+      {{ t("admin.pagination.next") }}
+    </a>
+  {% endif %}
+</div>
+{% endblock %}

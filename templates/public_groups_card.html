@@ -1,0 +1,49 @@
+<div class="bg-white border rounded-md p-4 shadow-sm">
+  <div class="flex justify-between items-start gap-4">
+    <div class="flex gap-3 w-full">
+      <div class="pt-1">
+        <input type="checkbox"
+               class="bulk-checkbox h-4 w-4 mt-1 text-blue-600 border-gray-300 rounded focus:ring-blue-400"
+               value="{{ g.id }}"
+               aria-label="{{ t('admin.public_groups.bulk_checkbox_label', name=g.name) }}">
+      </div>
+      <div class="flex-1">
+      <h3 class="text-base font-semibold text-gray-900">
+        <a href="{{ g.invite_link }}" target="_blank" rel="noopener" class="hover:underline">
+          {{ g.name }}
+        </a>
+      </h3>
+      <p class="text-sm text-gray-500 mt-1 truncate">{{ g.description or t('admin.public_groups.no_desc') }}</p>
+      <div class="text-xs text-gray-400 mt-2 flex flex-wrap gap-2">
+        <span>#{{ g.language or 'n/a' }}</span>
+        {% if g.tags %}
+          {% for tag in g.tags %}
+            <span class="px-2 py-0.5 bg-gray-100 border rounded">{{ tag }}</span>
+          {% endfor %}
+        {% endif %}
+      </div>
+      <div class="text-xs text-gray-500 mt-2 space-x-4">
+        <span>{{ t('admin.public_groups.members') }}: {{ g.members_count }}</span>
+        <span>{{ t('admin.public_groups.reward_pool') }}: {{ g.entry_reward_pool }}/{{ g.entry_reward_pool_max }}</span>
+        <span>{{ t('admin.public_groups.risk_score') }}: {{ g.risk_score }} ({{ g.risk_flags|join(', ') }})</span>
+        <span>{{ t('admin.public_groups.status') }}: {{ g.status }}</span>
+      </div>
+    </div>
+    <div class="flex flex-col gap-2">
+      <form method="post" action="/admin/public-groups/status/{{ g.id }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="note" value="">
+        <button name="action" value="approve" class="px-3 py-1 text-xs border rounded bg-green-500 text-white hover:bg-green-600">{{ t('admin.public_groups.approve') }}</button>
+      </form>
+      <form method="post" action="/admin/public-groups/status/{{ g.id }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button name="action" value="pause" class="px-3 py-1 text-xs border rounded bg-yellow-500 text-white hover:bg-yellow-600">{{ t('admin.public_groups.pause') }}</button>
+      </form>
+      <form method="post" action="/admin/public-groups/status/{{ g.id }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button name="action" value="remove" class="px-3 py-1 text-xs border rounded bg-red-500 text-white hover:bg-red-600">{{ t('admin.public_groups.remove') }}</button>
+      </form>
+    </div>
+  </div>
+</div>
+

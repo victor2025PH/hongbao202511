@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">{{ t("admin.reset.title") }}</h1>
+
+<div class="grid md:grid-cols-2 gap-6">
+
+  <!-- 指定用户清零 -->
+  <form id="form-reset-selected" method="post" action="/admin/reset/preview" class="bg-white shadow rounded-xl p-4 space-y-3" onsubmit="return __reset_lock(this);">
+    <!-- ✅ CSRF：由 GET /admin/reset 注入 -->
+    <input type="hidden" name="csrf_token" value="{{ csrf_token or '' }}"/>
+
+    <div class="font-semibold">{{ t("admin.reset.selected") }}</div>
+
+    <div class="text-xs text-gray-500">
+      {{ t("admin.filters.invited_by") or "Tips" }}：
+      {{ t("admin.reset.selected") or "Selected users" }}，ID 或 @用户名，支持逗号/空格/分号/换行分隔。
+    </div>
+
+    <div>
+      <label class="block text-sm text-gray-600 mb-1">{{ t("admin.adjust.users") }}</label>
+      <textarea
+        name="users"
+        rows="5"
+        class="w-full border rounded-md p-2"
+        placeholder="12345678, @alice, @bob"
+      ></textarea>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="block text-sm text-gray-600 mb-1">{{ t("admin.table.token") }}</label>
+        <select name="asset" class="w-full border rounded-md p-2" required>
+          <option value="USDT">USDT</option>
+          <option value="TON">TON</option>
+          <option value="POINT">POINT</option>
+          <option value="ENERGY">ENERGY</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm text-gray-600 mb-1">{{ t("admin.reset.passphrase") }}</label>
+        <input
+          name="passphrase"
+          class="w-full border rounded-md p-2"
+          placeholder="{{ t('admin.reset.confirm_title') or 'Confirm phrase' }}"
+          required
+        />
+      </div>
+    </div>
+
+    <button id="btn-reset-selected" class="px-4 py-2 bg-black text-white rounded-md">{{ t("admin.common.confirm") }}</button>
+  </form>
+
+  <!-- 全体清零 -->
+  <form id="form-reset-all" method="post" action="/admin/reset/preview_all" class="bg-white shadow rounded-xl p-4 space-y-3" onsubmit="return __reset_lock(this);">
+    <!-- ✅ CSRF：由 GET /admin/reset 注入 -->
+    <input type="hidden" name="csrf_token" value="{{ csrf_token or '' }}"/>
+
+    <div class="font-semibold">{{ t("admin.reset.everyone") }}</div>
+
+    <div class="text-xs text-red-600">
+      {{ t("admin.reset.disallowed") or "Dangerous operation. Make sure environment allows reset." }}
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="block text-sm text-gray-600 mb-1">{{ t("admin.table.token") }}</label>
+        <select name="asset" class="w-full border rounded-md p-2" required>
+          <option value="USDT">USDT</option>
+          <option value="TON">TON</option>
+          <option value="POINT">POINT</option>
+          <option value="ENERGY">ENERGY</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm text-gray-600 mb-1">{{ t("admin.reset.passphrase") }}</label>
+        <input
+          name="passphrase"
+          class="w-full border rounded-md p-2"
+          placeholder="{{ t('admin.reset.confirm_title') or 'Confirm phrase' }}"
+          required
+        />
+      </div>
+    </div>
+
+    <button id="btn-reset-all" class="px-4 py-2 bg-black text-white rounded-md">{{ t("admin.common.confirm") }}</button>
+  </form>
+
+</div>
+
+<!-- 轻量防重复提交脚本：表单提交后禁用按钮并替换文案 -->
+<script>
+  function __reset_lock(form) {
+    try {
+      const btn = form.querySelector('button[type="submit"], button');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = '{{ (t("admin.common.processing") or "处理中…")|e }}';
+      }
+    } catch (e) {}
+    return true;
+  }
+</script>
+{% endblock %}

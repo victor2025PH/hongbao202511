@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% macro fmt_dt(x) -%}
+  {%- if x is string -%}
+    {{- x -}}
+  {%- elif x -%}
+    {{- x.strftime("%Y-%m-%d %H:%M:%S") -}}
+  {%- else -%}
+    -
+  {%- endif -%}
+{%- endmacro %}
+
+<h1 class="text-2xl font-semibold mb-4">{{ t("admin.nav.dashboard") }}</h1>
+
+<!-- 统计卡片区：与 web_admin/controllers/dashboard.py 的 s.* 字段严格对齐 -->
+<div class="grid md:grid-cols-3 gap-4">
+
+  <!-- 用户总数 -->
+  <div class="p-4 rounded-xl bg-white shadow">
+    <div class="text-sm text-gray-500">{{ t("admin.dashboard.users_total") }}</div>
+    <div class="text-2xl font-bold">{{ s.users_total }}</div>
+  </div>
+
+  <!-- 活跃红包数 -->
+  <div class="p-4 rounded-xl bg-white shadow">
+    <div class="text-sm text-gray-500">{{ t("admin.dashboard.envelopes_active") }}</div>
+    <div class="text-2xl font-bold">{{ s.envelopes_active }}</div>
+  </div>
+
+  <!-- 近7天账本金额合计 -->
+  <div class="p-4 rounded-xl bg-white shadow">
+    <div class="text-sm text-gray-500">{{ t("admin.dashboard.ledger_7d_amount") }}</div>
+    <div class="text-2xl font-bold">{{ s.ledger_7d_amount }}</div>
+    <div class="text-xs text-gray-400">
+      since {{ fmt_dt(s.since) }}{% if s.until is defined %} ~ {{ fmt_dt(s.until) }}{% endif %}
+    </div>
+  </div>
+
+  <!-- 近7天账本条数 -->
+  <div class="p-4 rounded-xl bg-white shadow">
+    <div class="text-sm text-gray-500">{{ t("admin.dashboard.ledger_7d_count") }}</div>
+    <div class="text-2xl font-bold">{{ s.ledger_7d_count }}</div>
+  </div>
+
+  <!-- 充值待处理数量 -->
+  <div class="p-4 rounded-xl bg-white shadow">
+    <div class="text-sm text-gray-500">{{ t("admin.dashboard.recharge_pending") }}</div>
+    <div class="text-2xl font-bold">{{ s.recharge_pending }}</div>
+  </div>
+
+  <!-- 充值成功数量 -->
+  <div class="p-4 rounded-xl bg-white shadow">
+    <div class="text-sm text-gray-500">{{ t("admin.dashboard.recharge_success") }}</div>
+    <div class="text-2xl font-bold">{{ s.recharge_success }}</div>
+  </div>
+
+</div>
+
+<!-- 可选：二次操作入口 -->
+<div class="mt-6 flex items-center gap-3 text-sm">
+  <a class="underline text-gray-700 hover:text-black" href="/admin/ledger">{{ t("admin.nav.audit") or 'Ledger' }}</a>
+  <a class="underline text-gray-700 hover:text-black" href="/admin/envelopes">Envelopes</a>
+  <a class="underline text-gray-700 hover:text-black" href="/admin/recharge">Recharge</a>
+</div>
+{% endblock %}

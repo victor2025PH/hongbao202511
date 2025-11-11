@@ -1,0 +1,238 @@
+  cover:
+    change_btn: "🖼 เปลี่ยนภาพปก"
+    change: "🖼 เปลี่ยนภาพปก"
+    entry_tip: "คุณสามารถเลือกภาพปกจากช่องภาพ หรือกด “ข้าม”"
+    open_list: "🖼 เลือกภาพปก"
+    none: "🚫 ไม่ใช้ภาพปก"
+    prev: "« ก่อนหน้า"
+    next: "ถัดไป »"
+    pick_title: "🖼 เลือกภาพปก (จากช่อง)"
+    from_channel: "🖼 จากช่องภาพ"
+    use_this: "✅ ใช้ภาพปกนี้"
+    repick: "🔄 เลือกใหม่"
+    item: "ภาพปก"
+
+env_send:
+  title: "🧧 เลือกพารามิเตอร์ (ไม่บังคับ)"
+  tips: "พิมพ์ข้อความในช่องด้านล่าง\n• หลีกเลี่ยงข้อความโฆษณา\n• ตัวอย่าง: ขอให้ทุกคนโชคดี 🎉"
+  ok: "✅ ส่งแล้ว"
+  back: "⬅️ กลับ"
+  preview_btn: "👀 ดูตัวอย่าง"
+  previewed_ok: "✅ ส่งซองอั่งเปาแล้ว"
+  go_group: "🔗 เปิดกลุ่ม"
+
+env_sent:
+  you_sent: "คุณได้ส่ง {amount} USDT!"
+  mvp_line: "🏆 คุณคือผู้โชคดีที่สุดของรอบนี้ ส่งอีกครั้งด้วยข้อมูลเดียวกัน:"
+  mvp_send_btn: "🏆 ส่งในฐานะ MVP"
+
+hb:
+  grab: "🤲 รับตอนนี้"
+  rank_btn: "🏆 ดูอันดับ"
+
+hongbao_summary:
+  title: "📊 <b>สรุปรอบนี้</b>"
+  total: "💰 รวม: {amount} {token}, {shares} ซอง"
+  left: "📦 เหลือ: {left} ซอง"
+
+hongbao_result:
+  ok: "🎉 คุณได้รับ {amount} {token}!"
+  duplicate: "⚠️ คุณรับไปแล้ว"
+  dup: "⚠️ คุณรับไปแล้ว"
+
+rank:
+  title: "🏆 ผู้โชคดีที่สุด"
+  meta_line: "💰 รวม: {amount} {token} · 📦 ซอง: {shares}"
+  round_title: "🏆 <b>ผู้โชคดีที่สุดของรอบนี้</b>"
+  lucky: "🏅 MVP: ✨ {name} ✨ ({amount} {token})"
+  none: "😅 ยังไม่มีผู้เล่น"
+  global_offline: |-
+    📉 ปิดอันดับรวมทั่วโลก  
+    โปรดดู 📊 สถิติวันนี้
+  round_btn: "🏆 ดูอันดับรอบนี้"
+  mvp_send_btn: "🏅 ส่งในฐานะ MVP"
+  mvp_dm_tip: "🏅 คุณคือ MVP ของรอบนี้ ส่งอีกครั้งได้ทันที:"
+
+today:
+  button: "📊 สถิติวันนี้"
+  title: "📊 สถิติวันนี้ (เฉพาะการรับ)"
+  date_local: "🕒 วันที่ท้องถิ่น: {start} ~ {end} ({tz})"
+  grabbed_only: "🤲 วันนี้รับแล้ว {count} ครั้ง"
+  empty: "📭 ไม่มีข้อมูล"
+  income: "📈 รายรับ: {amount} {token}"
+  outcome: "📉 รายจ่าย: {amount} {token}"
+
+welfare:
+  title: "🎁 ศูนย์สิทธิพิเศษ"
+  signin_btn: "✅ เข้าระบบรายวัน"
+  invite_btn: "🎯 ชวนเพื่อนรับรางวัล"
+  promo_btn: "📢 ข่าวประกาศ"
+  rules_btn: "📜 กติกา"
+  signin_already: "⚠️ วันนี้คุณเข้าระบบแล้ว"
+  signin_ok: "✅ สำเร็จ ได้รับ {points} คะแนน"
+  invite_share_ready: "✅ ลิงก์เชิญพร้อมใช้งาน"
+  invite_share_link_label: "🔗 ลิงก์เชิญ:"
+  invite_rules: "📘 กติกาการเชิญและแลกของรางวัล"
+  promo: "📢 ข่าวประกาศ"
+  invite_share_btn: "🔗 สร้างลิงก์เชิญ"
+  invite_redeem_btn: "♻️ แลกคะแนน"
+  invite_title: "🎯 ความคืบหน้าเชิญเพื่อน"
+  invite_compact: |-
+    ความคืบหน้า: {percent}%
+    {bar}
+    {phase_text}
+  exchange:
+    desc: |-
+      ♻️ <b>แลกของรางวัล</b>  
+      • “คะแนน → ความคืบหน้า”: ทุก 1000 คะแนน = +1%  
+      • “พลังงาน → คะแนน”: แปลงตามอัตราคงที่  
+      • ครบ 100% จะปลดล็อกของรางวัล
+    not_enough: "🚫 {resource} ไม่เพียงพอ"
+    to_progress: "🔼 ใช้ 1000 คะแนน → +1% ความคืบหน้า"
+    energy_to_points_btn: "⚡ พลังงาน → ⭐ คะแนน"
+    success_progress: "✅ +{value}% ความคืบหน้า"
+    success_points: "✅ +{value} คะแนน"
+
+phase:
+  "100": "🎉 สำเร็จ!"
+  "99": "✨ อีกนิดเดียว!"
+  "95_98": "🔥 โค้งสุดท้าย!"
+  "90_94": "⚡ กำลังดีมาก"
+  "80_89": "👍 ดีขึ้นเรื่อยๆ"
+
+record:
+  title: "📜 ประวัติธุรกรรม"
+  recent10: "🕑 10 รายการล่าสุด:"
+  none: "📭 ไม่มีประวัติ"
+  fields:
+    time: "🕒 เวลา"
+    type: "🔖 ประเภท"
+    token: "🪙 สกุลเงิน"
+    amount: "💵 จำนวนเงิน"
+    note: "📝 หมายเหตุ"
+
+types:
+  RECHARGE: "💰 เติมเงิน"
+  WITHDRAW: "🏧 ถอนเงิน"
+  HONGBAO_SEND: "🧧 ส่ง"
+  HONGBAO_GRAB: "🤲 รับ"
+  ADJUSTMENT: "🔧 ปรับยอดโดยผู้ดูแล"
+  SIGNIN: "🗓️ เช็คอิน"
+  INVITE_REWARD: "🎯 รางวัลเชิญเพื่อน"
+
+lang:
+  title: "🌐 请选择语言"
+  zh: "🇨🇳 简体中文"
+  en: "🇺🇸 English"
+  fr: "🇫🇷 Français"
+  de: "🇩🇪 Deutsch"
+  es: "🇪🇸 Español"
+  hi: "🇮🇳 हिन्दी"
+  vi: "🇻🇳 Tiếng Việt"
+  th: "🇹🇭 ไทย"
+
+recharge:
+  title: "💰 เติมเงิน"
+  choose_method: "เลือกสกุลเงิน"
+  choose_amount: "เลือกจำนวน"
+  custom: "✏️ ป้อนจำนวนเอง"
+  refresh: "🔁 รีเฟรชสถานะ"
+  deposit_addr: "🔗 ที่อยู่สำหรับเติมเงิน"
+  addr_instr: |-
+    💡 โอน {token} ใดๆ ไปยังที่อยู่ข้างต้น (เครือข่าย: {network})  
+    ⏱ หลังยืนยันบนบล็อกเชน ยอดจะเข้าระบบโดยอัตโนมัติ  
+    🔁 ถ้าโอนแล้ว ให้กด “รีเฟรชสถานะ” เพื่อตรวจสอบ
+  fields:
+    id: "🧾 หมายเลขคำสั่งซื้อ"
+    token: "🪙 สกุลเงิน"
+    amount: "💵 จำนวนเงิน"
+    address: "🏦 ที่อยู่"
+    status:
+      pending: "⏳ รอดำเนินการ"
+      success: "✅ สำเร็จ"
+      failed: "❌ ล้มเหลว"
+      expired: "🕒 หมดอายุ"
+    created: "🗓️ วันที่สร้าง"
+    expires: "⏰ วันหมดอายุ"
+    label: "สถานะ"
+  link: "🔗 ลิงก์ชำระเงิน"
+  created: "✅ สร้างคำสั่งแล้ว กรุณาทำตามขั้นตอน"
+  input_custom: "✏️ ป้อนจำนวนเงินด้วยตนเอง (เฉพาะตัวเลข)"
+  invalid_amount: "❌ จำนวนเงินไม่ถูกต้อง"
+  invalid_amount_2dp: "❌ รองรับทศนิยม 2 หลักเท่านั้น"
+  success_text: "✅ เติมเงินสำเร็จ!"
+  addr_missing: "ไม่มีที่อยู่ให้คัดลอก"
+  copy_addr: "📋 คัดลอกที่อยู่"
+  copy_amount: "📋 คัดลอกจำนวน"
+  loading: "⏳ กำลังสร้างข้อมูลการชำระเงิน..."
+  tutorial:
+    title: "💰 ศูนย์เติมเงิน"
+    step1: "1️⃣ เลือกสกุลเงิน"
+    step2: "2️⃣ ป้อนจำนวนเงิน"
+    step3: "3️⃣ คัดลอกที่อยู่"
+    step4: "4️⃣ สแกน QR (ถ้ามี)"
+    step4_tip: "ใช้กระเป๋าเงินสแกนรูปนี้เพื่อชำระ"
+    step5: "5️⃣ ตรวจสอบและรอเงินเข้า"
+    step5_tip: "หลังโอน กด 【รีเฟรชสถานะ】 เพื่อตรวจสอบ"
+    warn_amount: "⚠️ ต้องโอนจำนวนที่ตรงกันเท่านั้น ไม่เช่นนั้นเงินจะไม่เข้า"
+    network: "เครือข่าย"
+    amount: "จำนวน"
+    address: "ที่อยู่"
+    expires: "หมดอายุ"
+
+  invoice:
+    title: "ข้อมูลการชำระเงิน"
+    amount: "จำนวน"
+    address: "ที่อยู่"
+    network: "เครือข่าย"
+    expires: "หมดอายุ"
+
+balance:
+  title: "💼 สินทรัพย์ของฉัน"
+  recharge: "💳 เติมเงิน"
+  withdraw: "🏧 ถอนเงิน"
+  template: |-
+    🧾 ยอดคงเหลือปัจจุบัน  
+    💵 USDT: {usdt}  
+    🪙 TON: {ton}  
+    ⭐ คะแนน: {points}  
+
+    🎯 สกุลเงินปัจจุบัน: <b>{token}</b>  
+    🧾 จะหัก: {real_amt}
+
+balance_page:
+  title: "💼 ภาพรวมสินทรัพย์"
+  usdt: "💵 USDT: {amount}"
+  ton: "🪙 TON: {amount}"
+  points: "⭐ คะแนน: {amount}"
+
+withdraw:
+  title: "🏧 ถอนเงิน"
+  choose_token: "เลือกสกุลเงิน"
+  amount:
+    ask: "💵 ป้อนจำนวนที่ต้องการถอน (รองรับทศนิยม)"
+    min: "📉 ขั้นต่ำ {token}: {amount}"
+    fee: "🧾 ค่าธรรมเนียม: {fee} {token}"
+  balance: "💼 ยอดคงเหลือ: {balance} {token}"
+  errors:
+    invalid_amount: "❌ จำนวนไม่ถูกต้อง"
+    less_than_min: "❌ น้อยกว่าขั้นต่ำ"
+    insufficient: "💸 ยอดไม่พอ กรุณาเติมเงิน"
+    bad_address: "❌ ที่อยู่ไม่ถูกต้อง"
+  address:
+    ask: "🏦 ป้อนที่อยู่รับ ({token})"
+  confirm: "✅ ยืนยันการถอน"
+  cancel: "✖️ ยกเลิก"
+  cancelled: "ยกเลิกแล้ว"
+  success: "✅ ส่งคำขอถอนเงินแล้ว"
+  success_detail: "• จำนวน: {amount} {token} (ค่าธรรมเนียม {fee})"
+  success_next: "⛓ จะดำเนินการโอนบนเชนโดยเร็ว"
+  fail: "❌ ล้มเหลว กรุณาลองใหม่"
+  confirm_page:
+    title: "🧧 ยืนยันการถอน"
+    token: "🪙 สกุลเงิน: {token}"
+    amount: "💵 จำนวน: {amount}"
+    fee: "🧾 ค่าธรรมเนียม: {fee}"
+    total: "💳 ยอดที่หักจริง: {total}"
+    address: "🏦 ที่อยู่: {address}"
+

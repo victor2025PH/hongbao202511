@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+  <div>
+    <h1 class="text-xl font-semibold">{{ t('admin.public_groups.dashboard_title') }}</h1>
+    <p class="text-sm text-gray-500">{{ t('admin.public_groups.dashboard_subtitle') }}</p>
+  </div>
+  <div class="flex items-center gap-3">
+    <a href="/admin/public-groups/activities/insights" class="px-3 py-1 rounded border text-sm text-blue-600 border-blue-500 hover:bg-blue-50">
+      {{ t('admin.public_groups.insights_link') }}
+    </a>
+    <label class="text-sm text-gray-600">
+      {{ t('admin.public_groups.dashboard_range') }}
+      <select id="rangeSelect" class="ml-2 border rounded px-2 py-1 text-sm">
+        {% for option in [7, 14, 30, 60, 90] %}
+          <option value="{{ option }}" {% if option == days %}selected{% endif %}>{{ option }} {{ t('admin.public_groups.dashboard_days') }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="text-sm text-gray-600">
+      {{ t('admin.public_groups.dashboard_top') }}
+      <select id="topSelect" class="ml-2 border rounded px-2 py-1 text-sm">
+        {% for option in [3, 5, 10, 15, 20] %}
+          <option value="{{ option }}" {% if option == top %}selected{% endif %}>{{ option }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button id="reloadBtn" class="px-3 py-1 rounded bg-blue-500 text-white text-sm hover:bg-blue-600">
+      {{ t('admin.public_groups.dashboard_refresh') }}
+    </button>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6" id="totalsCards">
+  <!-- Totals cards will be injected -->
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <div class="bg-white border rounded-md p-4 shadow-sm">
+    <h2 class="text-sm font-semibold mb-3">{{ t('admin.public_groups.dashboard_conversion') }}</h2>
+    <ul class="text-sm text-gray-600 space-y-2" id="conversionList"></ul>
+  </div>
+
+  <div class="bg-white border rounded-md p-4 shadow-sm">
+    <h2 class="text-sm font-semibold mb-3">{{ t('admin.public_groups.dashboard_status') }}</h2>
+    <ul class="text-sm text-gray-600 space-y-1" id="statusList"></ul>
+  </div>
+
+  <div class="bg-white border rounded-md p-4 shadow-sm md:col-span-2">
+    <h2 class="text-sm font-semibold mb-3">{{ t('admin.public_groups.dashboard_timeline') }}</h2>
+    <table class="w-full text-sm text-left">
+      <thead class="border-b text-gray-500">
+        <tr>
+          <th class="py-2">{{ t('admin.public_groups.dashboard_date') }}</th>
+          <th class="py-2">{{ t('admin.public_groups.dashboard_views') }}</th>
+          <th class="py-2">{{ t('admin.public_groups.dashboard_clicks') }}</th>
+          <th class="py-2">{{ t('admin.public_groups.dashboard_joins') }}</th>
+        </tr>
+      </thead>
+      <tbody id="timelineBody" class="divide-y"></tbody>
+    </table>
+  </div>
+
+  <div class="bg-white border rounded-md p-4 shadow-sm">
+    <h2 class="text-sm font-semibold mb-3">{{ t('admin.public_groups.dashboard_creations') }}</h2>
+    <table class="w-full text-sm text-left">
+      <thead class="border-b text-gray-500">
+        <tr>
+          <th class="py-2">{{ t('admin.public_groups.dashboard_date') }}</th>
+          <th class="py-2">{{ t('admin.public_groups.dashboard_created') }}</th>
+        </tr>
+      </thead>
+      <tbody id="creationBody" class="divide-y"></tbody>
+    </table>
+  </div>
+
+  <div class="bg-white border rounded-md p-4 shadow-sm">
+    <h2 class="text-sm font-semibold mb-3">{{ t('admin.public_groups.dashboard_tags') }}</h2>
+    <ul class="text-sm text-gray-600 space-y-1" id="tagList"></ul>
+  </div>
+
+  <div class="bg-white border rounded-md p-4 shadow-sm md:col-span-2">
+    <h2 class="text-sm font-semibold mb-3">{{ t('admin.public_groups.dashboard_top_groups') }}</h2>
+    <table class="w-full text-sm text-left">
+      <thead class="border-b text-gray-500">
+        <tr>
+          <th class="py-2">{{ t('admin.public_groups.dashboard_group') }}</th>
+          <th class="py-2">{{ t('admin.public_groups.dashboard_views') }}</th>
+          <th class="py-2">{{ t('admin.public_groups.dashboard_clicks') }}</th>
+          <th class="py-2">{{ t('admin.public_groups.dashboard_joins') }}</th>
+        </tr>
+      </thead>
+      <tbody id="groupBody" class="divide-y"></tbody>
+    </table>
+  </div>
+</div>
+
+<script type="application/json" id="dashboardData">{{ summary_json | safe }}</script>
+<script>
+(function () {
+  const dataEl = document.getElementById('dashboardData');
+  const reloadBtn = document.getElementById('reloadBtn');
+  const rangeSelect = document.getElementById('rangeSelect');
+  const topSelect = document.getElementById('topSelect');
+  let summary = {};
+
+  function render() {
+    summary = JSON.parse(dataEl.textContent || '{}');
+    const totals = summary.totals || {};
+    const conversion = summary.conversion || {};
+    const timeline = summary.timeline || {};
+    const creationTimeline = summary.creation_timeline || {};
+    const status = summary.status_breakdown || {};
+    const topTags = summary.top_tags || [];
+    const topGroups = summary.top_groups || [];
+
+    const cards = [
+      { label: 'view', value: totals.view || 0 },
+      { label: 'click', value: totals.click || 0 },
+      { label: 'join', value: totals.join || 0 },
+      { label: 'created', value: totals.created || 0 }
+    ];
+
+    const cardsContainer = document.getElementById('totalsCards');
+    cardsContainer.innerHTML = '';
+    cards.forEach(card => {
+      const div = document.createElement('div');
+      div.className = 'bg-white border rounded-md p-4 shadow-sm';
+      div.innerHTML = `
+        <p class="text-xs uppercase text-gray-500">${card.label}</p>
+        <p class="text-2xl font-semibold mt-2">${card.value}</p>
+      `;
+      cardsContainer.appendChild(div);
+    });
+
+    const conversionList = document.getElementById('conversionList');
+    conversionList.innerHTML = `
+      <li>${summary.range || ''} {{ t('admin.public_groups.dashboard_days') }} {{ t('admin.public_groups.dashboard_click_rate') }}: ${(conversion.click_rate * 100 || 0).toFixed(2)}%</li>
+      <li>${summary.range || ''} {{ t('admin.public_groups.dashboard_days') }} {{ t('admin.public_groups.dashboard_join_rate') }}: ${(conversion.join_rate * 100 || 0).toFixed(2)}%</li>
+      <li>{{ t('admin.public_groups.dashboard_join_per_click') }}: ${(conversion.join_per_click || 0).toFixed(3)}</li>
+    `;
+
+    const statusList = document.getElementById('statusList');
+    statusList.innerHTML = '';
+    Object.entries(status).forEach(([state, count]) => {
+      const li = document.createElement('li');
+      li.textContent = `${state}: ${count}`;
+      statusList.appendChild(li);
+    });
+
+    const timelineBody = document.getElementById('timelineBody');
+    timelineBody.innerHTML = '';
+    Object.entries(timeline).sort(([a], [b]) => a.localeCompare(b)).forEach(([date, data]) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="py-2">${date}</td>
+        <td class="py-2">${data.view || 0}</td>
+        <td class="py-2">${data.click || 0}</td>
+        <td class="py-2">${data.join || 0}</td>
+      `;
+      timelineBody.appendChild(row);
+    });
+
+    const creationBody = document.getElementById('creationBody');
+    creationBody.innerHTML = '';
+    Object.entries(creationTimeline).sort(([a], [b]) => a.localeCompare(b)).forEach(([date, count]) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `<td class="py-2">${date}</td><td class="py-2">${count}</td>`;
+      creationBody.appendChild(row);
+    });
+
+    const tagList = document.getElementById('tagList');
+    tagList.innerHTML = '';
+    topTags.forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = `${item.tag}: ${item.count}`;
+      tagList.appendChild(li);
+    });
+
+    const groupBody = document.getElementById('groupBody');
+    groupBody.innerHTML = '';
+    topGroups.forEach(item => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="py-2">${item.name || ('#' + item.group_id)}</td>
+        <td class="py-2">${item.views || 0}</td>
+        <td class="py-2">${item.clicks || 0}</td>
+        <td class="py-2">${item.joins || 0}</td>
+      `;
+      groupBody.appendChild(row);
+    });
+  }
+
+  async function reload() {
+    const days = rangeSelect.value;
+    const top = topSelect.value;
+    reloadBtn.disabled = true;
+    reloadBtn.textContent = '{{ t("admin.public_groups.dashboard_loading") }}';
+    try {
+      const resp = await fetch(`/admin/public-groups/stats?days=${days}&top=${top}`, { credentials: 'same-origin' });
+      if (!resp.ok) {
+        throw new Error('failed');
+      }
+      const json = await resp.json();
+      dataEl.textContent = JSON.stringify(json);
+      render();
+    } catch (err) {
+      alert('{{ t("admin.public_groups.dashboard_error") }}');
+    } finally {
+      reloadBtn.disabled = false;
+      reloadBtn.textContent = '{{ t("admin.public_groups.dashboard_refresh") }}';
+    }
+  }
+
+  reloadBtn.addEventListener('click', reload);
+  render();
+})();
+</script>
+{% endblock %}
+

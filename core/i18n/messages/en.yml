@@ -1,0 +1,1011 @@
+welcome: "🎉 Welcome, {username}! Pick a feature 👇"
+
+welcome_full:
+  title: "🎉 Welcome, {username}!"
+  subtitle: |-
+    🧧 <b>Red Packet Game</b>
+    Send packets in groups/DM, grab packets, view rankings and records.
+    Supports USDT / TON / ⭐ points. Multiple modes, easy to start!
+  howto:
+    title: "🎮 How it works"
+    steps: |-
+      • 🧧 <b>Send</b>: choose token → total amount → shares → random (luck) → send.
+      • 🤲 <b>Grab</b>: click “Grab now” on the card. Random amount, pure luck!
+      • 🏆 <b>Ranking</b>: view “Best Luck” and records after each round ends.
+      • 📊 <b>Today’s stats</b>: your send/grab amounts and counts for today.
+      • 💳 <b>Top up / Withdraw</b>: supports USDT / TON. On-chain confirmation may take time.
+  rules:
+    title: "📜 Basic rules"
+    points: |-
+      • ⏱ The packet is open during its validity; remaining amount is refunded after timeout.
+      • 👤 Each user can only grab once per round. Repeated clicks will be refused.
+      • 🧮 <b>Luck = random split</b>, not equal. You might get the most, or possibly 0.
+      • 🔄 Forwarding the packet card is supported (if enabled for the round).
+      • 🧾 All balance changes are recorded in the “Ledger” for audit.
+  fair:
+    title: "⚖️ Fairness"
+    points: |-
+      • 🎲 RNG: based on high-quality PRNG (Python secrets/random); amounts are drawn independently with sum guaranteed; <b>no user is favored</b>.
+      • 🚫 Anti-cheat: one valid grab per user/device; rate-limit and bot behavior will be blocked.
+      • 💠 Transparent & auditable: all send/grab events record time, amount and token; anomalies can be investigated.
+      • 📨 Permission checks: posting only in groups where the bot has rights, preventing delivery failure or tampering.
+      • 🛠 Fallback: on delivery failure, auto refund or ask to retry. No funds swallowed.
+  cta: "🧭 Open the menu and try sending a packet!"
+  tip_open_menu: "👉 Send /start anytime to open the menu."
+
+menu:
+  send: "🧧 Send Packet"
+  recharge: "💰 Top-up Center"
+  today: "📊 Today’s Stats"
+  assets: "💼 My Assets"
+  welfare: "🎁 Rewards"
+  panel: "🛠 Admin Panel"
+  admin: "🛠 Admin Panel"
+  language: "🌐 Language"
+  help: "❓ Help Center"
+  back: "⬅️ Back"
+  bind_this_group: "Bind this group and continue in DM ➡️"
+  bind_hint_in_group: "Detected you are configuring in a group. Click below to bind this group and continue in DM."
+  bound_go_dm: "✅ Bound this group as target. Continue in DM."
+  bound_dm_tips: "You have a target group bound. You can start sending here."
+  bound_ok: "Bound and continued in DM"
+
+asset:
+  title: "💼 My Assets"
+  usdt: "💵 USDT"
+  ton: "🪙 TON"
+  points: "⭐ Points"
+
+hongbao:
+  wizard_title: "🧧 Send Packet Wizard"
+  buttons:
+    relay: "🔁 Forward"
+  summary:
+    title: "📊 <b>Round Summary</b>"
+    total: "💰 Total: {amount} {token}, {shares} shares"
+    left: "📦 Left: {left} shares"
+  grab_now: "🤲 Grab Now"
+  view_rank: "🏆 View Ranking"
+  grab_ok: "🎉 You grabbed {amount} {token}!"
+  grab_dup: "⚠️ You already grabbed this packet."
+  errors:
+    only_mvp: "⚠️ Only the Best-Luck user can continue to send"
+  mvp:
+    success: "✅ New packet created from the Best-Luck data"
+  cover:
+    pick_title: "🖼 Pick a cover to attach:"
+    used_ok: "✅ Cover attached and card sent"
+
+env:
+  title: "🧧 Send Packet Wizard"
+  mode_title: "🔘 Choose a token"
+  dm_hint: "🔒 For privacy, continue in DM. Tap the blue button below."
+  continue_in_dm: "Continue in DM ➡️"
+
+  mode:
+    usdt: "💵 USDT"
+    ton: "🪙 TON"
+    point: "⭐ Points"
+
+  amount:
+    ask: "💰 Enter total amount (e.g., 12.34)"
+
+  shares:
+    ask: "📦 Enter number of shares (e.g., 10)"
+
+  dist:
+    ask: "⚖️ Choose distribution"
+    random: "🎲 Random (luck)"
+    fixed: "🟰 Even split (fixed)"
+
+  loc:
+    ask: "📍 Choose delivery location"
+    here: "📣 Current group"
+    dm: "💬 DM"
+    pick: "🎯 Specific group"
+    pick_tip: |-
+      ℹ️ Tip: group chat_id usually starts with -100. You can also send a link or @username:
+      • Example 1: @yourgroup or https://t.me/yourgroup
+      • Example 2: message link https://t.me/c/123456789/1 (parsed as -100123456789)
+      • Example 3: -100123456789 (raw chat_id)
+
+  memo:
+    ask: |-
+      📝 <b>Blessing/Note (optional)</b>
+      • Type in the input box below
+      • Emojis and new lines supported; skip if you prefer
+      • Example: New day, let’s go! 🎉
+
+  open_group_btn: "➡️ Go to packet group"
+
+  confirm:
+    title: "✅ Confirm parameters"
+    hint: "After confirming, a packet card will be created and delivered."
+
+  confirm_page:
+    title: "🧧 Confirm Packet"
+    token_label: "🪙 Token:"
+    amount_label: "💵 Amount:"
+    shares_label: "📦 Shares:"
+    dist_label: "⚖️ Distribution:"
+    loc_label: "📍 Location:"
+    memo_label: "📝 Note:"
+    random_tip: "🎲 Random"
+    fixed_tip: "🟰 Fixed"
+    cover_label: "🖼 Cover:"
+
+  cancel: "✖️ Cancel"
+  back: "⬅️ Back"
+  send: "🚀 Confirm & Send"
+
+  success:
+    sent: "✅ Packet sent!"
+
+  fail:
+    create: "❌ Creation failed. Try again later."
+    post: "⚠️ Created but failed to post the card. Check the target chat."
+    quick_refund: "❌ Quick send failed. Refunded."
+
+  quick:
+    no_template: "📭 No template yet — grab one round first."
+
+  relay:
+    only_lucky: "🍀 Only the Best-Luck user can forward."
+
+  errors:
+    invalid_amount: "❌ Invalid amount format. Please re-enter."
+    invalid_shares: "❌ Invalid shares. Please re-enter."
+    insufficient: "💳 Insufficient balance — top up or lower the amount."
+    not_ready: "⚠️ Parameters incomplete. Follow the steps."
+    not_in_chat: "🚫 Bot is not in the group. Invite it first."
+    no_rights: "🚫 Bot has no send permission in the group. Grant “Send Messages.”"
+    not_found: "❌ Target group not found. Check chat_id or link."
+    unknown: "⚠️ Cannot verify the target chat. Try later."
+
+  copy:
+    hint: "🧩 Copied last packet parameters. Send the <b>total amount</b> to continue (will charge immediately)."
+
+  cancelled: "✅ Cancelled. Funds were returned."
+
+  input_amount_tip: "✍️ You can directly send a number"
+  input_shares_tip: "✍️ You can directly send the shares"
+  custom_input: "✏️ Custom input"
+  memo_label: "📝 Note:"
+
+  tg:
+    choose: "📌 Choose a target group:"
+    unbound_tip: "🔧 No target group bound. Mention the bot in your group to bind, or tap “Manual Group ID.”"
+    unbound: "🔧 No target group yet."
+    chosen: "✅ Selected: {title}"
+    current: "📌 Current target group"
+    use_this: "👉 Use this group"
+    change: "🔄 Change group"
+    bind_help: "🧩 How to bind: invite the bot to your group and grant send permission, then come back to pick it; or tap “🎯 Manual Group ID” and enter a -100 chat_id."
+    bind_help_text: "🧩 How to bind: invite the bot to your group and grant send permission, then come back to pick it; or tap “🎯 Manual Group ID” and enter a -100 chat_id."
+    manual_pick: "🎯 Manual Group ID"
+    bind_new: "➕ Bind new group"
+    add_group: "➕ Add a group"
+    go_bind: "🪄 Bind in the group"
+    bind_in_group: "🪄 Bind in the group"
+    preset: "📍 Pre-set target group: {chat_id}"
+    chosen_bold: "🔖 <b>Selected: {title}</b>"
+    unbound_bold: "🧩 <b>No target group bound</b>"
+    parse_ok: "✅ Parsed and saved: <b>{title}</b> (<code>{chat_id}</code>)"
+    parse_fail: |-
+      ❌ Could not parse the link or username.
+      Send one of the following:
+      • Public group link, e.g., https://t.me/yourgroup
+      • Message link, e.g., https://t.me/c/123456789/1
+      • Raw chat_id, e.g., -100123456789
+
+  cover:
+    change_btn: "🖼 Change cover"
+    change: "🖼 Change cover"
+    entry_tip: "Pick from the media channel or “Skip.”"
+    open_list: "🖼 Choose cover"
+    none: "🚫 No cover"
+    prev: "« Prev"
+    next: "Next »"
+    pick_title: "🖼 Choose cover (media channel)"
+    from_channel: "🖼 From media channel"
+    use_this: "✅ Use this cover"
+    repick: "🔄 Pick again"
+    item: "Cover"
+
+# Backward compatibility for old code
+env_send:
+  title: "🧧 Choose packet parameters (optional)"
+  tips: "Type your blessing in the input area below.\n• Images/voice supported; avoid pure ads\n• Example: New day, let’s go! 🎉"
+  ok: "✅ I’ve sent it!"
+  back: "⬅️ Back"
+  preview_btn: "👀 Preview packet card"
+  previewed_ok: "✅ Packet sent!"
+  go_group: "🔗 Go to group"
+
+env_sent:
+  you_sent: "You sent {amount} USDT!"
+  mvp_line: "🏆 You’re the “Best Luck” this round. Reuse the parameters with one tap:"
+  mvp_send_btn: "🏆 Best-Luck Send"
+
+hb:
+  grab: "🤲 Grab now"
+  rank_btn: "🏆 View ranking"
+
+hongbao_summary:
+  title: "📊 <b>Round Summary</b>"
+  total: "💰 Total: {amount} {token}, {shares} shares"
+  left: "📦 Left: {left} shares"
+
+hongbao_result:
+  ok: "🎉 You grabbed {amount} {token}!"
+  duplicate: "⚠️ You already grabbed this packet."
+  dup: "⚠️ You already grabbed this packet."
+
+rank:
+  title: "🏆 Best Luck"
+  meta_line: "💰 Total: {amount} {token} · 📦 Shares: {shares}"
+  round_title: "🏆 <b>Best Luck of this round</b>"
+  lucky: "🏅 MVP: ✨ {name} ✨ ({amount} {token})"
+  none: "😅 No one yet"
+  global_offline: |-
+    📉 Global ranking is off.
+    Check 📊 Today’s Stats instead.
+  round_btn: "🏆 View round ranking"
+  mvp_send_btn: "🏅 Best-Luck Send"
+  mvp_dm_tip: "🏅 You’re the Best-Luck this round. Reuse parameters with one tap:"
+
+today:
+  button: "📊 Today’s Stats"
+  title: "📊 Today’s Stats (grabs only)"
+  date_local: "🕒 Local dates: {start} ~ {end} ({tz})"
+  grabbed_only: "🤲 Grabs today: {count}"
+  empty: "📭 No records."
+  income: "📈 Income: {amount} {token}"
+  outcome: "📉 Outcome: {amount} {token}"
+
+welfare:
+  title: "🎁 Rewards"
+  signin_btn: "✅ Daily check-in"
+  invite_btn: "🎯 Invite & Earn"
+  promo_btn: "📢 Announcements"
+  rules_btn: "📜 Rules"
+  signin_already: "⚠️ Checked in today."
+  signin_ok: "✅ Check-in success, gained {points} points."
+  invite_share_ready: "✅ Your invite link is ready."
+  invite_share_link_label: "🔗 Invite link:"
+  invite_rules: "📘 Invite & redemption rules"
+  promo: "📢 Announcements"
+  invite_share_btn: "🔗 Generate share link"
+  invite_redeem_btn: "♻️ Redeem"
+  invite_title: "🎯 Invite progress"
+  invite_compact: |-
+    Progress: {percent}%
+    {bar}
+    {phase_text}
+  exchange:
+    desc: |-
+      ♻️ <b>Redemption</b>
+      • “Points → Progress”: each 1000 points gives +1% progress
+      • “Energy → Points”: convert energy to points at fixed rate
+      • Rewards unlock when progress is full
+    not_enough: "🚫 Not enough {resource}."
+    to_progress: "🔼 Spend 1000 points → progress +1%"
+    energy_to_points_btn: "⚡ Energy → ⭐ Points"
+    success_progress: "✅ Progress +{value}%."
+    success_points: "✅ +{value} points."
+
+phase:
+  "100": "🎉 Goal achieved!"
+  "99": "✨ Almost there — push!"
+  "95_98": "🔥 Final sprint!"
+  "90_94": "⚡ Great momentum!"
+  "80_89": "👍 Getting closer!"
+
+record:
+  title: "📜 Ledger"
+  recent10: "🕑 Latest 10:"
+  none: "📭 No records."
+  fields:
+    time: "🕒 Time"
+    type: "🔖 Type"
+    token: "🪙 Token"
+    amount: "💵 Amount"
+    note: "📝 Note"
+
+types:
+  RECHARGE: "💰 Top-up"
+  WITHDRAW: "🏧 Withdraw"
+  HONGBAO_SEND: "🧧 Sent"
+  HONGBAO_GRAB: "🤲 Grabbed"
+  ADJUSTMENT: "🔧 Admin adjust"
+  SIGNIN: "🗓️ Check-in"
+  INVITE_REWARD: "🎯 Invite reward"
+  RESET: "🧨 Batch reset"
+
+lang:
+  title: "🌐 Choose language"
+  zh: "🇨🇳 Simplified Chinese"
+  en: "🇺🇸 English"
+  fr: "🇫🇷 Français"
+  de: "🇩🇪 Deutsch"
+  es: "🇪🇸 Español"
+  hi: "🇮🇳 हिन्दी"
+  vi: "🇻🇳 Tiếng Việt"
+  th: "🇹🇭 ไทย"
+
+recharge:
+  title: "💰 Top-up Center"
+  choose_method: "Choose a token"
+  choose_amount: "Choose an amount"
+  custom: "✏️ Custom amount"
+  refresh: "🔁 Refresh status"
+  deposit_addr: "🔗 Deposit address"
+  addr_instr: |-
+    💡 Send any amount of {token} to the address above (network: {network}).
+    ⏱ Funds will be credited after on-chain confirmation. Address is reusable.
+    🔁 If you’ve paid, tap “Refresh status” to update.
+  fields:
+    id: "🧾 Order ID"
+    token: "🪙 Token"
+    amount: "💵 Amount"
+    address: "🏦 Address"
+    status:
+      pending: "⏳ Pending"
+      success: "✅ Success"
+      failed: "❌ Failed"
+      expired: "🕒 Expired"
+    created: "🗓️ Created at"
+    expires: "⏰ Expires at"
+    label: "Status"
+  link: "🔗 Payment link"
+  created: "✅ Order created. Follow the instructions to pay."
+  input_custom: "✏️ Enter a custom amount (send a number)"
+  invalid_amount: "❌ Invalid amount."
+  invalid_amount_2dp: "❌ Only two decimals supported."
+  success_text: "✅ Top-up succeeded!"
+  addr_missing: "No address to copy"
+  copy_addr: "📋 Copy address"
+  copy_amount: "📋 Copy amount"
+  loading: "⏳ Generating payment info..."
+  tutorial:
+    title: "💰 Top-up Center"
+    step1: "1️⃣ Choose token"
+    step2: "2️⃣ Amount"
+    step3: "3️⃣ Address"
+    step4: "4️⃣ QR payment (optional)"
+    step4_tip: "Scan the message image with your wallet to pay"
+    step5: "5️⃣ Confirm & credit"
+    step5_tip: "After paying, tap “Refresh status” to check credit"
+    warn_amount: "⚠️ Amount must match exactly, or it won’t credit!"
+    network: "Network"
+    amount: "Amount"
+    address: "Address"
+    expires: "Expires"
+  invoice:
+    title: "Payment Info"
+    amount: "Amount"
+    address: "Address"
+    network: "Network"
+    expires: "Expires"
+
+balance:
+  title: "💼 My Assets"
+  recharge: "💳 Top up"
+  withdraw: "🏧 Withdraw"
+  template: |-
+    🧾 Current balance
+    💵 USDT: {usdt}
+    🪙 TON: {ton}
+    ⭐ Points: {points}
+
+    🎯 Current token: <b>{token}</b>
+    🧾 Pending charge: {real_amt}
+
+balance_page:
+  title: "💼 Balance Overview"
+  usdt: "💵 USDT: {amount}"
+  ton: "🪙 TON: {amount}"
+  points: "⭐ Points: {amount}"
+
+withdraw:
+  title: "🏧 Withdrawal"
+  choose_token: "Choose a token"
+  amount:
+    ask: "💵 Enter withdrawal amount (decimals allowed)"
+    min: "📉 Minimum {token}: {amount}"
+    fee: "🧾 Fee: {fee} {token} (per tx)"
+  balance: "💼 Balance: {balance} {token}"
+  errors:
+    invalid_amount: "❌ Invalid amount."
+    less_than_min: "❌ Below minimum."
+    insufficient: "💸 Insufficient balance — reduce amount or top up."
+    bad_address: "❌ Invalid address."
+  address:
+    ask: "🏦 Enter your {token} receiving address"
+  confirm: "✅ Confirm withdrawal"
+  cancel: "✖️ Cancel"
+  cancelled: "Cancelled."
+  success: "✅ Withdrawal submitted"
+  success_detail: "• Amount: {amount} {token} (fee {fee})"
+  success_next: "⛓ On-chain transfer will be processed ASAP."
+  fail: "❌ Submission failed."
+  confirm_page:
+    title: "🧧 Confirm withdrawal"
+    token: "🪙 Token: {token}"
+    amount: "💵 Amount: {amount}"
+    fee: "🧾 Fee: {fee}"
+    total: "💳 Deducted: {total}"
+    address: "🏦 Address: {address}"
+
+labels:
+  usdt: "💵 USDT"
+  ton: "🪙 TON"
+  point: "⭐ Star"
+  amount: "💵 Amount"
+  token: "🪙 Token"
+  user_id: "🆔 User ID"
+  user_tg_id: "🆔 Telegram User ID"
+  energy: "⚡ Energy"
+  is_last: "🔚 Last"
+  last: "🔚 Tail"
+
+admin:
+  settings: "⚙️ Settings"
+  stats: "📈 Overview"
+  toggle_auto: "🔁 Toggle auto mode"
+  no_permission: "⛔ No permission."
+  adjust_success: "✅ Adjusted {amount} {token} to user {uid}"
+  adjust_failed: "❌ Adjustment failed: {reason}"
+  stats_total_env: "🧧 Total packets: {n}"
+  stats_ongoing: "⏳ Ongoing: {n}"
+  stats_users: "👥 Users: {n}"
+  stats_recharge: "💰 Top-up summary:"
+  stats_active_today: "🔥 Active today: {n}"
+  export_service_missing: "❌ Export service missing (services/export_service.py)"
+  export_failed: "❌ Export failed: {reason}"
+  send_file_failed: "❌ File send failed: {reason}"
+  nav:
+    dashboard: Dashboard
+    covers: Covers
+    export: Export
+    adjust: Adjustment
+    reset: Balance Reset
+    envelopes: Packets
+    recharge: Top-ups
+    audit: Audit Log
+    users: Users
+    settings: Settings
+    invites: Invites
+    queue: Tasks
+    tags: Tags
+    approvals: Approvals
+    public_groups: Public Groups
+    public_group_reports: Reports
+    signout: Sign out
+  public_groups:
+    title: "Public Group Review Board"
+    subtitle: "Audit risk scores, approve or pause groups, and respond to reports."
+    review_tab: "Pending Review"
+    high_risk_tab: "High Risk (score ≥ threshold)"
+    paused_tab: "Paused Groups"
+    removed_tab: "Removed Groups"
+    empty_review: "No groups waiting for review."
+    empty_high_risk: "No high-risk groups for now."
+    empty_paused: "No paused groups."
+    empty_removed: "No removed groups."
+    no_desc: "No description provided."
+    members: "Members"
+    reward_pool: "Reward Pool"
+    risk_score: "Risk Score"
+    status: "Status"
+    approve: "Approve"
+    pause: "Pause"
+    remove: "Remove"
+    bulk_checkbox_label: "Select {name} for bulk actions"
+    bulk_selected_label: "Selected {count} groups"
+    bulk_note_placeholder: "Optional note for audit trail"
+    bulk_processing: "Applying..."
+    bulk_success: "Updated {updated} groups."
+    bulk_partial: "Updated {updated} groups, {failed} failed."
+    bulk_error: "Bulk update failed, please retry."
+    bulk_no_selection: "Select at least one group."
+    status_ok: "Status updated to {status}"
+  public_groups_reports:
+    title: "Public Group Reports"
+    subtitle: "Track incoming reports, assign operators, and close loops."
+    back_to_groups: "Back to groups"
+    filter_status: "Status"
+    filter_all_status: "All statuses"
+    filter_apply: "Apply filters"
+    filter_reset: "Reset"
+    search_label: "Search"
+    search_placeholder: "Group name, type, reporter or description"
+    table_id: "ID"
+    table_group: "Group"
+    table_type: "Type"
+    table_status: "Status"
+    table_priority: "Priority"
+    table_assigned: "Assigned to"
+    table_created: "Created"
+    table_summary: "Summary"
+    view_detail: "View detail"
+    empty: "No reports found for the current filter."
+    pagination_summary: "Showing {start}–{end} of {total} cases"
+    detail_title: "Report Detail"
+    detail_subtitle: "Review case context, add notes, and close out the report."
+    back_to_list: "Back to report list"
+    action_success: "Operation succeeded."
+    report_info: "Report information"
+    field_id: "Case ID"
+    field_status: "Status"
+    field_priority: "Priority"
+    field_type: "Type"
+    field_reporter: "Reporter"
+    field_description: "Description"
+    field_resolution_note: "Resolution note"
+    field_created: "Created at"
+    field_updated: "Updated at"
+    field_resolved: "Resolved at"
+    notes_heading: "Activity log"
+    notes_count: "entries"
+    note_operator: "Operator"
+    notes_empty: "No notes yet."
+    notes_new: "Add internal note"
+    notes_placeholder: "Write your note here..."
+    notes_submit: "Add note"
+    group_info: "Group"
+    group_missing: "Group has been removed."
+    field_group_id: "Group ID"
+    field_group_name: "Name"
+    field_group_link: "Invite link"
+    field_group_status: "Status"
+    actions_heading: "Update case"
+    action_status: "Status"
+    action_assign: "Assign to (Telegram ID)"
+    action_assign_placeholder: "e.g. 90001"
+    action_priority: "Priority"
+    action_resolution_note: "Resolution note"
+    action_resolution_placeholder: "Optional closing summary"
+    action_update: "Save changes"
+    status_pending: "Pending"
+    status_in_progress: "In progress"
+    status_resolved: "Resolved"
+    status_dismissed: "Dismissed"
+    inline_note_prompt: "Add a resolution note (optional):"
+    inline_mark_in_progress: "In progress"
+    inline_mark_resolved: "Resolve"
+    inline_mark_dismissed: "Dismiss"
+    inline_assign_me: "Assign to me"
+    inline_status_updated: "Case updated."
+    inline_assign_success: "Assigned to you."
+    inline_error: "Update failed. Please retry."
+    dashboard_title: "Public Group Dashboard"
+    dashboard_subtitle: "Review conversion trends, creation volume, and top tags."
+    dashboard_range: "Range"
+    dashboard_top: "Top N"
+    dashboard_days: "days"
+    dashboard_refresh: "Refresh"
+    dashboard_loading: "Loading..."
+    dashboard_error: "Failed to load stats. Please retry."
+    dashboard_conversion: "Conversion Summary"
+    dashboard_status: "Status Breakdown"
+    dashboard_timeline: "Exposure → Click → Join Timeline"
+    dashboard_date: "Date"
+    dashboard_views: "Views"
+    dashboard_clicks: "Clicks"
+    dashboard_joins: "Joins"
+    dashboard_creations: "New Groups"
+    dashboard_created: "Created"
+    dashboard_tags: "Top Tags"
+    dashboard_top_groups: "Top Groups"
+    dashboard_group: "Group"
+    insights_title: "Activity Insights"
+    insights_subtitle: "Monitor campaign conversions, bonus points, and webhook health."
+    insights_link: "View Activity Insights"
+    insights_filter_range: "Range"
+    insights_filter_activity: "Activity"
+    insights_filter_all: "All"
+    insights_filter_days: "Preset (days)"
+    insights_filter_apply: "Update"
+    insights_card_conversions: "Conversions"
+    insights_card_points: "Points"
+    insights_card_success: "Webhook Success"
+    insights_card_slack: "Slack Failures"
+    insights_chart_title: "Daily Conversions & Bonus Points"
+    insights_chart_series_conversions: "Conversions"
+    insights_chart_series_points: "Points"
+    insights_top_title: "Top Activities"
+    insights_table_activity: "Activity"
+    insights_table_conversions: "Conversions"
+    insights_table_points: "Points"
+    insights_table_success: "Success Rate"
+    insights_table_slack: "Slack Failures"
+    insights_alerts_title: "Alerts"
+    insights_alerts_empty: "No alerts – all activities look healthy."
+    insights_alerts_count: "alerts"
+    insights_loading: "Loading..."
+    insights_error: "Failed to load activity insights."
+    activities_title: "Automated Campaigns"
+    activities_subtitle: "Configure join bonus campaigns and manage their lifecycle."
+    activities_create_title: "Create Join Bonus Campaign"
+    activities_name: "Campaign Name"
+    activities_description: "Description"
+    activities_start_at: "Start Time"
+    activities_end_at: "End Time"
+    activities_reward_points: "Bonus Points"
+    activities_bonus_points: "Extra Bonus"
+    activities_daily_cap: "Daily Cap"
+    activities_total_cap: "Total Cap"
+    activities_highlight_slots: "Highlight Slots"
+    activities_highlight_enabled: "Enable MiniApp highlight slot"
+    activities_highlight_info: "Highlight"
+    activities_create_submit: "Create Campaign"
+    activities_existing: "Existing Campaigns"
+    activities_bulk_selected_label: "Selected {count} campaigns"
+    activities_bulk_processing: "Processing..."
+    activities_bulk_success: "Updated {updated} activities."
+    activities_bulk_partial: "Updated {updated} activities, {failed} failed."
+    activities_bulk_error: "Bulk update failed."
+    activities_bulk_no_selection: "Please select at least one activity."
+    activities_bulk_pause: "Pause"
+    activities_bulk_resume: "Resume"
+    activities_bulk_apply: "Apply updates"
+    activities_bulk_export_selected: "Export selected"
+    activities_bulk_export_all: "Export all"
+    activities_bulk_highlight_keep: "No change"
+    activities_bulk_highlight_on: "Enable"
+    activities_bulk_highlight_off: "Disable"
+    activities_front_title: "Front card title"
+    activities_front_title_hint: "Overrides the MiniApp/Bot card title; defaults to the campaign name."
+    activities_front_subtitle: "Front card subtitle"
+    activities_front_subtitle_hint: "Short summary shown in MiniApp/Bot cards."
+    activities_front_cta_label: "CTA label"
+    activities_front_cta_label_hint: "Optional button text, e.g. 'Join now'."
+    activities_front_cta_link: "CTA link"
+    activities_front_priority: "Display priority"
+    activities_front_priority_hint: "Lower numbers appear first in MiniApp/Bot surfaces. Default: 100."
+    activities_front_badge: "Badge text"
+    activities_front_preview: "Front card preview"
+    activities_type_join_bonus: "Join bonus"
+    activities_time_range: "Time range"
+    activities_caps: "Limits"
+    activities_no_end: "No end date"
+    activities_toggle_pause: "Pause"
+    activities_toggle_resume: "Resume"
+    activities_empty: "No campaigns yet. Create your first join bonus above."
+    activities_report_link: "View performance report"
+    activities_report_title: "Campaign Performance Report"
+    activities_report_subtitle: "Review daily grants, bonus points and export for analysis."
+    activities_report_start: "Start"
+    activities_report_end: "End"
+    activities_report_export_csv: "Export CSV"
+    activities_report_filter_alerts: "Only show alerts"
+    activities_report_total_conversions: "Total conversions"
+    activities_report_total_points: "Total points"
+    activities_report_webhook_success: "Webhook success"
+    activities_report_webhook_failures: "Webhook failures"
+    activities_report_slack_failures: "Slack failures"
+    activities_report_alert_heading: "Alerts detected in this range"
+    activities_report_total: "Total grants / points"
+    activities_report_grants: "Grants"
+    activities_report_points: "Points"
+    activities_report_conversions: "Conversions"
+    activities_report_webhook_rate: "Webhook success"
+  login:
+    title: Admin Login
+    username: Admin Account
+    password: Password
+    submit: Sign in
+    invalid: Wrong username or password
+    otp_input: 6-digit code
+    otp_send: Send code to Telegram
+    otp_resent: Code resent
+    otp_hint: 2FA is required for high-risk actions after login
+    otp_required: Please send the code first
+    otp_invalid: Invalid or expired code
+    blocked: You are not an admin
+    title: Admin Login
+    username: Admin Account
+    password: Password
+    submit: Sign in
+    invalid: Wrong username or password
+    otp_input: 6-digit code
+    otp_send: Send code to Telegram
+    otp_resent: Code resent
+    otp_hint: 2FA is required for high-risk actions after login
+    otp_required: Please send the code first
+    otp_invalid: Invalid or expired code
+    blocked: You are not an admin
+  twofactor:
+    title: Two-factor
+    need_otp: Code sent
+    send: Send code
+    verify: Verify
+    ok: Verified
+    fail: Verification failed
+  dashboard:
+    users_total: Users
+    envelopes_active: Active packets
+    ledger_7d_amount: Last-7-day amount
+    ledger_7d_count: Last-7-day entries
+    recharge_pending: Pending orders
+    recharge_success: Successful orders
+  covers:
+    title: Cover Library
+    upload: Upload
+    title_label: Title and #tags
+    file_label: File
+    list: List
+    toggle: Toggle
+    remove: Remove
+    empty: No covers
+    menu_title: "🎨 Manage Covers"
+    menu_desc: "🎨 Manage packet covers\nChoose an action:"
+    upload_btn: "➕ Upload cover"
+    list_btn: "📚 View covers"
+    delete_btn: "🗑 Delete cover"
+    back_to_mgr: "⬅️ Back"
+    no_channel: "❌ COVER_CHANNEL_ID not configured."
+    upload_ask: "Send an image as a packet cover. You may add a title."
+    add_ok: "✅ Cover added ID={id}"
+    add_fail: "❌ Upload failed: {reason}"
+    delete_pick: "Choose a cover to delete:"
+    delete_ok: "✅ Deleted cover #{id}"
+    delete_fail: "❌ Cover #{id} not found"
+    preview_fail: "❌ Preview failed."
+    preview_fail_hint: |-
+      Possible reasons:
+      • Bot not in the channel or lacks “Post Messages”;
+      • Wrong channel ID;
+      • Record missing a valid file_id.
+    copy_fail_hint: |-
+      Possible reasons:
+      • Bot not in the channel or lacks permissions;
+      • Wrong channel ID (should start with -100).
+    preview_ok: "✅ Preview sent"
+  export:
+    title: Data Export
+    users_label: Specific users (ID or @username, comma separated)
+    all_users_ledger: Full export (users + ledger)
+    users_only: Users only
+    ledger_only: Ledger only
+    selected_users: Selected users
+    start: Start export
+    done: Export done
+  export_intro: "Choose export scope"
+  export_user: "👤 By user"
+  export_all: "📊 Full export"
+  export_done: "✅ Export finished. Files:"
+  export_empty: "📭 No data"
+  adjust:
+    title: Balance Adjustment
+    users: Users (ID/@, multiple separated)
+    asset: Asset
+    amount: Amount
+    note: Note
+    preview: Preview
+    execute: Execute
+    success_count: Success count
+    fail_count: Fail count
+    insufficient: Insufficient balance
+    button: "➕ Balance adjustment"
+    ask_user: "👤 Target user: send <code>UserID</code> or <code>@username</code>"
+    choose_asset: "💱 Choose an asset:"
+    balance_after: "💼 Current balance"
+    amount:
+      ask_fx: "✍️ Enter amount (positive add, negative subtract)"
+      hint_fx: "Up to 6 decimals, e.g., 12.345678 or -0.5"
+      ask_point: "✍️ Enter points delta (positive/negative), e.g., 100 or -50"
+    memo:
+      ask: "📝 Optional note (or send 'skip')"
+    confirm:
+      title: "✅ Confirm adjustment"
+      user: "• User: {user}"
+      asset: "• Asset: {token}"
+      amount: "• Delta: {amount}"
+      memo: "• Note: {memo}"
+    cancelled: "Cancelled."
+    success: "✅ Adjustment completed"
+    fail: "❌ Adjustment failed"
+    errors:
+      bad_user: "❌ Invalid user ID or @username"
+      bad_amount: "❌ Invalid amount"
+      zero: "❌ Value cannot be 0"
+  reset:
+    title: Balance Reset
+    btn:
+      all: "⚠️ Reset all users"
+      select: "🧹 Reset selected (ID/@)"
+    confirm_title: "Confirmation"
+    passphrase: "Passphrase"
+    everyone: "Reset for all users"
+    selected: "Reset for selected users"
+    dryrun: "Dry run"
+    execute: "Confirm reset"
+    disallowed: "Reset disabled in this environment"
+    all:
+      confirm_phrase:
+        invalid: "❌ Wrong passphrase. Cancelled."
+    select:
+      input: "Enter targets to reset (user IDs or @usernames). Multiple supported by comma/space/semicolon/newline."
+  envelopes:
+    title: Packet Details
+    id: Packet ID
+    summary: Overview
+    claims: Claims
+    lucky: Best Luck
+  recharge:
+    title: Top-up Orders
+    order_id: Order ID
+    token: Token
+    amount: Order amount
+    final_pay: Final due
+    network: Network
+    address: Address
+    payment_url: Payment link
+    status:
+      PENDING: Pending
+      SUCCESS: Success
+      FAILED: Failed
+      EXPIRED: Expired
+    refresh: Refresh
+    expire: Set expired
+  settings:
+    title: Settings
+    feature_flags: Feature Flags
+    toggle_first: Toggle one feature to start
+  filters:
+    title: Advanced Filters
+    balance_range: Balance range
+    active_since: Active since
+    created_between: Registered between
+    invited_by: Invited by
+    token: Token
+  audit:
+    title: Audit Log
+    operator: Operator
+    operation: Operation
+    detail: Detail
+  queue:
+    title: Export Queue
+    enqueue: Enqueue
+    running: Running
+    done: Done
+    failed: Failed
+  tags:
+    title: Tags
+    hot: Hot tags
+    disable: Disable tag
+  approvals:
+    title: Approvals
+    need_two_admins: Two admins required
+    approve: Approve
+    reject: Reject
+  toast:
+    saved: Saved
+    done: Done
+    deleted: Deleted
+    copied: Copied
+  errors:
+    unknown: Unknown error
+    not_found: Not found
+    no_permission: No permission
+    validation: Invalid parameters
+  pagination:
+    prev: Prev
+    next: Next
+    total: Total
+  table:
+    user: User
+    username: Username
+    amount: Amount
+    token: Token
+    note: Note
+    result: Result
+  common:
+    title: Admin
+    save: Save
+    cancel: Cancel
+    confirm: Confirm
+    delete: Delete
+    edit: Edit
+    back: Back
+    search: Search
+    reset: Reset
+    refresh: Refresh
+    actions: Actions
+    status: Status
+    created_at: Created at
+    updated_at: Updated at
+    copy: Copy
+    download: Download
+    preview: Preview
+    enabled: Enabled
+    disabled: Disabled
+    on: On
+    off: Off
+
+common:
+  prev: "« Prev"
+  next: "Next »"
+  invalid: "Invalid operation"
+  not_available: "⛔ Not available for now"
+  bad_request: "⚠️ Bad request. Try again."
+  not_found: "🔍 Not found"
+  wait_emoji: "⏳"
+  ok_emoji: "👌"
+  custom_amount: "✏️ Custom amount"
+  custom_shares: "✏️ Custom shares"
+  skip: "➡️ Skip"
+  copied_tip: "Copied content sent"
+  processing: "⏳ Checking balance..."
+  refresh: "🔄 Refresh"
+  close: "Close"
+
+errors:
+  bad_request: "⚠️ Bad request. Try again."
+  not_found: "🔍 Not found"
+  only_mvp: "⚠️ Only the round MVP can do this"
+
+balance_card:
+  template: |-
+    🧾 Current balance
+    💵 USDT: {usdt}
+    🪙 TON: {ton}
+    ⭐ Points: {points}
+
+    🎯 Current token: <b>{token}</b>
+    🧾 Pending charge: {real_amt}
+
+help:
+  title: "❓ Help Center"
+  subtitle: "Browse FAQs or just ask me directly."
+  ask_me: "Send your question (中文/English)."
+  ask_placeholder: "e.g., How to send to a specific group?"
+  thinking: "Thinking..."
+  ai_fallback: "Didn’t fully get that. Try keywords: send, grab, top-up, withdraw, rules, fairness. Or tap the buttons below."
+  exit_ai_tip: "To exit, tap “Exit AI mode” or go back."
+  exit_ai: "🚪 Exit AI mode"
+  exit_ok: "Exited AI mode."
+  ai_empty: "Please send your question."
+  ask_ai_btn: "🤖 Ask me (AI)"
+  ask_ai: "💡 Ask me (AI)"
+  faq:
+    send: "🧧 How to send"
+    grab: "🤲 How to grab"
+    recharge: "💳 Top-up & Withdraw"
+    withdraw: "🏧 How to withdraw"
+    rank: "🏆 Ranking / Today"
+    rules: "⚖️ Rules & Fairness"
+
+faq:
+  send:
+    title: "🧧 How to send"
+    body: |-
+      1) Menu → Send;
+      2) Choose token (USDT / TON / ⭐ points), total amount, shares;
+      3) Choose location (group/DM), optional note, then confirm;
+      4) For groups, ensure the bot is invited and has send permission.
+  grab:
+    title: "🤲 How to grab"
+    body: |-
+      1) On seeing a packet card, tap “Grab now”;
+      2) Amount is random; ledger is recorded automatically;
+      3) After the round, view Best Luck and ranking.
+  recharge:
+    title: "💳 Top-up & Withdraw"
+    body: |-
+      · Use Assets/Top-up/Withdraw wizards;
+      · On-chain confirmations take time;
+      · Contact the admin if issues occur.
+  rank:
+    title: "🏆 Ranking / Today"
+    body: |-
+      · After a round ends, view the round ranking and Best Luck;
+      · The Today page may be toggled by feature flags.
+  rules:
+    title: "⚖️ Rules & Fairness"
+    body: |-
+      · Only random split (luck);
+      · The bot never participates in grabbing;
+      · For detailed terms, see channel posts or contact admin.

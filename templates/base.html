@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ title or "Admin" }}</title>
+  <!-- Tailwind：CDN 够用；内网就自己打包静态 CSS 替换 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  {# === 全局 CSRF 注入（供所有页面 fetch/AJAX 复用） === #}
+  <meta name="csrf-token" content="{{ (request and request.state and request.state.csrf_token) or (request.session.get('_csrf_token') if request and request.session else '') }}">
+  <script>
+    // 将 CSRF 挂到全局；各页面可直接用 window.__CSRF__ 作为请求头 x-csrf-token
+    (function () {
+      var m = document.querySelector('meta[name="csrf-token"]');
+      window.__CSRF__ = (m && m.content) || '';
+      // 可选：封装一个带 CSRF 的 fetch（按需使用）
+      window.csrfFetch = function(url, opts){
+        opts = opts || {};
+        opts.headers = Object.assign(
+          {'x-csrf-token': window.__CSRF__},
+          opts.headers || {}
+        );
+        return fetch(url, opts);
+      };
+    })();
+  </script>
+
+  <style>
+    .container { max-width: 1200px; }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+    details > summary { list-style: none; }
+    details > summary::-webkit-details-marker { display: none; }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-900">
+  {# === RBAC 预留：可在这里定义一个简单的“可见性判断”宏，后续可替换为真正的权限检查 === #}
+  {% macro can_view(link_name) -%}
+    {# 占位策略：如果以后 session 里有 perms/role，就按需判断；当前默认放行 #}
+    {%- set role = request.session.get('role') if request and request.session else None -%}
+    {%- set perms = request.session.get('perms') if request and request.session else None -%}
+    {# 例如：只允许 Auditor 查看审计；这里先不拦，等 RBAC 接入时再细化 #}
+    {{- true -}}
+  {%- endmacro %}
+
+  <!-- 顶部导航 -->
+  <header class="bg-white border-b">
+    <nav class="container mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-6">
+        <a href="/admin" class="font-semibold">🎛️ Admin</a>
+
+        {% if can_view('dashboard') %}
+        <a href="/admin" aria-current="{{ 'page' if nav_active=='dashboard' else 'false' }}" class="text-sm {{ 'text-black font-semibold' if nav_active=='dashboard' else 'text-gray-600 hover:text-black' }}">
+          {{ t('admin.nav.dashboard') }}
+        </a>
+        {% endif %}
+
+        {% if can_view('covers') %}
+        <a href="/admin/covers" aria-current="{{ 'page' if nav_active=='covers' else 'false' }}" class="text-sm {{ 'text-black font-semibold' if nav_active=='covers' else 'text-gray-600 hover:text-black' }}">
+          Covers
+        </a>
+        {% endif %}
+
+        {% if can_view('export') %}
+        <a href="/admin/export" aria-current="{{ 'page' if nav_active=='export' else 'false' }}" class="text-sm {{ 'text-black font-semibold' if nav_active=='export' else 'text-gray-600 hover:text-black' }}">
+          {{ t('admin.export.title') }}
+        </a>
+        {% endif %}
+
+        {% if can_view('adjust') %}
+        <a href="/admin/adjust" aria-current="{{ 'page' if nav_active=='adjust' else 'false' }}" class="text-sm {{ 'text-black font-semibold' if nav_active=='adjust' else 'text-gray-600 hover:text-black' }}">
+          {{ t('admin.nav.adjust') }}
+        </a>
+        {% endif %}
+
+        {% if can_view('reset') %}
+        <a href="/admin/reset" aria-current="{{ 'page' if nav_active=='reset' else 'false' }}" class="text-sm {{ 'text-black font-semibold' if nav_active=='reset' else 'text-gray-600 hover:text-black' }}">
+          {{ t('admin.nav.reset') }}
+        </a>
+        {% endif %}
+
+        {% if can_view('recharge') %}
+        <a href="/admin/recharge" aria-current="{{ 'page' if nav_active=='recharge' else 'false' }}" class="text-sm {{ 'text-black font-semibold' if nav_active=='recharge' else 'text-gray-600 hover:text-black' }}">
+          {{ t('admin.nav.recharge') }}
+        </a>
+        {% endif %}
+
+        {% if can_view('audit') %}
+        <a href="/admin/audit" aria-current="{{ 'page' if nav_active=='audit' else 'false' }}" class="text-sm {{ 'text-black font-semibold' if nav_active=='audit' else 'text-gray-600 hover:text-black' }}">
+          {{ t('admin.nav.audit') }}
+        </a>
+        {% endif %}
+
+        {% if can_view('approvals') %}
+        <a href="/admin/approvals" aria-current="{{ 'page' if nav_active=='approvals' else 'false' }}" class="text-sm {{ 'text-black font-semibold' if nav_active=='approvals' else 'text-gray-600 hover:text-black' }}">
+          {{ t('admin.nav.approvals') }}
+        </a>
+        {% endif %}
+
+        {% if can_view('queue') %}
+        <a href="/admin/queue" aria-current="{{ 'page' if nav_active=='queue' else 'false' }}" class="text-sm {{ 'text-black font-semibold' if nav_active=='queue' else 'text-gray-600 hover:text-black' }}">
+          {{ t('admin.nav.queue') }}
+        </a>
+        {% endif %}
+
+        {% if can_view('tags') %}
+        <a href="/admin/tags" aria-current="{{ 'page' if nav_active=='tags' else 'false' }}" class="text-sm {{ 'text-black font-semibold' if nav_active=='tags' else 'text-gray-600 hover:text-black' }}">
+          {{ t('admin.nav.tags') }}
+        </a>
+        {% endif %}
+
+        {% if can_view('invites') %}
+        <a href="/admin/invites" aria-current="{{ 'page' if nav_active=='invites' else 'false' }}" class="text-sm {{ 'text-black font-semibold' if nav_active=='invites' else 'text-gray-600 hover:text-black' }}">
+          {{ t('admin.nav.invites') }}
+        </a>
+        {% endif %}
+
+        {% if can_view('users') %}
+        <a href="/admin/users" aria-current="{{ 'page' if nav_active=='users' else 'false' }}" class="text-sm {{ 'text-black font-semibold' if nav_active=='users' else 'text-gray-600 hover:text-black' }}">
+          {{ t('admin.nav.users') }}
+        </a>
+        {% endif %}
+
+        {% if can_view('public_groups') %}
+        <a href="/admin/public-groups"
+           aria-current="{{ 'page' if nav_active=='public_groups' else 'false' }}"
+           class="text-sm {{ 'text-black font-semibold' if nav_active=='public_groups' else 'text-gray-600 hover:text-black' }}">
+          {{ t('admin.nav.public_groups') }}
+        </a>
+        {% endif %}
+
+        {% if can_view('public_group_reports') %}
+        <a href="/admin/public-groups/reports"
+           aria-current="{{ 'page' if nav_active=='public_group_reports' else 'false' }}"
+           class="text-sm {{ 'text-black font-semibold' if nav_active=='public_group_reports' else 'text-gray-600 hover:text-black' }}">
+          {{ t('admin.nav.public_group_reports') }}
+        </a>
+        {% endif %}
+
+        {% if can_view('sheet_users') %}
+        <!-- “用户资料”入口（Google Sheet 后台） -->
+        <a href="/admin/sheet-users"
+           aria-current="{{ 'page' if nav_active=='sheet_users' else 'false' }}"
+           class="text-sm {{ 'text-black font-semibold' if nav_active=='sheet_users' else 'text-gray-600 hover:text-black' }}">
+          用户资料
+        </a>
+        {% endif %}
+      </div>
+
+      <div class="flex items-center gap-3">
+        {% if can_view('settings') %}
+        <a href="/admin/settings" aria-current="{{ 'page' if nav_active=='settings' else 'false' }}" class="text-sm {{ 'text-black font-semibold' if nav_active=='settings' else 'text-gray-600 hover:text-black' }}">
+          {{ t('admin.settings.title') }}
+        </a>
+        {% endif %}
+        {% if can_view('a11y') %}
+        <a href="/admin/a11y" aria-current="{{ 'page' if nav_active=='a11y' else 'false' }}" class="text-sm {{ 'text-black font-semibold' if nav_active=='a11y' else 'text-gray-600 hover:text-black' }}">
+          A11y
+        </a>
+        {% endif %}
+
+        {# 登出表单：支持 CSRF（渐进式）。#}
+        {% set __csrf = (csrf_token if csrf_token is defined else (request.session.get('_csrf_token') if request and request.session else '')) %}
+        <form method="post" action="/admin/logout">
+          <input type="hidden" name="csrf_token" value="{{ __csrf }}">
+          <button class="text-sm text-gray-600 hover:text-black">{{ t('admin.nav.signout') }}</button>
+        </form>
+      </div>
+    </nav>
+  </header>
+
+  <!-- 主体 -->
+  <main class="container mx-auto px-4 py-6">
+    {# 兼容：少数页面还在用 query 参数传提示 #}
+    {% if request.query_params.get('error') %}
+      <div class="mb-4 p-3 border border-red-200 bg-red-50 text-red-700 rounded">{{ request.query_params.get('error') }}</div>
+    {% endif %}
+    {% if request.query_params.get('ok') or request.query_params.get('message') %}
+      <div class="mb-4 p-3 border border-green-200 bg-green-50 text-green-700 rounded">
+        {{ request.query_params.get('ok') or request.query_params.get('message') }}
+      </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="container mx-auto px-4 py-8 text-center text-xs text-gray-400">
+    <span>© {{ (now() if now else None) or '' }} Admin Console</span>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,27 @@
+字段说明
+
+timestamp_utc：UTC ISO8601 时间（带 Z）
+
+source：事件来源（如 start、member_join、member_join_via_invite、member_join_approved、welcome …）
+
+user_id：Telegram 用户 ID
+
+username：用户名（@xxx，可能为空）
+
+first_name / last_name / full_name：姓名拆分 & 拼接
+
+language_code：用户 Telegram 设置的语言（zh-hans、en 等）
+
+is_bot：HUMAN / BOT
+
+chat_id：事件关联的会话 ID（群/私聊）
+
+chat_title：群标题
+
+chat_type：private / group / supergroup / channel
+
+inviter_user_id：邀请人 ID（如果有）
+
+joined_via_invite_link：true / false
+
+note：备注（可选，例如“手动触发 /start”、“通过邀请链接”）

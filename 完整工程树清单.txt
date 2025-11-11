@@ -1,0 +1,295 @@
+卷序列号为 183A-A293
+E:.
+|   .env
+|   app.py
+|   data.sqlite
+|   docker-compose.yml
+|   excel表头字段说明.txt
+|   feature_flags.py
+|   Makefile
+|   patch_sheet_users_plus.diff
+|   patch_sheet_users_plus_v2.diff
+|   project_tree.txt
+|   pytest.ini
+|   README.md
+|   requirements.txt
+|   service_account.json
+|   start.sh
+|   修改文件.txt
+|   启动 Telegram 机器人.txt
+|   启动网页版.txt
+|   完整工程树清单.txt
+|   导航菜单说明.txt
+|   常用维护命令汇总.xlsx
+|   开发与交付指南.txt
+|   根目录（项目入口与环境）.txt
+|
++---assets
+|       .media_cache.json
+|       cover.jpg
+|       cover_en.jpg
+|       cover_zh.jpg
+|       封面图片说明.txt
+|
++---config
+|   |   feature_flags.py
+|   |   settings.py
+|   |   __init__.py
+|   |
+|   \---__pycache__
+|           feature_flags.cpython-311.pyc
+|           settings.cpython-311.pyc
+|           __init__.cpython-311.pyc
+|
++---core
+|   +---clients
+|   |   |   nowpayments.py
+|   |   |
+|   |   \---__pycache__
+|   |           nowpayments.cpython-311.pyc
+|   |
+|   +---i18n
+|   |   |   i18n.py
+|   |   |   __init__.py
+|   |   |
+|   |   +---messages
+|   |   |       de.yml
+|   |   |       en.yml
+|   |   |       es.yml
+|   |   |       fr.yml
+|   |   |       hi.yml
+|   |   |       th.yml
+|   |   |       vi.yml
+|   |   |       zh.yml
+|   |   |
+|   |   \---__pycache__
+|   |           i18n.cpython-311.pyc
+|   |           __init__.cpython-311.pyc
+|   |
+|   +---middlewares
+|   |       anti_echo.py
+|   |       errors.py
+|   |       throttling.py
+|   |       user_bootstrap.py
+|   |       __init__.py
+|   |
+|   \---utils
+|       |   keyboards.py
+|       |   __init__.py
+|       |
+|       \---__pycache__
+|               keyboards.cpython-311.pyc
+|               __init__.cpython-311.pyc
+|
++---exports
+|       export_all_20250902_052917.xlsx
+|       export_all_20250902_225237.xlsx
+|       export_all_20251001_093918.xlsx
+|       export_all_20251008_022547.xlsx
+|       export_all_20251008_033910.xlsx
+|       export_all_20251008_082843.xlsx
+|       export_all_20251008_093255.xlsx
+|       export_all_20251008_105605.xlsx
+|       export_all_20251008_140634.xlsx
+|       export_all_20251009_020902.xlsx
+|       export_all_20251009_021825.xlsx
+|       export_all_20251009_034252.xlsx
+|       export_users_20251008_114716.xlsx
+|       export_users_20251008_115550.xlsx
+|       export_users_20251014_034141.xlsx
+|       export_users_20251014_034431.xlsx
+|       export_users_20251014_103004.xlsx
+|       export_users_detail_20251008_031703.xlsx
+|       export_user_not_found_20251008_093413.xlsx
+|       export_user_not_found_20251008_093439.xlsx
+|       user_5433982810_20251008_043716.xlsx
+|       user_7621548266_20251008_042300.xlsx
+|
++---locales
+|       strings.py
+|
++---middlewares
+|       profile_sync.py
+|
++---models
+|   |   cover.py
+|   |   db.py
+|   |   envelope.py
+|   |   invite.py
+|   |   ledger.py
+|   |   recharge.py
+|   |   user.py
+|   |   __init__.py
+|   |
+|   \---__pycache__
+|           cover.cpython-311.pyc
+|           db.cpython-311.pyc
+|           envelope.cpython-311.pyc
+|           invite.cpython-311.pyc
+|           ledger.cpython-311.pyc
+|           recharge.cpython-311.pyc
+|           user.cpython-311.pyc
+|           __init__.cpython-311.pyc
+|
++---routers
+|   |   admin.py
+|   |   admin_adjust.py
+|   |   admin_covers.py
+|   |   balance.py
+|   |   envelope.py
+|   |   help.py
+|   |   hongbao.py
+|   |   invite.py
+|   |   member.py
+|   |   menu.py
+|   |   nowp_ipn.py
+|   |   rank.py
+|   |   recharge.py
+|   |   today.py
+|   |   welcome.py
+|   |   welfare.py
+|   |   withdraw.py
+|   |   __init__.py
+|   |
+|   \---__pycache__
+|           admin.cpython-311.pyc
+|           admin_adjust.cpython-311.pyc
+|           admin_covers.cpython-311.pyc
+|           balance.cpython-311.pyc
+|           envelope.cpython-311.pyc
+|           help.cpython-311.pyc
+|           hongbao.cpython-311.pyc
+|           invite.cpython-311.pyc
+|           member.cpython-311.pyc
+|           menu.cpython-311.pyc
+|           profile_sync.cpython-311.pyc
+|           rank.cpython-311.pyc
+|           recharge.cpython-311.pyc
+|           today.cpython-311.pyc
+|           welcome.cpython-311.pyc
+|           welfare.cpython-311.pyc
+|           withdraw.cpython-311.pyc
+|           __init__.cpython-311.pyc
+|
++---scripts
+|       cleanup_db.py
+|       demo_flow.py
+|       load_test_users.py
+|
++---services
+|   |   ai_helper.py
+|   |   ai_service.py
+|   |   export_service.py
+|   |   google_logger.py
+|   |   hongbao_service.py
+|   |   invite_service.py
+|   |   recharge_service.py
+|   |   safe_send.py
+|   |   sheet_users.py
+|   |   __init__.py
+|   |
+|   \---__pycache__
+|           ai_helper.cpython-311.pyc
+|           export_service.cpython-311.pyc
+|           google_logger.cpython-311.pyc
+|           invite_service.cpython-311.pyc
+|           recharge_service.cpython-311.pyc
+|           sheet_users.cpython-311.pyc
+|           __init__.cpython-311.pyc
+|
++---static
+|   \---uploads
++---templates
+|       a11y.html
+|       adjust_confirm.html
+|       adjust_form.html
+|       approvals.html
+|       audit.html
+|       base.html
+|       covers_list.html
+|       dashboard.html
+|       edger.html
+|       envelopes_view.html
+|       export.html
+|       invites.html
+|       invites_top.html
+|       ledger.html
+|       login.html
+|       queue.html
+|       recharge_orders.html
+|       reset_confirm.html
+|       reset_result.html
+|       reset_select.html
+|       settings.html
+|       sheet_users.html
+|       sheet_users_edit.html
+|       tags.html
+|       twofactor.html
+|       users_list.html
+|       user_detail.html
+|       __init__.py
+|
++---tests
+|       test_end_to_end.py
+|       test_i18n.py
+|       test_models.py
+|       test_services.py
+|
++---web_admin
+|   |   auth.py
+|   |   constants.py
+|   |   deps.py
+|   |   main.py
+|   |   __init__.py
+|   |
+|   +---controllers
+|   |   |   a11y.py
+|   |   |   adjust.py
+|   |   |   approvals.py
+|   |   |   audit.py
+|   |   |   covers.py
+|   |   |   dashboard.py
+|   |   |   envelopes.py
+|   |   |   export.py
+|   |   |   invites.py
+|   |   |   ipn.py
+|   |   |   ledger.py
+|   |   |   queue.py
+|   |   |   recharge.py
+|   |   |   reset.py
+|   |   |   settings.py
+|   |   |   sheet_users.py
+|   |   |   tags.py
+|   |   |   users.py
+|   |   |   __init__.py
+|   |   |
+|   |   \---__pycache__
+|   |           a11y.cpython-311.pyc
+|   |           adjust.cpython-311.pyc
+|   |           approvals.cpython-311.pyc
+|   |           audit.cpython-311.pyc
+|   |           covers.cpython-311.pyc
+|   |           dashboard.cpython-311.pyc
+|   |           envelopes.cpython-311.pyc
+|   |           export.cpython-311.pyc
+|   |           invites.cpython-311.pyc
+|   |           ipn.cpython-311.pyc
+|   |           ledger.cpython-311.pyc
+|   |           queue.cpython-311.pyc
+|   |           recharge.cpython-311.pyc
+|   |           reset.cpython-311.pyc
+|   |           settings.cpython-311.pyc
+|   |           sheet_users.cpython-311.pyc
+|   |           tags.cpython-311.pyc
+|   |           users.cpython-311.pyc
+|   |           __init__.cpython-311.pyc
+|   |
+|   \---__pycache__
+|           auth.cpython-311.pyc
+|           constants.cpython-311.pyc
+|           deps.cpython-311.pyc
+|           main.cpython-311.pyc
+|           __init__.cpython-311.pyc
+|
+\---__pycache__
+        feature_flags.cpython-311.pyc

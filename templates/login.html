@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ title or "Admin Login" }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .container{max-width:960px}
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-900">
+  <header class="bg-white border-b">
+    <nav class="container mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/admin" class="font-semibold">🎛️ Admin</a>
+    </nav>
+  </header>
+
+  <main class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow p-6">
+      <h1 class="text-2xl font-semibold mb-4">{{ t("admin.login.title") if t else "管理员登录" }}</h1>
+
+      {% if message %}
+      <!-- 有提示消息时，做可达性增强 -->
+      <div role="alert" aria-live="polite" class="mb-4 p-3 rounded border
+                  {% if 'invalid' in message or 'missing' in message or 'expired' in message or 'csrf' in message %}
+                    border-red-200 bg-red-50 text-red-700
+                  {% else %}
+                    border-green-200 bg-green-50 text-green-700
+                  {% endif %}">{{ message }}</div>
+      {% endif %}
+
+      <!-- 登录表单 -->
+      <form method="post" action="/admin/login" class="space-y-4" id="login-form">
+        <!-- CSRF：后端在 /admin/login GET 时下发 -->
+        <input type="hidden" name="csrf_token" id="csrf_token" value="{{ csrf_token or '' }}">
+
+        <div>
+          <label class="block text-sm text-gray-600 mb-1" for="username">管理员账号</label>
+          <input type="text" name="username" id="username" value="{{ username or '' }}" required autofocus
+                 class="w-full border rounded-md px-3 py-2" placeholder="admin" autocomplete="username" />
+        </div>
+
+        <div>
+          <label class="block text-sm text-gray-600 mb-1" for="password">密码</label>
+          <input type="password" name="password" id="password" required
+                 class="w-full border rounded-md px-3 py-2" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between">
+            <label class="block text-sm text-gray-600 mb-1" for="otp">6位验证码</label>
+            {% if totp_enabled %}
+              <span class="text-xs text-blue-600">已启用 TOTP，可直接输入 App 上的一次性验证码</span>
+            {% endif %}
+          </div>
+          <input name="otp" id="otp" value=""
+                 class="w-full border rounded-md px-3 py-2" placeholder="123456"
+                 inputmode="numeric" pattern="\\d{6}" maxlength="6" />
+          <p class="text-xs text-gray-500 mt-1">
+            {% if totp_enabled %}
+              使用 Google Authenticator 等 TOTP 应用的动态码；无需点击发送。
+            {% else %}
+              登录需二次验证：点击下方按钮发送验证码到 Telegram，再在此输入验证码提交。
+            {% endif %}
+          </p>
+          {% if otp_pending %}
+            <p class="text-xs text-amber-600 mt-1">验证码已请求，若未收到请 {{ (otp_ttl or 600) // 60 }} 分钟后重试。</p>
+          {% endif %}
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button type="submit" class="px-4 py-2 rounded-xl bg-black text-white">登录</button>
+
+          {% if not totp_enabled %}
+          <!-- 仅在未启用 TOTP 时显示“发送验证码”按钮 -->
+          <button type="button" id="send-otp" class="px-4 py-2 rounded-xl border">发送验证码到 Telegram</button>
+          <span id="otp-status" class="text-sm text-gray-600"></span>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer class="container mx-auto px-4 py-8 text-center text-xs text-gray-400">
+    © 2025 Admin Console
+  </footer>
+
+  <script>
+    (function() {
+      const btn = document.getElementById('send-otp');
+      const statusEl = document.getElementById('otp-status');
+      const csrfEl = document.getElementById('csrf_token');
+
+      if (!btn) return; // 启用了 TOTP 时按钮不存在
+
+      btn.addEventListener('click', async () => {
+        // 防连点 & UI 提示
+        const oldText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = '发送中…';
+        if (statusEl) statusEl.textContent = '发送中...';
+
+        try {
+          // 后端 /admin/send_otp 需要 CSRF
+          const params = new URLSearchParams();
+          params.set('csrf_token', csrfEl ? csrfEl.value : '');
+
+          const res = await fetch('/admin/send_otp', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: params.toString()
+          });
+
+          const js = await res.json();
+
+          // 成功则更新提示；后端会回传新的 csrf_token，防重放
+          if (js && js.ok) {
+            if (statusEl) statusEl.textContent = '验证码已发送，请查收 Telegram';
+            if (js.csrf_token && csrfEl) csrfEl.value = js.csrf_token;
+          } else {
+            if (statusEl) statusEl.textContent = '发送失败：' + (js.error || js.message || 'unknown');
+            if (js.csrf_token && csrfEl) csrfEl.value = js.csrf_token;
+          }
+        } catch (e) {
+          if (statusEl) statusEl.textContent = '发送失败：网络错误';
+        } finally {
+          btn.disabled = false;
+          btn.textContent = oldText;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

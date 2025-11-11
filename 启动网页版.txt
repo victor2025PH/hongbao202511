@@ -1,0 +1,47 @@
+.\.venv\Scripts\Activate.ps1
+uvicorn web_admin.main:app --reload --port 8080
+
+python -m uvicorn web_admin.main:app --reload --port 8080
+
+http://127.0.0.1:8080/admin/ledger
+
+http://165.154.254.99/admin
+登录用户名：admin
+登录密码（若使用上面的 HASH）：R0cket-Maple@2025!
+
+# 1) 进入项目根并激活 venv
+cd "E:\002-工作文件\重要程序\红包系统机器人\032添加用户表格"
+.\.venv\Scripts\Activate.ps1
+
+# 2) 用“模块方式”启动，确保采用当前 venv 的 Python/依赖
+python -m uvicorn web_admin.main:app --reload --port 8080
+
+python -m pip install -r requirements.txt
+
+
+# 状态 + 最近 50 行日志
+systemctl status redpacket-admin -n 50
+
+查看运行日志：
+sudo journalctl -u redpacket-bot -e --no-pager
+
+# 实时日志（按 Ctrl+C 退出）
+journalctl -u redpacket-admin -f
+
+本机探活（用 GET）
+curl -sS http://127.0.0.1:8080/admin | head -n 40
+
+# 保存代码后（或改了 service），重启服务
+sudo systemctl restart redpacket-admin
+
+# 停止/启动
+sudo systemctl stop  redpacket-admin
+sudo systemctl start redpacket-admin
+
+# 看端口监听（确认是 127.0.0.1:8080）
+ss -ltnp | grep 8080
+
+# 查看状态和日志
+systemctl status redpacket-admin -n 50
+journalctl -u redpacket-admin -n 100 --no-pager
+

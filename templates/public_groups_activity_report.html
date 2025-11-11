@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+  <div>
+    <h1 class="text-xl font-semibold">{{ t('admin.public_groups.activities_report_title') }}</h1>
+    <p class="text-sm text-gray-500">{{ t('admin.public_groups.activities_report_subtitle') }}</p>
+  </div>
+  <div class="flex items-center gap-3">
+    <form method="get" action="/admin/public-groups/activities/report" class="flex items-center gap-3">
+      <label class="text-xs text-gray-600 flex items-center gap-1">
+        {{ t('admin.public_groups.activities_report_start') }}
+        <input type="date" name="start" value="{{ start }}" class="border rounded px-2 py-1 text-sm">
+      </label>
+      <label class="text-xs text-gray-600 flex items-center gap-1">
+        {{ t('admin.public_groups.activities_report_end') }}
+        <input type="date" name="end" value="{{ end }}" class="border rounded px-2 py-1 text-sm">
+      </label>
+      <label class="text-xs text-gray-600 flex items-center gap-1">
+        <input type="checkbox" name="alerts_only" value="1" {% if alerts_only %}checked{% endif %}>
+        {{ t('admin.public_groups.activities_report_filter_alerts') }}
+      </label>
+      <button class="px-3 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600">
+        {{ t('admin.public_groups.dashboard_refresh') }}
+      </button>
+    </form>
+    <a href="/admin/public-groups/activities/report?start={{ start }}&end={{ end }}{% if alerts_only %}&alerts_only=1{% endif %}&format=csv"
+       class="px-3 py-2 border rounded text-sm text-gray-700 hover:bg-gray-100">
+      {{ t('admin.public_groups.activities_report_export_csv') }}
+    </a>
+  </div>
+</div>
+
+{% if conversion_overview %}
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+  <div class="bg-white border rounded-md p-4 shadow-sm">
+    <p class="text-xs text-gray-500">{{ t('admin.public_groups.activities_report_total_conversions') }}</p>
+    <p class="text-xl font-semibold">{{ conversion_overview.total_conversions }}</p>
+  </div>
+  <div class="bg-white border rounded-md p-4 shadow-sm">
+    <p class="text-xs text-gray-500">{{ t('admin.public_groups.activities_report_total_points') }}</p>
+    <p class="text-xl font-semibold">{{ conversion_overview.total_points }}</p>
+  </div>
+  <div class="bg-white border rounded-md p-4 shadow-sm">
+    <p class="text-xs text-gray-500">{{ t('admin.public_groups.activities_report_webhook_success') }}</p>
+    <p class="text-xl font-semibold">{{ (conversion_overview.webhook_success_rate * 100)|round(2) }}%</p>
+    <p class="text-xs text-gray-400">{{ t('admin.public_groups.activities_report_webhook_failures') }}: {{ conversion_overview.webhook_failures }}</p>
+  </div>
+  <div class="bg-white border rounded-md p-4 shadow-sm">
+    <p class="text-xs text-gray-500">{{ t('admin.public_groups.activities_report_slack_failures') }}</p>
+    <p class="text-xl font-semibold">{{ conversion_overview.slack_failures }}</p>
+  </div>
+</div>
+{% endif %}
+
+{% if conversion_alerts and not alerts_only %}
+<div class="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-6">
+  <p class="text-sm font-semibold text-yellow-800 mb-2">{{ t('admin.public_groups.activities_report_alert_heading') }}</p>
+  <ul class="space-y-1 text-xs text-yellow-800">
+    {% for alert in conversion_alerts %}
+    <li>
+      <span class="font-medium">{{ alert.name }}</span>
+      · {{ t('admin.public_groups.activities_report_conversions') }} {{ alert.conversions }} ·
+      {{ t('admin.public_groups.activities_report_webhook_rate') }} {{ (alert.webhook_success_rate * 100)|round(1) }}% ·
+      {{ t('admin.public_groups.activities_report_webhook_failures') }} {{ alert.webhook_failures }} ·
+      {{ t('admin.public_groups.activities_report_slack_failures') }} {{ alert.slack_failures }}
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+{% if summary.activities %}
+<div class="space-y-6">
+  {% for activity in summary.activities %}
+  <div class="bg-white border rounded-md p-4 shadow-sm">
+    <div class="flex justify-between items-center mb-3">
+      <div>
+        <p class="text-sm font-semibold">{{ activity.name }}</p>
+        <p class="text-xs text-gray-500">{{ t('admin.public_groups.activities_type_join_bonus') }}</p>
+      </div>
+      <div class="text-right">
+        <p class="text-xs text-gray-600">
+          {{ t('admin.public_groups.activities_report_grants') }}: {{ activity.total_grants }} ·
+          {{ t('admin.public_groups.activities_report_points') }}: {{ activity.total_points }}
+        </p>
+        <p class="text-xs text-gray-500">
+          {{ t('admin.public_groups.activities_report_conversions') }}: {{ activity.total_conversions }} ·
+          {{ t('admin.public_groups.activities_report_webhook_rate') }} {{ (activity.webhook_success_rate * 100)|round(2) }}% ·
+          {{ t('admin.public_groups.activities_report_webhook_failures') }} {{ activity.webhook_failures }} ·
+          {{ t('admin.public_groups.activities_report_slack_failures') }} {{ activity.slack_failures }}
+        </p>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left">
+        <thead class="border-b text-gray-500">
+          <tr>
+            <th class="py-2">{{ t('admin.public_groups.dashboard_date') }}</th>
+            <th class="py-2">{{ t('admin.public_groups.activities_report_grants') }}</th>
+            <th class="py-2">{{ t('admin.public_groups.activities_report_points') }}</th>
+            <th class="py-2">{{ t('admin.public_groups.activities_report_conversions') }}</th>
+            <th class="py-2">{{ t('admin.public_groups.activities_report_webhook_rate') }}</th>
+            <th class="py-2">{{ t('admin.public_groups.activities_report_webhook_failures') }}</th>
+            <th class="py-2">{{ t('admin.public_groups.activities_report_slack_failures') }}</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y">
+          {% for daily in activity.daily %}
+          <tr>
+            <td class="py-2">{{ daily.date }}</td>
+            <td class="py-2">{{ daily.grants }}</td>
+            <td class="py-2">{{ daily.points }}</td>
+            <td class="py-2">{{ daily.conversions }}</td>
+            <td class="py-2">{{ (daily.webhook_success_rate * 100)|round(2) }}%</td>
+            <td class="py-2">{{ daily.webhook_failures }}</td>
+            <td class="py-2">{{ daily.slack_failures }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="text-sm text-gray-500">{{ t('admin.public_groups.activities_report_empty') }}</p>
+{% endif %}
+{% endblock %}
+

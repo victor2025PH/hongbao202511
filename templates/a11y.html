@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">Health & A11y</h1>
+
+<div class="grid md:grid-cols-3 gap-4 mb-4">
+  <div class="p-4 bg-white rounded-xl shadow">
+    <div class="text-sm text-gray-500">Python</div>
+    <div class="text-2xl font-bold">{{ data.versions.python }}</div>
+  </div>
+  <div class="p-4 bg-white rounded-xl shadow">
+    <div class="text-sm text-gray-500">FastAPI</div>
+    <div class="text-2xl font-bold">{{ data.versions.fastapi }}</div>
+  </div>
+  <div class="p-4 bg-white rounded-xl shadow">
+    <div class="text-sm text-gray-500">SQLAlchemy</div>
+    <div class="text-2xl font-bold">{{ data.versions.sqlalchemy }}</div>
+  </div>
+</div>
+
+<div class="grid md:grid-cols-2 gap-4">
+  <div class="p-4 bg-white rounded-xl shadow">
+    <div class="text-sm text-gray-500 mb-2">Database</div>
+    {% if data.db.ok %}
+      <div class="text-green-600">OK</div>
+    {% else %}
+      <div class="text-red-600">{{ data.db.msg }}</div>
+    {% endif %}
+  </div>
+
+  <div class="p-4 bg-white rounded-xl shadow">
+    <div class="text-sm text-gray-500 mb-2">Redis</div>
+    {% if not data.redis.enabled %}
+      <div class="text-gray-500">Disabled</div>
+    {% elif data.redis.ok %}
+      <div class="text-green-600">OK</div>
+    {% else %}
+      <div class="text-red-600">{{ data.redis.msg }}</div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="p-4 bg-white rounded-xl shadow mt-4">
+  <div class="text-sm text-gray-500 mb-2">Filesystem</div>
+  <table class="min-w-full text-sm">
+    <thead>
+      <tr class="text-left text-gray-500">
+        <th class="py-2 pr-4">Path</th>
+        <th class="py-2 pr-4">Status</th>
+        <th class="py-2 pr-4">Message</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in data.fs.paths %}
+      <tr class="border-t">
+        <td class="py-2 pr-4 font-mono">{{ p.path }}</td>
+        <td class="py-2 pr-4">
+          {% if p.ok %}<span class="text-green-600">OK</span>
+          {% else %}<span class="text-red-600">FAIL</span>{% endif %}
+        </td>
+        <td class="py-2 pr-4">{{ p.msg }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="p-4 bg-white rounded-xl shadow mt-4">
+  <div class="text-sm text-gray-500 mb-2">Network DNS</div>
+  <ul class="list-disc pl-5 text-sm">
+    {% for r in data.net.targets %}
+      <li>
+        {{ r.host }}:
+        {% if r.ok %}<span class="text-green-600">OK</span>
+        {% else %}<span class="text-red-600">{{ r.msg }}</span>{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+
+<div class="p-4 bg-white rounded-xl shadow mt-4">
+  <div class="text-sm text-gray-500 mb-2">i18n Required Keys</div>
+  {% if data.i18n.missing_count > 0 %}
+    <div class="text-red-600 mb-2">Missing {{ data.i18n.missing_count }} keys</div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead><tr class="text-left text-gray-500">
+          <th class="py-2 pr-4">Key</th>
+        </tr></thead>
+        <tbody>
+          {% for k in data.i18n.missing %}
+          <tr class="border-t"><td class="py-2 pr-4 font-mono">{{ k }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="text-green-600">All good ({{ data.i18n.required }} required)</div>
+  {% endif %}
+</div>
+{% endblock %}

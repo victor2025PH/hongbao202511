@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+  <div>
+    <h1 class="text-xl font-semibold">{{ t('admin.public_groups.title') }}</h1>
+    <p class="text-sm text-gray-500">{{ t('admin.public_groups.subtitle') }}</p>
+  </div>
+  <div class="flex items-center gap-3">
+    <a href="/admin/public-groups/dashboard"
+       class="px-4 py-2 text-sm rounded bg-blue-500 text-white hover:bg-blue-600">
+      {{ t('admin.public_groups.dashboard_title') }}
+    </a>
+    <a href="/admin/public-groups/activities"
+       class="px-4 py-2 text-sm rounded border border-blue-400 text-blue-500 hover:bg-blue-50">
+      {{ t('admin.public_groups.activities_title') }}
+    </a>
+  </div>
+</div>
+
+{% set bulk_i18n = {
+  "selected_label": t('admin.public_groups.bulk_selected_label', count='{count}'),
+  "processing": t('admin.public_groups.bulk_processing'),
+  "success": t('admin.public_groups.bulk_success', updated='{updated}'),
+  "partial": t('admin.public_groups.bulk_partial', updated='{updated}', failed='{failed}'),
+  "error": t('admin.public_groups.bulk_error'),
+  "no_selection": t('admin.public_groups.bulk_no_selection')
+} %}
+
+<div id="bulk-toolbar"
+     class="hidden mb-6 bg-white border rounded-md p-4 shadow-sm flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
+     data-i18n='{{ bulk_i18n | tojson }}'>
+  <div class="text-sm font-medium text-gray-700" id="bulk-count-label">{{ t('admin.public_groups.bulk_selected_label', count=0) }}</div>
+  <div class="flex flex-col md:flex-row md:items-center gap-3 w-full md:w-auto">
+    <input id="bulk-note"
+           type="text"
+           class="border rounded px-3 py-2 text-sm w-full md:w-56 focus:border-blue-400 focus:ring-blue-200 focus:ring"
+           placeholder="{{ t('admin.public_groups.bulk_note_placeholder') }}">
+    <div class="flex items-center gap-2 flex-wrap">
+      <button type="button"
+              data-bulk-action="approve"
+              class="bulk-action-btn px-3 py-1.5 text-xs rounded bg-green-500 text-white hover:bg-green-600 disabled:opacity-60">
+        {{ t('admin.public_groups.approve') }}
+      </button>
+      <button type="button"
+              data-bulk-action="pause"
+              class="bulk-action-btn px-3 py-1.5 text-xs rounded bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-60">
+        {{ t('admin.public_groups.pause') }}
+      </button>
+      <button type="button"
+              data-bulk-action="review"
+              class="bulk-action-btn px-3 py-1.5 text-xs rounded bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-60">
+        {{ t('admin.public_groups.review_tab') }}
+      </button>
+      <button type="button"
+              data-bulk-action="remove"
+              class="bulk-action-btn px-3 py-1.5 text-xs rounded bg-red-500 text-white hover:bg-red-600 disabled:opacity-60">
+        {{ t('admin.public_groups.remove') }}
+      </button>
+    </div>
+  </div>
+  <p class="text-xs text-gray-500" id="bulk-status"></p>
+</div>
+
+<section class="mb-8">
+  <h2 class="text-lg font-semibold mb-3">{{ t('admin.public_groups.review_tab') }}</h2>
+  {% if review_groups %}
+    <div class="space-y-2">
+      {% for g in review_groups %}
+        {% include "public_groups_card.html" with context %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-sm text-gray-500">{{ t('admin.public_groups.empty_review') }}</p>
+  {% endif %}
+</section>
+
+<section class="mb-8">
+  <h2 class="text-lg font-semibold mb-3">{{ t('admin.public_groups.high_risk_tab') }}</h2>
+  {% if high_risk_groups %}
+    <div class="space-y-2">
+      {% for g in high_risk_groups %}
+        {% include "public_groups_card.html" with context %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-sm text-gray-500">{{ t('admin.public_groups.empty_high_risk') }}</p>
+  {% endif %}
+</section>
+
+<section class="mb-8">
+  <h2 class="text-lg font-semibold mb-3">{{ t('admin.public_groups.paused_tab') }}</h2>
+  {% if paused_groups %}
+    <div class="space-y-2">
+      {% for g in paused_groups %}
+        {% include "public_groups_card.html" with context %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-sm text-gray-500">{{ t('admin.public_groups.empty_paused') }}</p>
+  {% endif %}
+</section>
+
+<section class="mb-8">
+  <h2 class="text-lg font-semibold mb-3">{{ t('admin.public_groups.removed_tab') }}</h2>
+  {% if removed_groups %}
+    <div class="space-y-2">
+      {% for g in removed_groups %}
+        {% include "public_groups_card.html" with context %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-sm text-gray-500">{{ t('admin.public_groups.empty_removed') }}</p>
+  {% endif %}
+</section>
+{% endblock %}
+
+<script>
+(function () {
+  const toolbar = document.getElementById('bulk-toolbar');
+  if (!toolbar) {
+    return;
+  }
+  const checkboxes = Array.from(document.querySelectorAll('.bulk-checkbox'));
+  if (!checkboxes.length) {
+    return;
+  }
+  const countLabel = document.getElementById('bulk-count-label');
+  const noteInput = document.getElementById('bulk-note');
+  const statusNode = document.getElementById('bulk-status');
+  const actionButtons = Array.from(document.querySelectorAll('[data-bulk-action]'));
+  const i18n = JSON.parse(toolbar.dataset.i18n || '{}');
+  let processing = false;
+
+  function format(template, vars) {
+    template = template || '';
+    return template.replace(/\{(\w+)\}/g, function (_, key) {
+      if (Object.prototype.hasOwnProperty.call(vars, key)) {
+        return vars[key];
+      }
+      return _;
+    });
+  }
+
+  function getSelected() {
+    return checkboxes.filter(function (cb) { return cb.checked; });
+  }
+
+  function updateToolbar() {
+    const selected = getSelected();
+    if (!selected.length) {
+      toolbar.classList.add('hidden');
+      if (countLabel) {
+        countLabel.textContent = format(i18n.selected_label || '', {count: 0});
+      }
+      statusNode.textContent = '';
+      return;
+    }
+    toolbar.classList.remove('hidden');
+    if (countLabel) {
+      countLabel.textContent = format(i18n.selected_label || '', {count: selected.length});
+    }
+  }
+
+  function setStatus(message, tone) {
+    statusNode.textContent = message || '';
+    statusNode.className = 'text-xs ' + (tone || 'text-gray-500');
+  }
+
+  checkboxes.forEach(function (cb) {
+    cb.addEventListener('change', updateToolbar);
+  });
+  updateToolbar();
+
+  actionButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (processing) {
+        return;
+      }
+      const action = btn.dataset.bulkAction;
+      const selected = getSelected().map(function (cb) { return Number(cb.value); });
+      if (!selected.length) {
+        setStatus(i18n.no_selection || '', 'text-red-500');
+        return;
+      }
+      processing = true;
+      actionButtons.forEach(function (b) { b.disabled = true; });
+      setStatus(i18n.processing || '', 'text-gray-500');
+
+      const body = {
+        action: action,
+        group_ids: selected,
+        note: (noteInput && noteInput.value && noteInput.value.trim()) || null,
+      };
+
+      const fetchFn = window.csrfFetch || fetch;
+      fetchFn('/admin/public-groups/bulk/status', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body),
+      })
+        .then(function (resp) {
+          if (!resp.ok) {
+            return resp.text().then(function (text) {
+              throw new Error(text || 'HTTP ' + resp.status);
+            });
+          }
+          return resp.json();
+        })
+        .then(function (data) {
+          const errors = Array.isArray(data.errors) ? data.errors : [];
+          const updated = Number(data.updated_count || 0);
+          if (updated > 0 && errors.length === 0) {
+            setStatus(format(i18n.success || '', {updated: updated}), 'text-green-600');
+            setTimeout(function () { window.location.reload(); }, 800);
+          } else if (updated > 0 && errors.length > 0) {
+            setStatus(format(i18n.partial || '', {updated: updated, failed: errors.length}), 'text-yellow-600');
+          } else {
+            setStatus(i18n.error || '', 'text-red-500');
+          }
+        })
+        .catch(function (err) {
+          console.error('bulk status update failed', err);
+          setStatus(i18n.error || '', 'text-red-500');
+        })
+        .finally(function () {
+          processing = false;
+          actionButtons.forEach(function (b) { b.disabled = false; });
+        });
+    });
+  });
+})();
+</script>
+

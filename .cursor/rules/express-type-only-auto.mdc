@@ -1,0 +1,49 @@
+---
+description:
+globs: src/**/*.ts
+alwaysApply: false
+---
+
+# Express 类型仅使用 type-only 导入（自动）
+
+## 使用场景
+- 当修改/创建 TypeScript 源码且存在 express 的导入
+- 项目包含健康检查路由 `/healthz`（用于 smoke 与可观测性）
+
+## 关键规则
+- 运行时只导入必要符号（如：`express`、`Router`、中间件函数等）
+- 仅将类型（`Request`、`Response`、`NextFunction` 等）用 `import type` 导入
+- 合并重复导入；去除空的 `{}` 导入
+- 常见替换模式：
+  - `import express, { Request, Response } from 'express'`
+    →
+  - `import express from 'express'`
+  - `import type { Request, Response } from 'express'`
+
+## 示例
+<example>
+修改前：
+import express, { Request, Response } from 'express';
+
+const app = express();
+app.get('/healthz', (req: Request, res: Response) => {
+  res.json({ ok: true });
+});
+
+修改后（/healthz 路由名称与路径明确展示）：
+import express from 'express';
+import type { Request, Response } from 'express';
+
+const app = express();
+/** 健康检查（healthz）：GET /healthz */
+app.get('/healthz', (req: Request, res: Response) => {
+  res.json({ ok: true });
+});
+
+export { app };
+</example>
+
+<example type="invalid">
+import { Request, Response } from 'express'; // 运行时代码直接值导入类型，可能导致 ESM 导出错误
+app.get('/healthz', (req, res) => res.send('ok'));
+</example>

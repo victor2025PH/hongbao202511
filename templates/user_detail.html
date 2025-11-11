@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block content %}
+
+{# === 工具宏：日期/数字 安全格式化 === #}
+{% macro fmt_dt(v) -%}
+  {%- if v is not none -%}
+    {%- if v is string -%}
+      {{ v }}
+    {%- else -%}
+      {{ v.strftime("%Y-%m-%d %H:%M:%S") }}
+    {%- endif -%}
+  {%- else -%}
+    —
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro fmt_num(v, max_places=8) -%}
+  {%- if v is none -%}—{%- else -%}
+    {%- if v is string -%}
+      {{ v }}
+    {%- else -%}
+      {# 将 Decimal/float/int 转为字符串；默认最多 8 位小数（可按需调整） #}
+      {%- set s = ("{:." ~ max_places ~ "f}").format(v)|trim -%}
+      {# 去掉尾部多余 0 和小数点 #}
+      {{ s.rstrip('0').rstrip('.') if '.' in s else s }}
+    {%- endif -%}
+  {%- endif -%}
+{%- endmacro %}
+
+{# ---------- 新增：通用取值宏 F()，适配 ORM / Row / dict ---------- #}
+{% macro F(obj, name) -%}
+  {%- set _attr = (obj|attribute(name)) if (obj is defined and obj is not none) else none -%}
+  {%- if _attr is defined and _attr is not undefined and _attr is not none -%}
+    {{- _attr -}}
+  {%- else -%}
+    {%- set _m = (obj|attribute("_mapping")) if (obj is defined and obj is not none) else none -%}
+    {%- if _m and (name in _m) -%}
+      {{- _m[name] -}}
+    {%- else -%}
+      {%- if obj is mapping and (name in obj) -%}
+        {{- obj[name] -}}
+      {%- else -%}
+        {{- none -}}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endif -%}
+{%- endmacro %}
+
+{# ---------- 顶部：标题 + 操作 ---------- #}
+{% set _uid = F(u, "tg_id") or F(u, "id") %}
+{% set _uname = F(u, "username") %}
+<h1 class="text-2xl font-semibold mb-4">{{ t("admin.table.user") }} {{ _uid }}</h1>
+
+<div class="flex items-center gap-2 mb-4">
+  {# 导出该用户的基本信息（复用 /admin/users/export.* 接口） #}
+  <a class="px-3 py-1.5 border rounded-md text-sm text-gray-700 hover:bg-gray-50"
+     href="/admin/users/export.csv?q={{ _uid if _uid else ('@' ~ _uname) }}">
+    CSV
+  </a>
+  <a class="px-3 py-1.5 border rounded-md text-sm text-gray-700 hover:bg-gray-50"
+     href="/admin/users/export.json?q={{ _uid if _uid else ('@' ~ _uname) }}">
+    JSON
+  </a>
+
+  {# 去账本页继续做高级筛选/导出（把用户与当前 token 传过去） #}
+  <a class="ml-2 px-3 py-1.5 border rounded-md text-sm text-gray-700 hover:bg-gray-50"
+     href="/admin/ledger?user={{ _uid if _uid else ('@' ~ _uname) }}{% if token %}&token={{ token }}{% endif %}">
+    {{ t("admin.nav.audit") or "Ledger" }}
+  </a>
+</div>
+
+<div class="grid md:grid-cols-4 gap-4">
+  <div class="p-4 bg-white shadow rounded-xl">
+    <div class="text-sm text-gray-500">{{ t("admin.table.username") }}</div>
+    <div class="text-lg font-bold">
+      {% if _uname %}@{{ _uname }}{% else %}—{% endif %}
+    </div>
+    <div class="text-xs text-gray-500 mt-2">
+      {{ t("admin.common.created_at") }}: {{ fmt_dt(F(u, "created_at") or F(u, "created")) }}
+    </div>
+    <div class="text-xs text-gray-500 mt-1">
+      {{ t("admin.filters.active_since") }}: {{ fmt_dt(F(u, "last_active_at") or F(u, "active_at")) }}
+    </div>
+  </div>
+
+  <div class="p-4 bg-white shadow rounded-xl md:col-span-3">
+    <div class="text-sm text-gray-500 mb-2">{{ t("balance_page.title") }}</div>
+    <div class="grid md:grid-cols-4 gap-3">
+      {% for tk in tokens %}
+      <div class="border rounded-lg p-3">
+        <div class="text-xs text-gray-500">{{ tk }}</div>
+        <div class="text-lg font-semibold">
+          {{ fmt_num(balances.get(tk)) }}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="mt-6 p-4 bg-white shadow rounded-xl">
+  <div class="flex items-center justify-between">
+    <div class="text-sm text-gray-500">{{ t("record.title") }}</div>
+    <form method="get" action="" class="flex items-center gap-2">
+      <select name="token" class="border rounded-md px-2 py-1 text-sm">
+        <option value="">{{ t("admin.table.token") }}</option>
+        {% for tk in tokens %}
+        <option value="{{ tk }}" {% if token==tk %}selected{% endif %}>{{ tk }}</option>
+        {% endfor %}
+      </select>
+      <input type="hidden" name="page" value="1"/>
+      <button class="px-3 py-1 border rounded-md text-sm">{{ t("admin.common.search") }}</button>
+    </form>
+  </div>
+
+  <div class="overflow-x-auto mt-3">
+    <table class="min-w-full text-sm">
+      <thead>
+        <tr class="text-left text-gray-500">
+          <th class="py-2 pr-4">{{ t("admin.common.created_at") }}</th>
+          <th class="py-2 pr-4">{{ t("admin.table.type") }}</th>
+          <th class="py-2 pr-4">{{ t("admin.table.token") }}</th>
+          <th class="py-2 pr-4">{{ t("admin.table.amount") }}</th>
+          <th class="py-2 pr-4">{{ t("admin.table.note") }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for lg in ledgers %}
+        <tr class="border-t">
+          <td class="py-2 pr-4">{{ fmt_dt(F(lg, "created_at") or F(lg, "ts")) }}</td>
+          <td class="py-2 pr-4">{{ F(lg, "type") or F(lg, "ltype") }}</td>
+          <td class="py-2 pr-4">{{ F(lg, "token") }}</td>
+          <td class="py-2 pr-4">{{ fmt_num(F(lg, "amount")) }}</td>
+          <td class="py-2 pr-4 truncate max-w-[320px]">{{ F(lg, "note") or "—" }}</td>
+        </tr>
+        {% endfor %}
+        {% if ledgers|length == 0 %}
+        <tr><td colspan="5" class="py-4 text-center text-gray-400">{{ t("record.none") }}</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="flex justify-between mt-4">
+    {% if page > 1 %}
+      <a href="{{ request.url.include_query_params(page=page-1) }}" class="text-sm text-gray-700">{{ t("admin.pagination.prev") }}</a>
+    {% endif %}
+    {% if page < total_pages %}
+      <a href="{{ request.url.include_query_params(page=page+1) }}" class="text-sm text-gray-700">{{ t("admin.pagination.next") }}</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

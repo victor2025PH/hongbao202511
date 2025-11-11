@@ -1,0 +1,231 @@
+根目录（项目入口与环境）
+
+app.py
+整个机器人入口：加载 .env、初始化 i18n、数据库、Router，注册各 routers/*.py，启动 Aiogram 轮询。
+典型职责：创建 Dispatcher、绑定中间件、注册路由顺序（admin/欢迎/菜单/红包/充值等）、全局异常日志。
+
+.env
+私密配置（BOT_TOKEN、数据库路径、管理员ID、素材频道ID、NOWPAYMENTS API Key、回调URL等）。仅本机/服务器用，不进版本库。
+
+data.sqlite
+SQLite 数据库文件。模型在 models/*.py 定义，实际数据落此文件。测试或迁移时注意备份。
+
+docker-compose.yml
+容器化部署（可选）。一般提供 bot 容器 +（可选）反向代理/队列等。
+
+feature_flags.py（根目录）
+旧版遗留的“开关/阈值”文件（最小金额、份数上限、启用某些功能等）。
+注意：你在 config/feature_flags.py 还有一份同名实现（新版）。老版本继续跑时，只保留一份，避免“双份导入导致行为不一致”。
+
+excel表头字段说明.txt / 开发与支付指南.txt / 启动 Telegram机器人.txt / 完整工程树清单.txt / 修改文件.txt / 执行命令.txt
+操作/研发文档。便于新环境快速起盘、记账导出对齐字段、部署命令备忘。
+
+assets（静态资源）
+
+cover.jpg / cover_zh.jpg / cover_en.jpg
+红包封面/菜单封面等静态图（在私聊/群里展示）。
+
+.media_cache.json
+运行期上传到 Telegram 后得到的 file_id 缓存，避免重复上传，提升速度。
+
+封面图片说明.txt
+封面规范与替换说明（尺寸、体积、命名）。
+
+config（配置中心）
+
+settings.py
+把 .env + 默认值整合为全局设置对象（如：是否启用封面、默认语言、素材频道ID、导出目录、日志等级等）。
+
+feature_flags.py（新版推荐）
+所有“业务开关 & 阈值”：
+例：最小/最大红包金额、份数范围、是否允许私聊发红包、是否开启邀请奖励、是否展示“使用此群继续”等。
+✅ 建议统一用这一份，删除/废弃根目录同名文件，避免混淆。
+
+core（核心能力层）
+core/clients
+
+nowpayments.py
+第三方支付客户端封装（创建订单、查询状态、校验回调签名等）。供 routers/recharge.py 与 routers/nowp_ipn.py 调用。
+
+core/i18n
+
+messages/zh.yml / en.yml
+所有文案键值库。路由与服务均用 t('key') 取文案，避免硬编码。
+
+i18n.py
+加载 yml、根据用户/群语言选择对应语言；提供 t() 或 _() 的封装；格式化插值（如 {username}、金额格式等）。
+
+core/middlewares
+
+anti_echo.py
+抑制重复消息/按钮重复点击（例如 Telegram 端网络抖动导致的重复 Update）。
+
+errors.py
+全局异常捕获与友好提示：拦截未处理异常、记录日志、给用户返回“出错了，请重试/联系管理员”。
+
+（如果你目录里还有 user_bootstrap.py 之类中间件：负责“每次消息到来时确保用户存在于数据库、语言已设置、统计字段初始化”。）
+
+core/utils
+
+keyboards.py
+统一的键盘工厂：
+
+菜单键盘（红包、充值、排行、今日战绩、福利中心等）
+
+红包流程键盘（选择币种、金额份数、拼手气/普通、确认/返回）
+
+“目标群相关动作键”（使用此群继续、更换目标群、绑定帮助）
+
+充值相关键盘（选择金额/通道/返回）
+任何路由需要键盘，都从这里取，确保文案与布局一致。
+
+（可能还包含）formatters.py / validators.py / money.py
+金额/份数/昵称/时间等格式化与校验；正则、边界、两位小数处理；人性化时间等。
+
+models（数据层：SQLAlchemy/ORM）
+
+db.py
+数据库引擎与会话管理（SessionLocal、Base、get_session()），统一初始化，避免多引擎/多Base。
+
+user.py
+User 模型：用户ID、语言、余额（USDT/TON/积分）、邀请关系、最近目标群 last_target_chat_id（用于“使用此群继续”）。
+常用方法：get_or_create_user()、update_balance()、set_last_target_chat()、get_last_target_chat()。
+
+envelope.py
+Envelope（红包）主表与条目：金额、份数、拼手气/普通、币种、祝福语、状态（进行中/已抢完/已撤销）、关联群ID/发起人ID；
+及 EnvelopeItem 抢到的记录；查询汇总、最佳手气、超时回收等。
+
+ledger.py
+资金流水账：Ledger、LedgerType（充值、发红包冻结、抢到入账、退回、提现等）；确保任何余额变化都有凭证可追溯。
+
+recharge.py
+充值订单（外部单号、内部单号、金额、币种/法币、支付通道、状态、回调时间、对账标记）。
+
+invite.py
+邀请/拉新关系：邀请人ID、被邀请人ID、奖励发放状态、时间戳等。
+
+cover.py（若存在）
+封面资源/红包封面市场：封面ID、图片 file_id、价格（积分/USDT/TON）、上下架、购买与分配记录。
+
+init.py
+对外导出模型或统一导入路径。
+
+注意：老版本“绑定群不生效/按钮不显示”的根因，常见就是 User.last_target_chat_id 没有被正确写入/读取，或被不同的 Session/Base 写入另一个数据库连接。老版本保持此 models 层“唯一初始化”即可避坑。
+
+routers（业务路由：Aiogram Handlers）
+
+这些文件被 app.py 按顺序注册，决定命令、按钮回调如何分发。
+
+init.py
+（可选）集中导入与对外暴露路由，提供统一 setup(dp) 或 register(router)。
+
+welcome.py
+/start 欢迎页：展示封面与主要入口按钮；根据上下文（私聊/群聊）决定下一步引导。可读取用户的 last_target_chat_id 以提示“使用此群继续”。
+
+menu.py
+主菜单：红包、充值、今日战绩、排行、福利中心、帮助等入口；
+负责从任何地方“回菜单”时把上下文（已选择的目标群/语言）保留好。
+
+envelope.py
+发红包“向导”主流程：
+
+选择币种 → 2) 输入总金额 → 3) 输入份数 → 4) 选择拼手气/普通 → 5) 祝福语 → 6) 选择目标群/确认页 → 7) 发送
+包含“目标群动作按钮”（使用此群继续/更换目标群/绑定帮助）、深链 send_g<chat_id> 的解析、金额份数校验、余额冻结/解冻、红包创建与发布到群。
+这是“绑定群”的核心路由。
+
+hongbao.py
+抢红包/开包/显示排行卡片、最佳手气、红包详情；对 Envelope 与 EnvelopeItem 的读取与原子抢红包逻辑（乐观/悲观锁方案）。
+
+recharge.py
+充值中心（用户侧）：选择通道与金额、创建订单、展示支付二维码/链接、轮询支付状态、到账后记账（ledger）并更新余额。
+与 services/recharge_service.py、core/clients/nowpayments.py 协作。
+
+nowp_ipn.py
+第三方支付（NowPayments）异步回调的 webhook：校验签名、幂等更新订单状态、触发入账与通知（避免轮询不准）。
+
+balance.py
+余额卡片：USDT/TON 两位小数，积分取整显示；展示流水入口（可选）。
+
+rank.py
+排行与“手气最佳”汇总卡片；可按天/周/月统计。
+
+today.py
+今日战绩统计：当日发出/抢到的金额与次数，分币种汇总，常在菜单一级展示。
+
+welfare.py
+福利中心：签到/任务、邀请有奖、红包封面领取/购买等；与 invite.py、cover.py 关联。
+
+withdraw.py
+提现向导（若启用）：绑定地址、风控校验、生成审核单、出账流水。
+
+invite.py（router）
+邀请/拉新入口：生成专属邀请链接、显示邀请进度、发放奖励。
+
+member.py
+成员绑定/群绑定辅助路由：处理“把机器人拉到群”“授权/可见性检测”“把当前群设为默认目标群”等小流程。
+
+help.py
+帮助中心/FAQ：玩法、充值/提现说明、风控提醒、人工客服入口；可接入 services/ai_helper.py 做 AI 问答。
+
+admin.py / admin_adjust.py
+管理端：余额人工调整、封面上下架、全局公告、封禁/解封用户、导出报表入口。
+
+admin_covers.py
+管理封面库：上新、定价、上下架、用户分配。
+
+services（领域服务/跨路由复用）
+
+recharge_service.py
+充值闭环服务：
+
+生成订单（内部单号、金额、汇率、失效时间）
+
+调用 core/clients/nowpayments.py 创建外部账单
+
+轮询/回调状态统一落账（流水、余额）、通知
+
+幂等防重、金额一致性校验
+
+export_service.py
+数据导出（CSV/Excel）：红包记录、流水、用户清单、邀请清单；对接 “导出中心/exports” 目录。
+
+ai_service.py / ai_helper.py
+AI 问答/帮助中心：把 FAQ / 历史对话投喂给模型返回答案；也可做敏感词/风控建议。
+
+google_logger.py
+将关键事件写入 Google（表格/日志），用于运营看板或外部审计。
+
+scripts（一次性/工具脚本）
+
+cleanup_db.py
+清理脏数据、演示库重置（危险操作！务必在测试库跑）。
+
+demo_flow.py
+本地演示红包→抢红包→排行→充值→到账的“串联跑通”脚本，方便新人熟悉流程。
+
+load_test_users.py
+造数脚本：批量创建测试用户、模拟充值/发包/抢包，便于看板测试。
+
+tests（自动化测试）
+
+（按功能分文件）
+覆盖核心模型（红包创建/抢包竞态/回收/流水一致性）、充值服务（签名校验/幂等）、路由流程（FSM 步进、键盘渲染）。
+
+locales（旧版/兼容层）
+
+strings.py（若存在）
+早期硬编码文案的集合。老版本回退后如果继续使用它，建议逐步迁移到 core/i18n/messages/*.yml，避免中英文不同步。
+
+这套“老版本”运行与维护的三条建议
+
+只保留一份 feature_flags.py
+统一使用 config/feature_flags.py，把根目录那份删除或改名为 feature_flags_legacy.py，并全项目改为：
+from config.feature_flags import ...
+这样“使用此群继续/金额阈值/份数限制”等开关才不会漂移。
+
+确保数据库会话唯一
+所有模型都从 models/db.py 拿同一个 SessionLocal 与 Base；所有路由/服务只 from models.db import get_session。
+这是避免“写了却读不到”的根因之一。
+
+i18n 只用 yml
+新增/修改文案时只改 core/i18n/messages/zh.yml / en.yml，路由统一 t('xxx.yyy') 调用，strings.py 逐步下线。

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">{{ t("admin.nav.invites") }}</h1>
+
+<!-- 统计卡 -->
+<div class="grid md:grid-cols-3 gap-4 mb-4">
+  <div class="p-4 bg-white shadow rounded-xl">
+    <div class="text-sm text-gray-500">{{ t("admin.pagination.total") }}</div>
+    <div class="text-2xl font-bold">{{ stat.total }}</div>
+  </div>
+  <div class="p-4 bg-white shadow rounded-xl">
+    <div class="text-sm text-gray-500">Reward Σ</div>
+    <div class="text-2xl font-bold">{{ stat.reward }}</div>
+  </div>
+  <div class="p-4 bg-white shadow rounded-xl">
+    <div class="text-sm text-gray-500">{{ t("admin.common.actions") }}</div>
+    <a href="/admin/invites/top" class="inline-block mt-2 px-3 py-2 border rounded-md text-sm">Top inviters</a>
+  </div>
+</div>
+
+<!-- 筛选 -->
+<form method="get" action="/admin/invites" class="bg-white shadow rounded-xl p-4 grid md:grid-cols-6 gap-3 mb-4 text-sm">
+  <div>
+    <label class="block text-gray-600 mb-1">Inviter</label>
+    <input name="inviter" value="{{ filters.inviter }}" class="w-full border rounded-md p-2" placeholder="123456 or @name" />
+  </div>
+  <div>
+    <label class="block text-gray-600 mb-1">Invitee</label>
+    <input name="invitee" value="{{ filters.invitee }}" class="w-full border rounded-md p-2" placeholder="123456 or @name" />
+  </div>
+  <div>
+    <label class="block text-gray-600 mb-1">Start</label>
+    <input name="start" value="{{ filters.start }}" class="w-full border rounded-md p-2" placeholder="2025-01-01" />
+  </div>
+  <div>
+    <label class="block text-gray-600 mb-1">End</label>
+    <input name="end" value="{{ filters.end }}" class="w-full border rounded-md p-2" placeholder="2025-01-31" />
+  </div>
+  <div class="md:col-span-2">
+    <label class="block text-gray-600 mb-1">Query</label>
+    <input name="q" value="{{ filters.q }}" class="w-full border rounded-md p-2" placeholder="@alice / 123456" />
+  </div>
+  <div class="md:col-span-6">
+    <button class="px-4 py-2 bg-black text-white rounded-md">{{ t("admin.common.search") }}</button>
+  </div>
+</form>
+
+<!-- 列表 -->
+<div class="bg-white shadow rounded-xl overflow-x-auto">
+  <table class="min-w-full text-sm">
+    <thead>
+      <tr class="text-left text-gray-500">
+        <th class="py-2 px-3">Inviter</th>
+        <th class="py-2 px-3">Invitee</th>
+        <th class="py-2 px-3">{{ t("admin.common.created_at") }}</th>
+        <th class="py-2 px-3">Reward</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for pair in rows %}
+        {% set inv = pair[0] %}
+        {% set reward = pair[1] %}
+        {% set invitee = pair[2] %}
+        <tr class="border-t">
+          <td class="py-2 px-3">{{ inv.inviter_id }}</td>
+          <td class="py-2 px-3">
+            {{ invitee.tg_id }}
+            {% if invitee.username %}<span class="text-gray-400">@{{ invitee.username }}</span>{% endif %}
+          </td>
+          <td class="py-2 px-3">{{ inv.created_at or inv.ts or "—" }}</td>
+          <td class="py-2 px-3">{{ reward }}</td>
+        </tr>
+      {% endfor %}
+      {% if rows|length == 0 %}
+      <tr><td colspan="4" class="py-6 text-center text-gray-400">No data</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+<div class="flex justify-between mt-4">
+  {% if page > 1 %}
+    <a href="?page={{ page - 1 }}&inviter={{ filters.inviter }}&invitee={{ filters.invitee }}&start={{ filters.start }}&end={{ filters.end }}&q={{ filters.q }}" class="text-sm text-gray-700">{{ t("admin.pagination.prev") }}</a>
+  {% endif %}
+  {% if page < total_pages %}
+    <a href="?page={{ page + 1 }}&inviter={{ filters.inviter }}&invitee={{ filters.invitee }}&start={{ filters.start }}&end={{ filters.end }}&q={{ filters.q }}" class="text-sm text-gray-700">{{ t("admin.pagination.next") }}</a>
+  {% endif %}
+</div>
+{% endblock %}

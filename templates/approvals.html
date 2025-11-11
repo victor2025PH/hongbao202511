@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">{{ t("admin.approvals.title") }}</h1>
+
+<div class="flex items-center gap-2 mb-4">
+  <a href="/admin/approvals?status=PENDING" class="px-3 py-1 border rounded-md text-sm {% if status=='PENDING' %}bg-black text-white{% endif %}">PENDING</a>
+  <a href="/admin/approvals?status=APPROVED" class="px-3 py-1 border rounded-md text-sm {% if status=='APPROVED' %}bg-black text-white{% endif %}">APPROVED</a>
+  <a href="/admin/approvals?status=REJECTED" class="px-3 py-1 border rounded-md text-sm {% if status=='REJECTED' %}bg-black text-white{% endif %}">REJECTED</a>
+  <a href="/admin/approvals?status=FAILED" class="px-3 py-1 border rounded-md text-sm {% if status=='FAILED' %}bg-black text-white{% endif %}">FAILED</a>
+</div>
+
+<div class="bg-white shadow rounded-xl overflow-x-auto">
+  <table class="min-w-full text-sm">
+    <thead>
+      <tr class="text-left text-gray-500">
+        <th class="py-2 px-3">ID</th>
+        <th class="py-2 px-3">Type</th>
+        <th class="py-2 px-3">Submitter</th>
+        <th class="py-2 px-3">{{ t("admin.common.status") }}</th>
+        <th class="py-2 px-3">{{ t("admin.audit.detail") }}</th>
+        <th class="py-2 px-3">{{ t("admin.common.actions") }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for it in rows %}
+      <tr class="border-t">
+        <td class="py-2 px-3">{{ it.id }}</td>
+        <td class="py-2 px-3">{{ it.op_type }}</td>
+        <td class="py-2 px-3">{{ it.submitter_id }}</td>
+        <td class="py-2 px-3">{{ it.status }}</td>
+        <td class="py-2 px-3 truncate max-w-[360px]">
+          <details class="text-gray-600">
+            <summary class="cursor-pointer">payload</summary>
+            <pre class="whitespace-pre-wrap break-all">{{ it.payload }}</pre>
+          </details>
+          {% if it.result %}
+          <details class="text-gray-600 mt-1">
+            <summary class="cursor-pointer">result</summary>
+            <pre class="whitespace-pre-wrap break-all">{{ it.result }}</pre>
+          </details>
+          {% endif %}
+        </td>
+        <td class="py-2 px-3">
+          {% if it.status == 'PENDING' %}
+          <form method="post" action="/admin/approvals/{{ it.id }}/approve" class="inline" onsubmit="return confirm('Approve and execute?')">
+            <button class="text-xs px-2 py-1 border rounded-md">Approve</button>
+          </form>
+          <form method="post" action="/admin/approvals/{{ it.id }}/reject" class="inline ml-2">
+            <input type="hidden" name="reason" value="reject"/>
+            <button class="text-xs px-2 py-1 border rounded-md">Reject</button>
+          </form>
+          {% else %}
+            —
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+      {% if rows|length == 0 %}
+      <tr><td colspan="6" class="py-6 text-center text-gray-400">No data</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+<div class="flex justify-between mt-4">
+  {% if page > 1 %}
+    <a href="?status={{ status }}&page={{ page - 1 }}" class="text-sm text-gray-700">{{ t("admin.pagination.prev") }}</a>
+  {% endif %}
+  {% if page < total_pages %}
+    <a href="?status={{ status }}&page={{ page + 1 }}" class="text-sm text-gray-700">{{ t("admin.pagination.next") }}</a>
+  {% endif %}
+</div>
+{% endblock %}

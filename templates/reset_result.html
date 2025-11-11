@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">{{ t("admin.reset.title") }}</h1>
+
+{% macro chip(label, tone) -%}
+  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
+    {% if tone=='ok' %} bg-green-100 text-green-700
+    {% elif tone=='warn' %} bg-yellow-100 text-yellow-800
+    {% elif tone=='bad' %} bg-red-100 text-red-700
+    {% else %} bg-gray-100 text-gray-700 {% endif %}">
+    {{ label }}
+  </span>
+{%- endmacro %}
+
+{% if dryrun %}
+  <!-- 仅统计（演练） -->
+  <div class="p-4 bg-white shadow rounded-xl">
+    <div class="text-sm text-gray-600 space-x-2">
+      <span>{{ t("admin.table.token") }}: <b>{{ asset }}</b></span>
+      {% if mode == "everyone" %}
+        <span>{{ t("admin.reset.affected_users") or '预计影响用户数' }}：<b>{{ total_users }}</b></span>
+      {% endif %}
+      <span>{{ t("admin.reset.total_deduct") or '预计总扣减' }}：<b>{{ total }}</b></span>
+      {{ chip((t("admin.common.preview") or "预览"), "warn") }}
+    </div>
+    <a href="/admin/reset" class="inline-block mt-4 px-4 py-2 border rounded-md">{{ t("admin.common.back") }}</a>
+  </div>
+
+{% else %}
+  <!-- 实际执行结果 -->
+  <div class="p-4 bg-white shadow rounded-xl">
+    <div class="text-sm text-gray-600 mb-3 space-x-3">
+      <span>{{ t("admin.table.token") }}: <b>{{ asset }}</b></span>
+      <span>{{ t("admin.reset.ok") or '成功' }}：<b>{{ ok or 0 }}</b></span>
+      <span>{{ t("admin.reset.fail") or '失败' }}：<b>{{ fail or 0 }}</b></span>
+      {% if total %}
+        <span>{{ t("admin.reset.total_deduct") or '总扣减' }}：<b>{{ total }}</b></span>
+      {% endif %}
+      {{ chip((t("admin.toast.done") or "已执行"), (fail or 0) > 0 and 'bad' or 'ok') }}
+    </div>
+
+    {% if results %}
+      <div class="overflow-x-auto border rounded-lg">
+        <table class="min-w-full text-sm">
+          <thead class="bg-gray-50 text-gray-600">
+            <tr class="text-left">
+              <th class="py-2 px-3">{{ t("admin.table.user") }}</th>
+              <th class="py-2 px-3">{{ t("admin.table.username") }}</th>
+              <th class="py-2 px-3">{{ t("admin.table.result") }}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y">
+            {% for r in results %}
+            <tr class="hover:bg-gray-50">
+              <td class="py-2 px-3 font-mono">{{ r.u.tg_id }}</td>
+              <td class="py-2 px-3">@{{ r.u.username or "—" }}</td>
+              <td class="py-2 px-3">
+                {% if r.ok %}
+                  <span class="text-green-700">{{ t("admin.toast.done") or "OK" }}</span>
+                {% else %}
+                  <span class="text-red-700">{{ r.msg }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    {% elif sample %}
+      <div class="text-sm text-gray-600 mb-2">{{ t("admin.reset.sample20") or "示例（前 20 条）" }}：</div>
+      <ul class="list-disc pl-5 text-sm space-y-0.5">
+        {% for s in sample %}
+        <li class="font-mono">
+          {{ s.u.tg_id }} — {{ s.ok and (t("admin.toast.done") or 'OK') or s.msg }}
+        </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <a href="/admin/reset" class="inline-block mt-4 px-4 py-2 border rounded-md">{{ t("admin.common.back") }}</a>
+  </div>
+{% endif %}
+{% endblock %}

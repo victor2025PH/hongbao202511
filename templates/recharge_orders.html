@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">{{ t("admin.recharge.title") }}</h1>
+
+<!-- Filters -->
+<form method="get" action="/admin/recharge" class="mb-4 grid gap-3 md:grid-cols-4">
+  <div>
+    <label class="block text-sm text-gray-500 mb-1">{{ t("admin.common.search") }}</label>
+    <input name="q" value="{{ q }}" placeholder="id / user / address / network / payment_id / invoice_id / tx"
+           class="w-full border rounded px-3 py-2" />
+  </div>
+  <div>
+    <label class="block text-sm text-gray-500 mb-1">{{ t("admin.common.status") }}</label>
+    <select name="status" class="w-full border rounded px-3 py-2">
+      {% set st = (status or '') | upper %}
+      <option value="">{{ t("admin.pagination.total") }} / All</option>
+      <option value="PENDING" {{ "selected" if st=="PENDING" else "" }}>{{ t("admin.recharge.status.PENDING") }}</option>
+      <option value="SUCCESS" {{ "selected" if st=="SUCCESS" else "" }}>{{ t("admin.recharge.status.SUCCESS") }}</option>
+      <option value="FAILED"  {{ "selected" if st=="FAILED"  else "" }}>{{ t("admin.recharge.status.FAILED") }}</option>
+      <option value="EXPIRED" {{ "selected" if st=="EXPIRED" else "" }}>{{ t("admin.recharge.status.EXPIRED") }}</option>
+    </select>
+  </div>
+  <div class="flex items-end">
+    <button class="px-4 py-2 rounded bg-black text-white">{{ t("admin.common.search") }}</button>
+  </div>
+</form>
+
+<!-- Result Table -->
+<div class="overflow-x-auto bg-white rounded-xl shadow">
+  <table class="min-w-full text-sm">
+    <thead class="bg-gray-50 text-gray-500">
+      <tr>
+        <th class="px-4 py-2 text-left">#</th>
+        <th class="px-4 py-2 text-left">{{ t("labels.user_tg_id") or "User TG" }}</th>
+        <th class="px-4 py-2 text-left">{{ t("admin.recharge.token") }}</th>
+        <th class="px-4 py-2 text-left">{{ t("admin.recharge.amount") }}</th>
+        <th class="px-4 py-2 text-left">{{ t("admin.recharge.final_pay") }}</th>
+        <th class="px-4 py-2 text-left">{{ t("admin.recharge.network") }}</th>
+        <th class="px-4 py-2 text-left">{{ t("admin.recharge.address") }}</th>
+        <th class="px-4 py-2 text-left">{{ t("admin.common.status") }}</th>
+        <th class="px-4 py-2 text-left">{{ t("admin.common.actions") }}</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y">
+      {% for row in rows %}
+      {% set status_name = (row.status.name if row.status is not string else row.status) | upper %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-4 py-2 align-top font-mono">#{{ row.id }}</td>
+        <td class="px-4 py-2 align-top font-mono">{{ row.user_tg_id }}</td>
+        <td class="px-4 py-2 align-top">{{ row.token }}</td>
+        <td class="px-4 py-2 align-top">{{ row.amount }}</td>
+        <td class="px-4 py-2 align-top">
+          {% if row.pay_amount %}
+            {{ row.pay_amount }} {{ row.pay_currency or row.token }}
+          {% elif row.final_pay_display %}
+            {{ row.final_pay_display }}
+          {% else %}
+            {{ row.amount }} {{ row.token }}
+          {% endif %}
+        </td>
+        <td class="px-4 py-2 align-top">{{ row.network }}</td>
+        <td class="px-4 py-2 align-top">
+          <div class="font-mono break-all max-w-[280px]">{{ row.pay_address }}</div>
+        </td>
+        <td class="px-4 py-2 align-top">
+          <span class="inline-block px-2 py-0.5 rounded text-xs
+            {% if status_name == 'SUCCESS' %} bg-green-100 text-green-700
+            {% elif status_name == 'PENDING' %} bg-yellow-100 text-yellow-800
+            {% elif status_name == 'FAILED' %} bg-red-100 text-red-700
+            {% elif status_name == 'EXPIRED' %} bg-gray-200 text-gray-700
+            {% else %} bg-gray-100 text-gray-600 {% endif %}">
+            {{ t("admin.recharge.status." ~ status_name) }}
+          </span>
+        </td>
+        <td class="px-4 py-2 align-top">
+          <div class="flex gap-2">
+            <!-- Refresh -->
+            <form class="inline" method="post" action="/admin/recharge/refresh" onsubmit="return __rcg_lock(this);">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="id" value="{{ row.id }}">
+              <button class="px-3 py-1 rounded border">{{ t("admin.recharge.refresh") }}</button>
+            </form>
+            <!-- Expire (danger) -->
+            {% if status_name == 'PENDING' %}
+            <form class="inline" method="post" action="/admin/recharge/expire" onsubmit="return __rcg_confirm_expire(this);">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="id" value="{{ row.id }}">
+              <button class="px-3 py-1 rounded border border-red-300 text-red-700">
+                {{ t("admin.recharge.expire") }}
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="9" class="px-4 py-6 text-center text-gray-500">
+          {{ t("export_empty") or t("admin.export_empty") or t("common.not_found") }}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Pagination -->
+{% if total_pages > 1 %}
+  {% set qs = "&status=" ~ (status or '') ~ "&q=" ~ (q or '') %}
+  <div class="mt-4 flex items-center justify-between">
+    <div class="text-sm text-gray-500">
+      {{ t("admin.pagination.total") }}: {{ total_pages }}
+    </div>
+    <div class="flex items-center gap-2">
+      {% if page > 1 %}
+      <a class="px-3 py-1 border rounded" href="/admin/recharge?page={{ page-1 }}{{ qs }}">{{ t("admin.pagination.prev") }}</a>
+      {% endif %}
+      <span class="px-3 py-1">{{ page }} / {{ total_pages }}</span>
+      {% if page < total_pages %}
+      <a class="px-3 py-1 border rounded" href="/admin/recharge?page={{ page+1 }}{{ qs }}">{{ t("admin.pagination.next") }}</a>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+
+<!-- 轻量防重复提交脚本 -->
+<script>
+  function __rcg_lock(form) {
+    try {
+      const btn = form.querySelector('button');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = '{{ (t("admin.common.processing") or "处理中…")|e }}';
+      }
+    } catch (e) {}
+    return true;
+  }
+  function __rcg_confirm_expire(form) {
+    if (!confirm('Set this order expired?')) return false;
+    return __rcg_lock(form);
+  }
+</script>
+{% endblock %}

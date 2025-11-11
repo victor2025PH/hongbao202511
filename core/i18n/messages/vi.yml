@@ -1,0 +1,413 @@
+  cover:
+    change_btn: "🖼 Đổi ảnh bìa"
+    change: "🖼 Đổi ảnh bìa"
+    entry_tip: "Bạn có thể chọn ảnh bìa từ kênh tài nguyên, hoặc bấm “Bỏ qua”."
+    open_list: "🖼 Chọn ảnh bìa"
+    none: "🚫 Không dùng ảnh bìa"
+    prev: "« Trước"
+    next: "Tiếp »"
+    pick_title: "🖼 Chọn ảnh bìa (kênh tài nguyên)"
+    from_channel: "🖼 Chọn từ kênh"
+    use_this: "✅ Dùng ảnh bìa này"
+    repick: "🔄 Chọn lại"
+    item: "Ảnh bìa"
+
+env_send:
+  title: "🧧 Chọn tham số (tùy chọn)"
+  tips: "Hãy viết lời chúc trong ô bên dưới.\n• Tránh quảng cáo lộ liễu.\n• Ví dụ: Chúc mọi người một ngày tuyệt vời! 🎉"
+  ok: "✅ Đã gửi."
+  back: "⬅️ Quay lại"
+  preview_btn: "👀 Xem trước"
+  previewed_ok: "✅ Phong bao đã được gửi."
+  go_group: "🔗 Mở nhóm"
+
+env_sent:
+  you_sent: "Bạn đã gửi {amount} USDT!"
+  mvp_line: "🏆 Bạn là “người may mắn nhất” của vòng. Dùng lại tham số này để gửi nhanh:"
+  mvp_send_btn: "🏆 Gửi với tư cách MVP"
+
+hb:
+  grab: "🤲 Nhận ngay"
+  rank_btn: "🏆 Xem bảng xếp hạng"
+
+hongbao_summary:
+  title: "📊 <b>Tổng kết vòng</b>"
+  total: "💰 Tổng: {amount} {token}, {shares} phần"
+  left: "📦 Còn lại: {left} phần"
+
+hongbao_result:
+  ok: "🎉 Bạn đã nhận được {amount} {token}!"
+  duplicate: "⚠️ Bạn đã nhận phong bao này rồi."
+  dup: "⚠️ Bạn đã nhận phong bao này rồi."
+
+rank:
+  title: "🏆 Người may mắn nhất"
+  meta_line: "💰 Tổng: {amount} {token} · 📦 Số phần: {shares}"
+  round_title: "🏆 <b>May mắn nhất vòng này</b>"
+  lucky: "🏅 MVP: ✨ {name} ✨ ({amount} {token})"
+  none: "😅 Chưa có ai"
+  global_offline: |-
+    📉 BXH toàn cục đang tắt.
+    Hãy xem 📊 Thống kê hôm nay.
+  round_btn: "🏆 Xem BXH của vòng"
+  mvp_send_btn: "🏅 Gửi với tư cách MVP"
+  mvp_dm_tip: "🏅 Bạn là MVP của vòng này. Gửi lại chỉ với một chạm:"
+
+today:
+  button: "📊 Thống kê hôm nay"
+  title: "📊 Thống kê hôm nay (chỉ ghi nhận lượt nhận)"
+  date_local: "🕒 Ngày địa phương: {start} ~ {end} ({tz})"
+  grabbed_only: "🤲 Hôm nay đã nhận: {count} lần"
+  empty: "📭 Chưa có dữ liệu."
+  income: "📈 Nhận: {amount} {token}"
+  outcome: "📉 Gửi: {amount} {token}"
+
+welfare:
+  title: "🎁 Trung tâm phúc lợi"
+  signin_btn: "✅ Điểm danh hằng ngày"
+  invite_btn: "🎯 Mời bạn nhận quà"
+  promo_btn: "📢 Thông báo"
+  rules_btn: "📜 Quy tắc"
+  signin_already: "⚠️ Hôm nay bạn đã điểm danh."
+  signin_ok: "✅ Điểm danh thành công, +{points} điểm."
+  invite_share_ready: "✅ Liên kết mời đã sẵn sàng."
+  invite_share_link_label: "🔗 Liên kết mời:"
+  invite_rules: "📘 Quy tắc mời và đổi thưởng"
+  promo: "📢 Thông báo"
+  invite_share_btn: "🔗 Tạo liên kết"
+  invite_redeem_btn: "♻️ Đổi điểm"
+  invite_title: "🎯 Tiến độ mời"
+  invite_compact: |-
+    Tiến độ: {percent}%
+    {bar}
+    {phase_text}
+  exchange:
+    desc: |-
+      ♻️ <b>Đổi thưởng</b>
+      • “Điểm → Tiến độ”: mỗi 1000 điểm = +1%
+      • “Năng lượng → Điểm”: quy đổi theo tỉ lệ cố định
+      • Khi đạt 100% sẽ mở khóa phần thưởng tương ứng
+    not_enough: "🚫 {resource} không đủ."
+    to_progress: "🔼 Tiêu 1000 điểm → +1% tiến độ"
+    energy_to_points_btn: "⚡ Năng lượng → ⭐ Điểm"
+    success_progress: "✅ +{value}% tiến độ."
+    success_points: "✅ +{value} điểm."
+
+phase:
+  "100": "🎉 Mục tiêu đã đạt!"
+  "99": "✨ Chỉ còn chút nữa — tăng tốc!"
+  "95_98": "🔥 Chặng cuối."
+  "90_94": "⚡ Tiến triển tốt, tiếp tục nào."
+  "80_89": "👍 Đang tốt dần."
+
+record:
+  title: "📜 Lịch sử giao dịch"
+  recent10: "🕑 10 mục gần đây:"
+  none: "📭 Chưa có bản ghi."
+  fields:
+    time: "🕒 Thời gian"
+    type: "🔖 Loại"
+    token: "🪙 Tiền tệ"
+    amount: "💵 Số tiền"
+    note: "📝 Ghi chú"
+
+types:
+  RECHARGE: "💰 Nạp tiền"
+  WITHDRAW: "🏧 Rút tiền"
+  HONGBAO_SEND: "🧧 Gửi"
+  HONGBAO_GRAB: "🤲 Nhận"
+  ADJUSTMENT: "🔧 Điều chỉnh quản trị"
+  SIGNIN: "🗓️ Điểm danh"
+  INVITE_REWARD: "🎯 Thưởng mời bạn"
+
+lang:
+  title: "🌐 请选择语言"
+  zh: "🇨🇳 简体中文"
+  en: "🇺🇸 English"
+  fr: "🇫🇷 Français"
+  de: "🇩🇪 Deutsch"
+  es: "🇪🇸 Español"
+  hi: "🇮🇳 हिन्दी"
+  vi: "🇻🇳 Tiếng Việt"
+  th: "🇹🇭 ไทย"
+
+recharge:
+  title: "💰 Trung tâm nạp tiền"
+  choose_method: "Chọn loại tiền"
+  choose_amount: "Chọn số tiền"
+  custom: "✏️ Số tiền tùy chọn"
+  refresh: "🔁 Làm mới trạng thái"
+  deposit_addr: "🔗 Địa chỉ nạp"
+  addr_instr: |-
+    💡 Gửi bất kỳ số {token} nào đến địa chỉ trên (mạng: {network}).
+    ⏱ Sau khi xác nhận trên chuỗi, tiền sẽ tự động ghi có. Địa chỉ có hiệu lực lâu dài, dùng nhiều lần.
+    🔁 Nếu đã chuyển, bấm “Làm mới trạng thái” để cập nhật.
+  fields:
+    id: "🧾 Mã đơn"
+    token: "🪙 Loại tiền"
+    amount: "💵 Số tiền"
+    address: "🏦 Địa chỉ"
+    status:
+      pending: "⏳ Đang chờ"
+      success: "✅ Thành công"
+      failed: "❌ Thất bại"
+      expired: "🕒 Hết hạn"
+    created: "🗓️ Thời điểm tạo"
+    expires: "⏰ Hết hạn"
+    label: "Trạng thái"
+  link: "🔗 Liên kết thanh toán"
+  created: "✅ Đã tạo đơn. Hãy làm theo hướng dẫn."
+  input_custom: "✏️ Nhập số tiền (chỉ số)"
+  invalid_amount: "❌ Số tiền không hợp lệ."
+  invalid_amount_2dp: "❌ Chỉ cho phép tối đa hai chữ số thập phân."
+  success_text: "✅ Nạp tiền thành công."
+  addr_missing: "Không có địa chỉ để sao chép"
+  copy_addr: "📋 Sao chép địa chỉ"
+  copy_amount: "📋 Sao chép số tiền"
+  loading: "⏳ Đang tạo thông tin thanh toán…"
+  tutorial:
+    title: "💰 Trung tâm nạp tiền"
+    step1: "1️⃣ Chọn loại tiền"
+    step2: "2️⃣ Số tiền"
+    step3: "3️⃣ Địa chỉ"
+    step4: "4️⃣ Mã QR (tùy chọn)"
+    step4_tip: "Dùng ví quét ảnh trong tin nhắn này để thanh toán"
+    step5: "5️⃣ Xác nhận và ghi có"
+    step5_tip: "Sau khi thanh toán, bấm 【Làm mới trạng thái】 để kiểm tra"
+    warn_amount: "⚠️ Số tiền phải khớp chính xác, nếu không sẽ không ghi có."
+    network: "Mạng"
+    amount: "Số tiền"
+    address: "Địa chỉ"
+    expires: "Hết hạn"
+
+  invoice:
+    title: "Thông tin thanh toán"
+    amount: "Số tiền"
+    address: "Địa chỉ"
+    network: "Mạng"
+    expires: "Hết hạn"
+
+balance:
+  title: "💼 Tài sản của tôi"
+  recharge: "💳 Nạp tiền"
+  withdraw: "🏧 Rút tiền"
+  template: |-
+    🧾 Số dư hiện tại
+    💵 USDT: {usdt}
+    🪙 TON: {ton}
+    ⭐ Điểm: {points}
+
+    🎯 Loại tiền hiện tại: <b>{token}</b>
+    🧾 Sẽ trừ: {real_amt}
+
+balance_page:
+  title: "💼 Tổng quan tài sản"
+  usdt: "💵 USDT: {amount}"
+  ton: "🪙 TON: {amount}"
+  points: "⭐ Điểm: {amount}"
+
+withdraw:
+  title: "🏧 Rút tiền"
+  choose_token: "Chọn loại tiền"
+  amount:
+    ask: "💵 Nhập số tiền rút (cho phép thập phân)"
+    min: "📉 Tối thiểu {token}: {amount}"
+    fee: "🧾 Phí: {fee} {token} (mỗi lần)"
+  balance: "💼 Số dư: {balance} {token}"
+  errors:
+    invalid_amount: "❌ Số tiền không hợp lệ."
+    less_than_min: "❌ Thấp hơn mức tối thiểu."
+    insufficient: "💸 Số dư không đủ. Hãy giảm số tiền hoặc nạp thêm."
+    bad_address: "❌ Địa chỉ không hợp lệ."
+  address:
+    ask: "🏦 Nhập địa chỉ nhận ({token}) của bạn"
+  confirm: "✅ Xác nhận rút"
+  cancel: "✖️ Hủy"
+  cancelled: "Đã hủy thao tác."
+  success: "✅ Đã gửi yêu cầu rút."
+  success_detail: "• Số tiền: {amount} {token} (phí {fee})"
+  success_next: "⛓ Sẽ xử lý chuyển on-chain sớm nhất có thể."
+  fail: "❌ Gửi thất bại. Vui lòng thử lại."
+  confirm_page:
+    title: "🧧 Xác nhận rút tiền"
+    token: "🪙 Loại tiền: {token}"
+    amount: "💵 Số tiền: {amount}"
+    fee: "🧾 Phí: {fee}"
+    total: "💳 Khấu trừ: {total}"
+    address: "🏦 Địa chỉ: {address}"
+
+labels:
+  usdt: "💵 USDT"
+  ton: "🪙 TON"
+  point: "⭐ Sao"
+  amount: "💵 Số tiền"
+  token: "🪙 Loại tiền"
+  user_id: "🆔 ID người dùng"
+  user_tg_id: "🆔 ID Telegram"
+  energy: "⚡ Năng lượng"
+  is_last: "🔚 Cuối cùng"
+  last: "🔚 Cuối"
+
+admin:
+  settings: "⚙️ Cài đặt hệ thống"
+  stats: "📈 Tổng quan thống kê"
+  toggle_auto: "🔁 Bật/Tắt chế độ tự động"
+  no_permission: "⛔ Bạn không có quyền."
+  adjust_success: "✅ Đã điều chỉnh {amount} {token} cho người dùng {uid}"
+  adjust_failed: "❌ Điều chỉnh thất bại: {reason}"
+  covers:
+    menu_title: "🎨 Quản lý ảnh bìa phong bao"
+    menu_desc: "🎨 Quản lý ảnh bìa\nHãy chọn thao tác:"
+    upload_btn: "➕ Tải ảnh bìa"
+    list_btn: "📚 Danh sách ảnh bìa"
+    delete_btn: "🗑 Xóa ảnh bìa"
+    back_to_mgr: "⬅️ Quay lại quản lý bìa"
+    no_channel: "❌ Chưa cấu hình COVER_CHANNEL_ID trong settings."
+    upload_ask: "Hãy gửi một ảnh làm ảnh bìa. Có thể kèm tiêu đề."
+    add_ok: "✅ Đã thêm ảnh bìa ID={id}"
+    add_fail: "❌ Tải lên thất bại: {reason}"
+    empty: "📭 Chưa có ảnh bìa."
+    list_title: "📚 Danh sách ảnh bìa"
+    delete_pick: "Chọn ảnh bìa để xóa:"
+    delete_ok: "✅ Đã xóa ảnh bìa #{id}"
+    delete_fail: "❌ Không tìm thấy ảnh bìa #{id}"
+    preview_fail: "❌ Xem trước thất bại."
+    preview_fail_hint: |-
+      Nguyên nhân có thể:
+      • Bot chưa vào kênh hoặc không có quyền đăng;
+      • Sai ID kênh;
+      • Bản ghi thiếu file_id hợp lệ.
+    copy_fail_hint: |-
+      Nguyên nhân có thể:
+      • Bot chưa vào kênh hoặc không có quyền đăng;
+      • ID kênh sai (phải bắt đầu bằng -100).
+    preview_ok: "✅ Đã gửi bản xem trước"
+  stats_total_env: "🧧 Tổng số phong bao: {n}"
+  stats_ongoing: "⏳ Đang diễn ra: {n}"
+  stats_users: "👥 Người dùng: {n}"
+  stats_recharge: "💰 Tổng nạp:"
+  stats_active_today: "🔥 Người dùng hoạt động hôm nay: {n}"
+  export_service_missing: "❌ Dịch vụ xuất không khả dụng (thiếu services/export_service.py)"
+  export_failed: "❌ Xuất thất bại: {reason}"
+  send_file_failed: "❌ Gửi tệp thất bại: {reason}"
+  adjust:
+    button: "➕ Điều chỉnh số dư"
+    ask_user: "👤 Gửi <code>ID</code> hoặc <code>@username</code> của người dùng"
+    choose_asset: "💱 Chọn tài sản:"
+    balance_after: "💼 Số dư hiện tại"
+    amount:
+      ask_fx: "✍️ Nhập số tiền (dương = cộng, âm = trừ)"
+      hint_fx: "Tối đa 6 chữ số thập phân. Ví dụ 12.345678 hoặc -0.5"
+      ask_point: "✍️ Nhập thay đổi điểm (ví dụ 100 hoặc -50)"
+    memo:
+      ask: "📝 Ghi chú (tùy chọn, hoặc gửi 'skip')"
+    confirm:
+      title: "✅ Xác nhận điều chỉnh"
+      user: "• Người dùng: {user}"
+      asset: "• Tài sản: {token}"
+      amount: "• Thay đổi: {amount}"
+      memo: "• Ghi chú: {memo}"
+      ok: "✅ Thực hiện"
+      cancel: "✖️ Hủy"
+    cancelled: "Đã hủy thao tác."
+    success: "✅ Đã điều chỉnh xong"
+    fail: "❌ Điều chỉnh thất bại. Thử lại sau."
+    errors:
+      bad_user: "❌ Định dạng sai. Gửi ID hoặc @username"
+      bad_amount: "❌ Số tiền không hợp lệ"
+      zero: "❌ Giá trị không thể là 0"
+  export:
+    button: "📤 Xuất dữ liệu"
+    by_user: "👤 Xuất theo người dùng"
+    all: "📊 Xuất toàn bộ"
+    confirm_user: "✅ Xác nhận người dùng"
+  export_intro: "Chọn phạm vi xuất"
+  export_user: "👤 Theo người dùng"
+  export_all: "📊 Toàn bộ"
+  export_done: "✅ Xuất xong. Tệp bên dưới:"
+  export_empty: "📭 Không có dữ liệu"
+
+common:
+  prev: "« Trước"
+  next: "Tiếp »"
+  invalid: "Hành động không hợp lệ"
+  not_available: "⛔ Chức năng tạm thời không khả dụng"
+  bad_request: "⚠️ Yêu cầu không hợp lệ. Vui lòng thử lại."
+  not_found: "🔍 Không tìm thấy"
+  wait_emoji: "⏳"
+  ok_emoji: "👌"
+  custom_amount: "✏️ Số tiền tùy chọn"
+  custom_shares: "✏️ Số phần tùy chọn"
+  skip: "➡️ Bỏ qua"
+  copied_tip: "Đã gửi nội dung có thể sao chép"
+  processing: "⏳ Đang kiểm tra số dư…"
+  refresh: "🔄 Làm mới"
+  close: "Đóng"
+
+errors:
+  bad_request: "⚠️ Yêu cầu không hợp lệ. Vui lòng thử lại."
+  not_found: "🔍 Không tìm thấy"
+  only_mvp: "⚠️ Chỉ dành cho MVP của vòng"
+
+balance_card:
+  template: |-
+    🧾 Số dư hiện tại
+    💵 USDT: {usdt}
+    🪙 TON: {ton}
+    ⭐ Điểm: {points}
+
+    🎯 Loại tiền hiện tại: <b>{token}</b>
+    🧾 Sẽ trừ: {real_amt}
+
+help:
+  title: "❓ Trung tâm trợ giúp"
+  subtitle: "Câu hỏi thường gặp nhanh; bạn cũng có thể hỏi trực tiếp."
+  ask_me: "Gửi câu hỏi của bạn (中文/English/Tiếng Việt đều được)."
+  ask_placeholder: "Ví dụ: Làm sao gửi vào nhóm chỉ định?"
+  thinking: "Đang suy nghĩ… vui lòng đợi."
+  ai_fallback: "Mình chưa hiểu rõ. Thử các từ khóa: gửi phong bao, nhận phong bao, nạp, rút, quy tắc, công bằng. Hoặc dùng các nút bên dưới."
+  exit_ai_tip: "Để thoát, bấm “Thoát chế độ AI” hoặc Quay lại."
+  exit_ai: "🚪 Thoát chế độ AI"
+  exit_ok: "Đã thoát chế độ AI."
+  ai_empty: "Hãy gửi câu hỏi trực tiếp."
+  ask_ai_btn: "🤖 Hỏi mình (AI)"
+  ask_ai: "💡 Hỏi mình (AI)"
+  faq:
+    send: "🧧 Cách gửi phong bao"
+    grab: "🤲 Cách nhận phong bao"
+    recharge: "💳 Nạp & Rút"
+    withdraw: "🏧 Rút tiền"
+    rank: "🏆 BXH/Thống kê hôm nay"
+    rules: "⚖️ Quy tắc & Công bằng"
+
+faq:
+  send:
+    title: "🧧 Cách gửi phong bao"
+    body: |-
+      1. Mở menu → Gửi phong bao;
+      2. Chọn loại tiền (USDT/TON/⭐ điểm), tổng tiền, số phần;
+      3. Chọn nơi gửi (nhóm/riêng), nhập lời chúc (tùy chọn), xác nhận;
+      4. Nếu gửi vào nhóm, đảm bảo bot đã vào và có quyền gửi tin.
+  grab:
+    title: "🤲 Cách nhận phong bao"
+    body: |-
+      1. Trên thẻ, bấm 【Nhận ngay】;
+      2. Số tiền là ngẫu nhiên, sẽ tự động ghi vào lịch sử;
+      3. Khi kết thúc, xem “người may mắn nhất”.
+  recharge:
+    title: "💳 Nạp & Rút"
+    body: |-
+      · Vào “Tài sản của tôi/Nạp/Rút” và làm theo hướng dẫn;
+      · Xác nhận trên chuỗi cần thời gian, vui lòng chờ;
+      · Nếu bất thường, liên hệ quản trị viên.
+  rank:
+    title: "🏆 BXH/Thống kê hôm nay"
+    body: |-
+      · Sau mỗi vòng có thể xem BXH và “ngôi sao may mắn”;
+      · Mục “Thống kê hôm nay” có thể phụ thuộc phiên bản.
+  rules:
+    title: "⚖️ Quy tắc & Công bằng"
+    body: |-
+      · Chỉ phân phối ngẫu nhiên;
+      · Bot không tham gia nhận;
+      · Xem kênh thông báo hoặc liên hệ quản trị viên để biết chi tiết.

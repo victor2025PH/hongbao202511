@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block content %}
+
+{# ---------- 通用格式化宏：日期 / 数字 ---------- #}
+{% macro fmt_dt(v) -%}
+  {%- if v is not none -%}
+    {%- if v is string -%}
+      {{ v }}
+    {%- else -%}
+      {{ v.strftime("%Y-%m-%d %H:%M:%S") }}
+    {%- endif -%}
+  {%- else -%}
+    —
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro fmt_num(v, max_places=8) -%}
+  {%- if v is none -%}—{%- else -%}
+    {%- if v is string -%}
+      {{ v }}
+    {%- else -%}
+      {%- set s = ("{:." ~ max_places ~ "f}").format(v)|trim -%}
+      {{ s.rstrip('0').rstrip('.') if '.' in s else s }}
+    {%- endif -%}
+  {%- endif -%}
+{%- endmacro %}
+
+{# ---------- 通用取值宏 F()：兼容 ORM/Row/Dict ---------- #}
+{% macro F(obj, name) -%}
+  {%- set _attr = (obj|attribute(name)) if (obj is defined and obj is not none) else none -%}
+  {%- if _attr is defined and _attr is not undefined and _attr is not none -%}
+    {{- _attr -}}
+  {%- else -%}
+    {# 2) 再试 SQLAlchemy Row 的 _mapping —— 先稳妥拿到 _mapping 引用 #}
+    {%- set _m = (obj|attribute("_mapping")) if (obj is defined and obj is not none) else none -%}
+    {%- if _m and (name in _m) -%}
+      {{- _m[name] -}}
+    {%- else -%}
+      {# 3) 最后试 dict #}
+      {%- if obj is mapping and (name in obj) -%}
+        {{- obj[name] -}}
+      {%- else -%}
+        {{- none -}}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endif -%}
+{%- endmacro %}
+
+<h1 class="text-2xl font-semibold mb-4">{{ t("admin.nav.audit") or "账本流水" }}</h1>
+
+{# ---------- 顶部筛选区 + 导出 ---------- #}
+<form method="get" action="" class="bg-white p-4 rounded-xl shadow mb-4">
+  <div class="grid md:grid-cols-7 gap-3 text-sm">
+    <div>
+      <label class="block text-gray-500 mb-1">{{ t("admin.table.token") or "代币" }}</label>
+      <input name="token" value="{{ filters.token or '' }}" class="w-full border rounded-md px-2 py-1" placeholder="如 USDT / CNY"/>
+    </div>
+    <div>
+      <label class="block text-gray-500 mb-1">{{ t("admin.table.type") or "类型" }}</label>
+      <select name="type" class="w-full border rounded-md px-2 py-1">
+        <option value="">{{ t("admin.common.all") or "全部" }}</option>
+        {% set _type = filters.type or '' %}
+        {% for opt in ["recharge","deposit","withdraw","transfer","adjust","bonus","consume","refund"] %}
+        <option value="{{ opt }}" {% if _type==opt %}selected{% endif %}>{{ opt }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="block text-gray-500 mb-1">{{ t("admin.filters.user") or "用户" }}</label>
+      <input name="user" value="{{ filters.user or '' }}" class="w-full border rounded-md px-2 py-1" placeholder="tg_id / @username"/>
+    </div>
+    <div>
+      <label class="block text-gray-500 mb-1">{{ t("admin.filters.date_from") or "开始日期" }}</label>
+      <input type="datetime-local" name="start" value="{{ filters.start or '' }}" class="w-full border rounded-md px-2 py-1"/>
+    </div>
+    <div>
+      <label class="block text-gray-500 mb-1">{{ t("admin.filters.date_to") or "结束日期" }}</label>
+      <input type="datetime-local" name="end" value="{{ filters.end or '' }}" class="w-full border rounded-md px-2 py-1"/>
+    </div>
+    <div>
+      <label class="block text-gray-500 mb-1">{{ t("admin.common.search") or "关键词" }}</label>
+      <input name="q" value="{{ filters.q or '' }}" class="w-full border rounded-md px-2 py-1" placeholder="备注/订单/红包…"/>
+    </div>
+    <div>
+      <label class="block text-gray-500 mb-1">每页</label>
+      <select name="per_page" class="w-full border rounded-md px-2 py-1">
+        {% set _pp = (per_page or request.query_params.get('per_page') or 50)|int %}
+        {% for n in [25,50,100,200] %}
+          <option value="{{ n }}" {% if _pp==n %}selected{% endif %}>{{ n }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="mt-3 flex items-center gap-2">
+    <button class="px-3 py-1 border rounded-md text-sm">{{ t("admin.common.search") or "查询" }}</button>
+    <a href="?reset=1" class="px-3 py-1 border rounded-md text-sm text-gray-600">{{ t("admin.common.reset") or "重置" }}</a>
+
+    <span class="inline-block w-px h-5 bg-gray-200 mx-1"></span>
+
+    {# 导出：保持当前筛选条件，直接改 path #}
+    <a class="px-3 py-1 border rounded-md text-sm hover:bg-gray-50"
+       href="{{ request.url.replace(path='/admin/ledger/export.csv') }}">
+      导出 CSV
+    </a>
+    <a class="px-3 py-1 border rounded-md text-sm hover:bg-gray-50"
+       href="{{ request.url.replace(path='/admin/ledger/export.json') }}">
+      导出 JSON
+    </a>
+  </div>
+</form>
+
+{# ---------- 汇总卡片 ---------- #}
+<div class="grid md:grid-cols-2 gap-4 mb-4">
+  <div class="p-4 rounded-xl bg-white shadow">
+    <div class="text-sm text-gray-500">{{ t("admin.dashboard.ledger_7d_amount") or "当前筛选总金额" }}</div>
+    <div class="text-2xl font-bold">{{ fmt_num(total_amount) }}</div>
+  </div>
+  <div class="p-4 rounded-xl bg白 shadow">
+    <div class="text-sm text-gray-500">{{ t("admin.dashboard.ledger_7d_count") or "当前筛选总条数" }}</div>
+    <div class="text-2xl font-bold">{{ total_count or total or (rows|length) }}</div>
+  </div>
+</div>
+
+{# ---------- 列表 ---------- #}
+<div class="bg-white p-4 rounded-xl shadow overflow-x-auto">
+  <table class="min-w-full text-sm">
+    <thead>
+      <tr class="text-left text-gray-500 border-b">
+        <th class="py-2 pr-4">{{ t("admin.common.created_at") or "时间" }}</th>
+        <th class="py-2 pr-4">{{ t("admin.table.user") or "用户" }}</th>
+        <th class="py-2 pr-4">{{ t("admin.table.type") or "类型" }}</th>
+        <th class="py-2 pr-4">{{ t("admin.table.token") or "代币" }}</th>
+        <th class="py-2 pr-4">{{ t("admin.table.amount") or "金额" }}</th>
+        <th class="py-2 pr-4">{{ t("admin.table.note") or "备注" }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr class="border-t">
+        <td class="py-2 pr-4">{{ fmt_dt(F(r, "created_at")) }}</td>
+
+        <td class="py-2 pr-4">
+          {% set _tg = F(r, "tg_id") %}
+          {% set _un = F(r, "username") %}
+          {% set _uid = F(r, "user_id") %}
+          {% if _tg %}tg:{{ _tg }}
+          {% elif _un %}@{{ _un }}
+          {% elif _uid %}uid:{{ _uid }}
+          {% else %}—{% endif %}
+        </td>
+
+        <td class="py-2 pr-4">{{ F(r, "type") }}</td>
+        <td class="py-2 pr-4">{{ F(r, "token") }}</td>
+        <td class="py-2 pr-4">{{ fmt_num(F(r, "amount")) }}</td>
+
+        {% set _note = F(r, "note") %}
+        <td class="py-2 pr-4 max-w-[420px] truncate" title="{{ _note or '' }}">{{ _note or "—" }}</td>
+      </tr>
+      {% endfor %}
+      {% if rows|length == 0 %}
+      <tr><td colspan="6" class="py-6 text-center text-gray-400">{{ t("record.none") or "暂无数据" }}</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+
+  {% set _page = page or 1 %}
+  {% set _total_pages = total_pages or 1 %}
+  {% set _per_page = (per_page or request.query_params.get('per_page') or 50)|int %}
+  <div class="flex items-center justify-between mt-4 text-sm">
+    <div class="text-gray-500">
+      {{ t("admin.pagination.page") or "第" }} {{ _page }} {{ t("admin.pagination.of") or "页 / 共" }} {{ _total_pages }} {{ t("admin.pagination.pages") or "页" }}
+      · {{ _per_page }} / page
+    </div>
+    <div class="flex items-center gap-2">
+      {% if _page > 1 %}
+        <a class="px-3 py-1 border rounded-md" href="{{ request.url.include_query_params(page=_page-1) }}">{{ t("admin.pagination.prev") or "上一页" }}</a>
+      {% else %}
+        <span class="px-3 py-1 border rounded-md text-gray-300 cursor-not-allowed">{{ t("admin.pagination.prev") or "上一页" }}</span>
+      {% endif %}
+
+      {% if _page < _total_pages %}
+        <a class="px-3 py-1 border rounded-md" href="{{ request.url.include_query_params(page=_page+1) }}">{{ t("admin.pagination.next") or "下一页" }}</a>
+      {% else %}
+        <span class="px-3 py-1 border rounded-md text-gray-300 cursor-not-allowed">{{ t("admin.pagination.next") or "下一页" }}</span>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-md mx-auto bg-white shadow rounded-xl p-6">
+  <h1 class="text-xl font-semibold mb-4">Two-Factor</h1>
+
+  {# 顶部提示：成功与错误信息 #}
+  {% if message %}
+    <div class="mb-3 text-sm bg-green-50 text-green-700 border border-green-200 rounded-md p-2">
+      {{ message }}
+    </div>
+  {% endif %}
+  {% if error %}
+    <div class="mb-3 text-sm bg-red-50 text-red-700 border border-red-200 rounded-md p-2">
+      {{ error }}
+    </div>
+  {% endif %}
+
+  {# 发送验证码按钮：不依赖登录页，直连 /admin/twofactor/send #}
+  <form method="post" action="/admin/twofactor/send" class="mb-4">
+    <button class="w-full border rounded-md py-2">
+      {{ t("admin.login.otp_send") }}
+    </button>
+  </form>
+
+  {# 输入并验证验证码 #}
+  <form method="post" action="/admin/twofactor/verify" class="space-y-3">
+    <div>
+      <label class="block text-sm text-gray-600 mb-1">{{ t("admin.login.otp_input") }}</label>
+      <input name="otp"
+             inputmode="numeric"
+             pattern="[0-9]*"
+             maxlength="6"
+             class="w-full border rounded-md px-3 py-2"
+             placeholder="123456"
+             required />
+      {% if sent and not ok %}
+        <p class="text-xs text-gray-500 mt-1">{{ t("admin.twofactor.need_otp") }}</p>
+      {% endif %}
+      {% if ok %}
+        <p class="text-xs text-green-600 mt-1">{{ t("admin.twofactor.ok") }}</p>
+      {% endif %}
+    </div>
+    <button class="w-full bg-black text-white rounded-md py-2">
+      {{ t("admin.common.confirm") }}
+    </button>
+  </form>
+</div>
+{% endblock %}

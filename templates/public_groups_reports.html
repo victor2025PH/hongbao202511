@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+  <div>
+    <h1 class="text-xl font-semibold">{{ t('admin.public_groups_reports.title') }}</h1>
+    <p class="text-sm text-gray-500">{{ t('admin.public_groups_reports.subtitle') }}</p>
+  </div>
+  <a href="/admin/public-groups"
+     class="px-3 py-2 text-sm border rounded text-gray-700 hover:bg-gray-100">
+    {{ t('admin.public_groups_reports.back_to_groups') }}
+  </a>
+</div>
+
+<form method="get" class="bg-white border rounded-md p-4 shadow-sm mb-4 flex flex-col gap-3 md:flex-row md:items-end md:gap-4">
+  <div class="flex-1">
+    <label class="block text-xs text-gray-500 mb-1">{{ t('admin.public_groups_reports.filter_status') }}</label>
+    <select name="status"
+            class="w-full border rounded px-3 py-2 text-sm focus:border-blue-400 focus:ring-blue-200 focus:ring">
+      <option value="">{{ t('admin.public_groups_reports.filter_all_status') }}</option>
+      {% for s in statuses %}
+      <option value="{{ s }}" {% if s == status_filter %}selected{% endif %}>
+        {{ t('admin.public_groups_reports.status_' + s) }}
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="flex-1">
+    <label class="block text-xs text-gray-500 mb-1">{{ t('admin.public_groups_reports.search_label') }}</label>
+    <input type="text"
+           name="search"
+           value="{{ search }}"
+           placeholder="{{ t('admin.public_groups_reports.search_placeholder') }}"
+           class="w-full border rounded px-3 py-2 text-sm focus:border-blue-400 focus:ring-blue-200 focus:ring">
+  </div>
+  <div class="flex items-center gap-2">
+    <button class="px-3 py-2 text-sm rounded bg-blue-500 text-white hover:bg-blue-600">
+      {{ t('admin.public_groups_reports.filter_apply') }}
+    </button>
+    <a href="/admin/public-groups/reports"
+       class="px-3 py-2 text-sm rounded border text-gray-700 hover:bg-gray-100">
+      {{ t('admin.public_groups_reports.filter_reset') }}
+    </a>
+  </div>
+</form>
+
+{% set summary_totals = status_totals or {} %}
+<div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+  <div class="rounded-md border bg-white shadow-sm p-4 flex flex-col">
+    <span class="text-xs text-gray-500">{{ t('admin.public_groups_reports.status_pending') }}</span>
+    <span class="text-2xl font-semibold text-gray-900 mt-1">{{ summary_totals.get('pending', 0) }}</span>
+  </div>
+  <div class="rounded-md border bg-white shadow-sm p-4 flex flex-col">
+    <span class="text-xs text-gray-500">{{ t('admin.public_groups_reports.status_in_progress') }}</span>
+    <span class="text-2xl font-semibold text-gray-900 mt-1">{{ summary_totals.get('in_progress', 0) }}</span>
+  </div>
+  <div class="rounded-md border bg-white shadow-sm p-4 flex flex-col">
+    <span class="text-xs text-gray-500">{{ t('admin.public_groups_reports.status_resolved') }}</span>
+    <span class="text-2xl font-semibold text-gray-900 mt-1">{{ summary_totals.get('resolved', 0) }}</span>
+  </div>
+  <div class="rounded-md border bg-white shadow-sm p-4 flex flex-col">
+    <span class="text-xs text-gray-500">{{ t('admin.public_groups_reports.status_dismissed') }}</span>
+    <span class="text-2xl font-semibold text-gray-900 mt-1">{{ summary_totals.get('dismissed', 0) }}</span>
+  </div>
+</div>
+
+{% set status_label_map = {
+  "pending": t('admin.public_groups_reports.status_pending'),
+  "in_progress": t('admin.public_groups_reports.status_in_progress'),
+  "resolved": t('admin.public_groups_reports.status_resolved'),
+  "dismissed": t('admin.public_groups_reports.status_dismissed')
+} %}
+{% set inline_i18n = {
+  "note_prompt": t('admin.public_groups_reports.inline_note_prompt'),
+  "assign_me": t('admin.public_groups_reports.inline_assign_me'),
+  "mark_in_progress": t('admin.public_groups_reports.inline_mark_in_progress'),
+  "mark_resolved": t('admin.public_groups_reports.inline_mark_resolved'),
+  "mark_dismissed": t('admin.public_groups_reports.inline_mark_dismissed'),
+  "status_updated": t('admin.public_groups_reports.inline_status_updated'),
+  "assign_success": t('admin.public_groups_reports.inline_assign_success'),
+  "error": t('admin.public_groups_reports.inline_error')
+} %}
+
+<div class="bg-white border rounded-md shadow-sm overflow-x-auto">
+  <div id="inline-status" class="hidden px-4 py-2 text-xs"></div>
+  <table class="min-w-full text-sm"
+         id="reports-table"
+         data-current-operator="{{ current_operator or 0 }}"
+         data-status-labels='{{ status_label_map | tojson }}'
+         data-inline-i18n='{{ inline_i18n | tojson }}'>
+    <thead class="bg-gray-50 text-gray-500">
+      <tr>
+        <th class="px-4 py-2 text-left">{{ t('admin.public_groups_reports.table_id') }}</th>
+        <th class="px-4 py-2 text-left">{{ t('admin.public_groups_reports.table_group') }}</th>
+        <th class="px-4 py-2 text-left">{{ t('admin.public_groups_reports.table_type') }}</th>
+        <th class="px-4 py-2 text-left">{{ t('admin.public_groups_reports.table_status') }}</th>
+        <th class="px-4 py-2 text-left">{{ t('admin.public_groups_reports.table_priority') }}</th>
+        <th class="px-4 py-2 text-left">{{ t('admin.public_groups_reports.table_assigned') }}</th>
+        <th class="px-4 py-2 text-left">{{ t('admin.public_groups_reports.table_created') }}</th>
+        <th class="px-4 py-2 text-left">{{ t('admin.public_groups_reports.table_summary') }}</th>
+        <th class="px-4 py-2 text-left"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in reports %}
+      <tr class="border-t" data-report-id="{{ item.id }}">
+        <td class="px-4 py-2 text-gray-600">#{{ item.id }}</td>
+        <td class="px-4 py-2">
+          <div class="font-medium text-gray-900">{{ item.group.name }}</div>
+          <div class="text-xs text-gray-500 truncate max-w-[280px]">
+            <a href="{{ item.group.invite_link }}" target="_blank" rel="noopener" class="hover:underline">{{ item.group.invite_link }}</a>
+          </div>
+        </td>
+        <td class="px-4 py-2 text-gray-600">{{ item.report_type }}</td>
+        <td class="px-4 py-2" data-col="status">
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 status-pill">
+            {{ t('admin.public_groups_reports.status_' + item.status) }}
+          </span>
+        </td>
+        <td class="px-4 py-2 text-gray-600">{{ item.priority }}</td>
+        <td class="px-4 py-2 text-gray-600" data-col="assigned">
+          {% if item.assigned_operator %}
+          {{ item.assigned_operator }}
+          {% else %}
+          —
+          {% endif %}
+        </td>
+        <td class="px-4 py-2 text-gray-500">{{ item.created_at }}</td>
+        <td class="px-4 py-2 text-gray-600">
+          <div class="text-xs truncate max-w-[260px]">{{ item.description or "—" }}</div>
+        </td>
+        <td class="px-4 py-2 text-right">
+          <div class="flex items-center justify-end gap-2 flex-wrap">
+            <button type="button"
+                    class="inline-action text-xs px-2 py-1 border rounded bg-yellow-50 text-yellow-700 hover:bg-yellow-100"
+                    data-action="in_progress">
+              {{ t('admin.public_groups_reports.inline_mark_in_progress') }}
+            </button>
+            <button type="button"
+                    class="inline-action text-xs px-2 py-1 border rounded bg-green-50 text-green-700 hover:bg-green-100"
+                    data-action="resolved">
+              {{ t('admin.public_groups_reports.inline_mark_resolved') }}
+            </button>
+            <button type="button"
+                    class="inline-action text-xs px-2 py-1 border rounded bg-red-50 text-red-700 hover:bg-red-100"
+                    data-action="dismissed">
+              {{ t('admin.public_groups_reports.inline_mark_dismissed') }}
+            </button>
+            <button type="button"
+                    class="inline-action text-xs px-2 py-1 border rounded bg-blue-50 text-blue-700 hover:bg-blue-100"
+                    data-action="assign_me">
+              {{ t('admin.public_groups_reports.inline_assign_me') }}
+            </button>
+            <a href="/admin/public-groups/reports/{{ item.id }}"
+               class="text-xs px-3 py-1 border rounded text-gray-700 hover:bg-gray-100">
+              {{ t('admin.public_groups_reports.view_detail') }}
+            </a>
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="9" class="px-4 py-8 text-center text-gray-400 text-sm">
+          {{ t('admin.public_groups_reports.empty') }}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if total_pages > 1 %}
+<div class="flex justify-between items-center mt-4 text-sm text-gray-600">
+  <div>
+    {{ t('admin.public_groups_reports.pagination_summary', start=((page-1)*page_size)+1, end=((page-1)*page_size)+reports|length, total=total) }}
+  </div>
+  <div class="flex items-center gap-2">
+    {% if page > 1 %}
+    <a href="?status={{ status_filter }}&search={{ search }}&page={{ page - 1 }}" class="px-3 py-1 border rounded hover:bg-gray-100">
+      {{ t('admin.pagination.prev') }}
+    </a>
+    {% endif %}
+    <span>{{ page }} / {{ total_pages }}</span>
+    {% if page < total_pages %}
+    <a href="?status={{ status_filter }}&search={{ search }}&page={{ page + 1 }}" class="px-3 py-1 border rounded hover:bg-gray-100">
+      {{ t('admin.pagination.next') }}
+    </a>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+<script>
+(function () {
+  const table = document.getElementById('reports-table');
+  if (!table) {
+    return;
+  }
+  const currentOperator = Number(table.dataset.currentOperator || 0);
+  const statusLabels = JSON.parse(table.dataset.statusLabels || '{}');
+  const inlineI18n = JSON.parse(table.dataset.inlineI18n || '{}');
+  const statusNode = document.getElementById('inline-status');
+
+  function showMessage(message, tone) {
+    if (!statusNode) {
+      return;
+    }
+    if (!message) {
+      statusNode.textContent = '';
+      statusNode.classList.add('hidden');
+      return;
+    }
+    statusNode.textContent = message;
+    statusNode.className = 'px-4 py-2 text-xs ' + (tone || 'text-gray-600');
+    statusNode.classList.remove('hidden');
+  }
+
+  function updateRow(row, data) {
+    if (!row || !data) {
+      return;
+    }
+    if (data.status) {
+      const pill = row.querySelector('[data-col="status"] .status-pill');
+      if (pill) {
+        pill.textContent = statusLabels[data.status] || data.status;
+      }
+    }
+    if ('assigned_operator' in data) {
+      const assignedCell = row.querySelector('[data-col="assigned"]');
+      if (assignedCell) {
+        assignedCell.textContent = data.assigned_operator ? data.assigned_operator : '—';
+      }
+    }
+  }
+
+  function handleAction(event) {
+    const button = event.currentTarget;
+    const row = button.closest('tr[data-report-id]');
+    if (!row) {
+      return;
+    }
+    const reportId = row.dataset.reportId;
+    const action = button.dataset.action;
+    if (!reportId || !action) {
+      return;
+    }
+
+    const payload = {};
+    if (action === 'assign_me') {
+      if (!currentOperator) {
+        showMessage(inlineI18n.error || 'Failed.', 'text-red-500');
+        return;
+      }
+      payload.assigned_operator = currentOperator;
+    } else {
+      payload.status = action;
+      if (action === 'resolved' || action === 'dismissed') {
+        const promptMsg = inlineI18n.note_prompt || 'Add resolution note';
+        const note = window.prompt(promptMsg);
+        if (note === null) {
+          return;
+        }
+        payload.resolution_note = note.trim();
+      }
+    }
+
+    button.disabled = true;
+    const originalLabel = button.textContent;
+    button.textContent = '…';
+
+    const fetchFn = window.csrfFetch || fetch;
+    fetchFn(`/admin/public-groups/reports/${reportId}/inline`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload),
+    })
+      .then(function (resp) {
+        if (!resp.ok) {
+          return resp.text().then(function (text) {
+            throw new Error(text || ('HTTP ' + resp.status));
+          });
+        }
+        return resp.json();
+      })
+      .then(function (data) {
+        if (data && data.ok) {
+          updateRow(row, data);
+          if (payload.assigned_operator) {
+            showMessage(inlineI18n.assign_success || 'Assigned.', 'text-green-600');
+          } else {
+            showMessage(inlineI18n.status_updated || 'Updated.', 'text-green-600');
+          }
+        } else {
+          showMessage(inlineI18n.error || 'Failed.', 'text-red-500');
+        }
+      })
+      .catch(function (err) {
+        console.error('inline update failed', err);
+        showMessage(inlineI18n.error || 'Failed.', 'text-red-500');
+      })
+      .finally(function () {
+        button.disabled = false;
+        button.textContent = originalLabel;
+      });
+  }
+
+  table.querySelectorAll('.inline-action').forEach(function (btn) {
+    if (btn.dataset.action === 'assign_me' && !currentOperator) {
+      btn.disabled = true;
+      btn.classList.add('opacity-60');
+    } else {
+      btn.addEventListener('click', handleAction);
+    }
+  });
+})();
+</script>

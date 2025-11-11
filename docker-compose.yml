@@ -1,0 +1,72 @@
+version: "3.9"
+
+x-common-env: &common-env
+  env_file:
+    - .env
+  environment:
+    DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://redpacket:redpacket@db:5432/redpacket}
+    FLAG_ENABLE_PUBLIC_GROUPS: ${FLAG_ENABLE_PUBLIC_GROUPS:-1}
+
+services:
+  bot:
+    build: .
+    image: redpacket/app:latest
+    container_name: redpacket_bot
+    restart: always
+    <<: *common-env
+    depends_on:
+      db:
+        condition: service_healthy
+    command: python app.py
+
+  web_admin:
+    image: redpacket/app:latest
+    container_name: redpacket_web_admin
+    restart: always
+    <<: *common-env
+    depends_on:
+      db:
+        condition: service_healthy
+    command: uvicorn web_admin.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+
+  miniapp_api:
+    image: redpacket/app:latest
+    container_name: redpacket_miniapp_api
+    restart: always
+    <<: *common-env
+    depends_on:
+      db:
+        condition: service_healthy
+    command: uvicorn miniapp.main:app --host 0.0.0.0 --port 8080
+    ports:
+      - "8080:8080"
+
+  db:
+    image: postgres:15
+    container_name: redpacket_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-redpacket}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-redpacket}
+      POSTGRES_DB: ${POSTGRES_DB:-redpacket}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    container_name: redpacket_redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+volumes:
+  db_data:

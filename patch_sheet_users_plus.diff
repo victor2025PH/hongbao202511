@@ -1,0 +1,342 @@
+diff --git a/web_admin/controllers/sheet_users.py b/web_admin/controllers/sheet_users.py
+index 3333333..7777777 100644
+--- a/web_admin/controllers/sheet_users.py
++++ b/web_admin/controllers/sheet_users.py
+@@ -1,19 +1,24 @@
+ # web_admin/controllers/sheet_users.py
+ from __future__ import annotations
+-from typing import Optional, Dict
++from typing import Optional, Dict, Any
+ 
+-from fastapi import APIRouter, Depends, Request, Query, Form
+-from fastapi.responses import HTMLResponse, RedirectResponse
++from fastapi import APIRouter, Depends, Request, Query, Form, Body, HTTPException
++from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse, JSONResponse
+ 
+ from web_admin.deps import require_admin
+-from services.sheet_users import list_rows, get_row, update_row, EDITABLE_COLUMNS
++from services.sheet_users import (
++    list_rows, get_row, update_row, EDITABLE_COLUMNS,
++    export_rows_as_csv, append_audit, export_audit_as_csv
++)
+ 
+ router = APIRouter(prefix="/admin/sheet-users", tags=["admin-sheet-users"])
+ PAGE_SIZE = 50
+ 
+ def _nav(req: Request):
+     # 给 base.html 的导航高亮使用
+     req.state.nav_active = "sheet_users"
+-    return {"nav_active": "sheet_users", "title": "用户资料（Google Sheet）"}
++    return {"nav_active": "sheet_users", "title": "用户资料（Google Sheet）"}
++
++def _editor_from_session(sess: Any) -> str:
++    return getattr(sess, "username", None) or getattr(sess, "name", None) or str(getattr(sess, "id", "")) or "admin"
+ 
+ @router.get("", response_class=HTMLResponse)
+ @router.get("/", response_class=HTMLResponse)
+@@ -35,12 +40,16 @@ def page_list(
+     rows, total, headers = list_rows(page=page, per_page=per_page, filters=filters)
+     total_pages = max(1, (total + per_page - 1) // per_page)
+ 
++    # CSV 导出 URL（保留筛选条件）
++    def _q(v: str) -> str: 
++        return ("&" + v) if v else ""
++    export_url = "/admin/sheet-users/export" \
++        f"?page={page}&per_page={per_page}" \
++        f"{_q('用户ID=' + (q_user_id or ''))}{_q('用户名=' + (q_username or ''))}" \
++        f"{_q('聊天ID=' + (q_chat_id or ''))}{_q('来源=' + (q_source or ''))}"
++
+     ctx = {
+         "request": req,
+         "rows": rows,
+         "page": page,
+         "total_pages": total_pages,
+         "headers": headers,
++        "editable": EDITABLE_COLUMNS,
++        "export_url": export_url,
+         "filters": {
+             "用户ID": q_user_id or "",
+             "用户名": q_username or "",
+             "聊天ID": q_chat_id or "",
+             "来源": q_source or "",
+         },
+         **_nav(req),
+     }
+     return req.app.state.templates.TemplateResponse("sheet_users.html", ctx)
+@@ -67,10 +76,66 @@ def page_edit(
+     }
+     return req.app.state.templates.TemplateResponse("sheet_users_edit.html", ctx)
+ 
+ @router.post("/edit")
+ async def do_edit(
+     req: Request,
+     sess=Depends(require_admin),
+     row: int = Form(...),
+ ):
+     form = await req.form()
+     payload = {k: v for k, v in form.items() if k not in ("row",)}
+-    update_row(row, payload)
++    # 读取旧值用于审计
++    before, _ = get_row(row)
++    update_row(row, payload)
++    # 审计：逐字段记录变化
++    editor = _editor_from_session(sess)
++    for k, new_v in payload.items():
++        old_v = before.get(k, "")
++        if str(old_v) != str(new_v):
++            append_audit(row=row, field=k, old=old_v, new=new_v, editor=editor)
+     return RedirectResponse(url="/admin/sheet-users?ok=updated", status_code=303)
++
++# --- 新增：行内编辑（AJAX） ---
++@router.post("/inline")
++async def inline_edit(
++    req: Request,
++    sess=Depends(require_admin),
++    body: Dict[str, Any] = Body(...),
++):
++    row = int(body.get("row") or 0)
++    field = str(body.get("field") or "").strip()
++    value = str(body.get("value") or "")
++    if row < 2:
++        raise HTTPException(status_code=400, detail="invalid row")
++    if field not in EDITABLE_COLUMNS:
++        raise HTTPException(status_code=400, detail="field not editable")
++
++    before, _ = get_row(row)
++    update_row(row, {field: value})
++    editor = _editor_from_session(sess)
++    old_v = before.get(field, "")
++    if str(old_v) != str(value):
++        append_audit(row=row, field=field, old=old_v, new=value, editor=editor)
++    return JSONResponse({"ok": 1, "row": row, "field": field, "value": value})
++
++# --- 新增：CSV 导出（数据） ---
++@router.get("/export")
++def export_csv(
++    req: Request,
++    sess=Depends(require_admin),
++    page: int = 1,
++    per_page: int = PAGE_SIZE,
++    q_user_id: Optional[str] = Query(None, alias="用户ID"),
++    q_username: Optional[str] = Query(None, alias="用户名"),
++    q_chat_id: Optional[str] = Query(None, alias="聊天ID"),
++    q_source: Optional[str] = Query(None, alias="来源"),
++):
++    filters: Dict[str, str] = {}
++    if q_user_id: filters["用户ID"] = q_user_id
++    if q_username: filters["用户名"] = q_username
++    if q_chat_id: filters["聊天ID"] = q_chat_id
++    if q_source: filters["来源"] = q_source
++
++    stream = export_rows_as_csv(filters=filters)
++    return StreamingResponse(
++        stream, media_type="text/csv; charset=utf-8",
++        headers={"Content-Disposition": "attachment; filename=sheet_users.csv"},
++    )
++
++# --- 新增：CSV 导出（审计） ---
++@router.get("/export-audit")
++def export_audit(sess=Depends(require_admin)):
++    stream = export_audit_as_csv()
++    return StreamingResponse(
++        stream, media_type="text/csv; charset=utf-8",
++        headers={"Content-Disposition": "attachment; filename=sheet_users_audit.csv"},
++    )
+diff --git a/services/sheet_users.py b/services/sheet_users.py
+index 4444444..8888888 100644
+--- a/services/sheet_users.py
++++ b/services/sheet_users.py
+@@ -1,12 +1,18 @@
+ # services/sheet_users.py
+ from __future__ import annotations
+-from typing import List, Dict, Any, Optional, Tuple
++from typing import List, Dict, Any, Optional, Tuple, Iterable
+ 
+ import gspread
++import csv
++import io
++import os
++from datetime import datetime, timezone
+ 
+ # 兼容两种工程放置：优先 services.google_logger，其次根模块 google_logger
+ try:
+     from services.google_logger import _get_worksheet  # type: ignore
+ except Exception:  # pragma: no cover
+     from google_logger import _get_worksheet  # type: ignore
+@@ -83,6 +89,70 @@ def get_row(row_number: int) -> Tuple[Dict[str, Any], List[str]]:
+     for idx, h in enumerate(header):
+         data[h] = values[idx] if idx < len(values) else ""
+     return data, header
+ 
+ def update_row(row_number: int, payload: Dict[str, str]) -> None:
+@@ -112,3 +182,73 @@ def update_row(row_number: int, payload: Dict[str, str]) -> None:
+ 
+     if requests:
+         ws.batch_update(requests, value_input_option="RAW")
++
++# =========================
++# 导出 & 审计
++# =========================
++def export_rows_as_csv(filters: Optional[Dict[str, str]] = None) -> Iterable[bytes]:
++    """将（可筛选的）全量数据导出为 CSV（流式）"""
++    rows, total, headers = list_rows(page=1, per_page=10**9, filters=filters or {})
++    buf = io.StringIO()
++    w = csv.writer(buf)
++    w.writerow(["__row", *headers])
++    for r in rows:
++        w.writerow([r.get("__row", "")] + [r.get(h, "") for h in headers])
++    yield buf.getvalue().encode("utf-8")
++
++_AUDIT_FILE = os.getenv("SHEET_USERS_AUDIT_FILE", "storage/audit_sheet_users.csv")
++_AUDIT_HEADERS = ["time_utc", "row", "field", "old", "new", "editor"]
++
++def _ensure_audit_file():
++    os.makedirs(os.path.dirname(_AUDIT_FILE), exist_ok=True)
++    if not os.path.exists(_AUDIT_FILE) or os.path.getsize(_AUDIT_FILE) == 0:
++        with open(_AUDIT_FILE, "w", encoding="utf-8", newline="") as f:
++            csv.writer(f).writerow(_AUDIT_HEADERS)
++
++def append_audit(*, row: int, field: str, old: str, new: str, editor: str):
++    """
++    追加一行审计记录到 CSV 文件。
++    若你想写入 DB，可在此处替换为 ORM insert，并复用导出接口。
++    """
++    _ensure_audit_file()
++    ts = datetime.now(timezone.utc).isoformat(timespec="seconds")
++    with open(_AUDIT_FILE, "a", encoding="utf-8", newline="") as f:
++        csv.writer(f).writerow([ts, row, field, old, new, editor])
++
++def export_audit_as_csv() -> Iterable[bytes]:
++    _ensure_audit_file()
++    # 流式读出，避免一次性加载
++    with open(_AUDIT_FILE, "r", encoding="utf-8", newline="") as f:
++        for chunk in iter(lambda: f.read(64 * 1024), ""):
++            yield chunk.encode("utf-8")
+diff --git b/templates/sheet_users.html a/templates/sheet_users.html
+index 5555555..9999999 100644
+--- a/templates/sheet_users.html
++++ b/templates/sheet_users.html
+@@ -1,16 +1,22 @@
+ {% extends "base.html" %}
+ {% block content %}
+ <div class="flex items-center justify-between mb-4">
+   <h1 class="text-xl font-semibold">用户资料（Google Sheet）</h1>
+-  <a class="text-sm text-gray-600 hover:text-black" href="/admin/sheet-users">刷新</a>
++  <div class="flex items-center gap-3">
++    <a class="text-sm text-gray-600 hover:text-black" href="{{ export_url }}">导出 CSV</a>
++    <a class="text-sm text-gray-600 hover:text-black" href="/admin/sheet-users/export-audit">导出审计</a>
++    <a class="text-sm text-gray-600 hover:text-black" href="/admin/sheet-users">刷新</a>
++  </div>
+   <div class="hidden">{{ nav_active|default('') }}</div>
+ </div>
+@@ -39,18 +45,48 @@
+ <div class="overflow-x-auto bg-white border rounded-lg">
+   <table class="min-w-full text-sm" id="sheet-table">
+     <thead class="bg-gray-50 text-gray-600 border-b">
+       <tr>
+         <th class="px-3 py-2 text-left">#</th>
+         {% for h in headers %}
+-          <th class="px-3 py-2 text-left">{{ h }}</th>
++          <th class="px-3 py-2 text-left">{{ h }}{% if h in editable %}<span class="ml-1 text-xs text-gray-400">(可编辑)</span>{% endif %}</th>
+         {% endfor %}
+         <th class="px-3 py-2 text-left">操作</th>
+       </tr>
+     </thead>
+     <tbody class="divide-y">
+       {% for r in rows %}
+       <tr class="hover:bg-gray-50" data-row="{{ r['__row'] }}">
+         <td class="px-3 py-2">{{ r["__row"] }}</td>
+         {% for h in headers %}
+-          <td class="px-3 py-2 truncate max-w-[240px]" title="{{ r.get(h, '') }}">{{ r.get(h, "") }}</td>
++          {% set is_edit = h in editable %}
++          <td class="px-3 py-2 truncate max-w-[240px] {% if is_edit %}editable bg-white{% endif %}"
++              data-field="{{ h }}" title="{{ r.get(h, '') }}">
++            <span class="cell-text">{{ r.get(h, "") }}</span>
++          </td>
+         {% endfor %}
+         <td class="px-3 py-2">
+           <a class="text-blue-600 hover:underline" href="/admin/sheet-users/edit?row={{ r['__row'] }}">编辑</a>
+         </td>
+       </tr>
+       {% endfor %}
+@@ -70,4 +106,77 @@
+   {% endif %}
+ </div>
++<script>
++// 行内编辑：双击进入编辑，Enter 保存，Esc 取消；失焦也保存
++(function () {
++  const table = document.getElementById('sheet-table');
++  if (!table) return;
++
++  function toInput(td) {
++    if (td.classList.contains('editing')) return;
++    const span = td.querySelector('.cell-text');
++    const old = span ? span.textContent : '';
++    td.classList.add('editing');
++    const input = document.createElement('input');
++    input.type = 'text';
++    input.value = old || '';
++    input.className = 'w-full border rounded px-2 py-1';
++    td.innerHTML = '';
++    td.appendChild(input);
++    input.focus();
++    input.select();
++
++    function cancel() {
++      td.classList.remove('editing');
++      td.innerHTML = '<span class="cell-text"></span>';
++      td.querySelector('.cell-text').textContent = old || '';
++    }
++    function commit() {
++      const tr = td.closest('tr');
++      const row = tr ? tr.getAttribute('data-row') : null;
++      const field = td.getAttribute('data-field');
++      const value = input.value || '';
++      if (!row || !field) return cancel();
++      fetch('/admin/sheet-users/inline', {
++        method: 'POST',
++        headers: {'Content-Type': 'application/json'},
++        body: JSON.stringify({row: Number(row), field, value})
++      }).then(r => r.json()).then(j => {
++        if (j && j.ok) {
++          td.classList.remove('editing');
++          td.innerHTML = '<span class="cell-text"></span>';
++          td.querySelector('.cell-text').textContent = value;
++        } else {
++          alert('保存失败：' + (j && j.detail || ''));
++          cancel();
++        }
++      }).catch(e => {
++        alert('网络错误：' + e);
++        cancel();
++      });
++    }
++    input.addEventListener('keydown', (e) => {
++      if (e.key === 'Enter') commit();
++      if (e.key === 'Escape') cancel();
++    });
++    input.addEventListener('blur', commit);
++  }
++
++  table.addEventListener('dblclick', (e) => {
++    const td = e.target.closest('td.editable');
++    if (td) toInput(td);
++  });
++})();
++</script>
+ {% endblock %}
+diff --git b/templates/sheet_users_edit.html a/templates/sheet_users_edit.html
+index 6666666..aaaaaaa 100644
+--- a/templates/sheet_users_edit.html
++++ b/templates/sheet_users_edit.html
+@@ -1,6 +1,6 @@
+ {% extends "base.html" %}
+ {% block content %}
+-<div class="mb-4 flex items-center justify-between">
++<div class="mb-4 flex items-center justify-between">
+   <h1 class="text-xl font-semibold">{{ title or ("编辑第 " ~ row ~ " 行") }}</h1>
+-  <a class="text-sm text-gray-600 hover:text-black" href="/admin/sheet-users">返回列表</a>
++  <a class="text-sm text-gray-600 hover:text-black" href="/admin/sheet-users">返回列表</a>
+ </div>
+ 
+ <form method="post" action="/admin/sheet-users/edit" class="bg-white p-4 border rounded-lg">

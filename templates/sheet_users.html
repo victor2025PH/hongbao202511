@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+  .col-hidden { display: none; }
+  .th-resizer { position:absolute; right:2px; top:0; bottom:0; width:6px; cursor:col-resize; opacity:.4; }
+  .th-resizer:hover { opacity:.8; }
+  .thead-sticky { position: sticky; top: 0; z-index: 10; box-shadow: inset 0 -1px 0 #e5e7eb; }
+  .table-grid td, .table-grid th { border-bottom: 1px solid #f1f5f9; }
+</style>
+
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-xl font-semibold">用户资料（Google Sheet）</h1>
+  <div class="flex items-center gap-2">
+    {% if export_url %}
+      <a class="px-3 py-1.5 border rounded text-sm bg-white hover:bg-gray-50" href="{{ export_url }}">导出 CSV</a>
+    {% endif %}
+    <a class="px-3 py-1.5 border rounded text-sm bg-white hover:bg-gray-50" href="/admin/sheet-users/export-audit">导出审计</a>
+    <a class="text-sm text-gray-600 hover:text-black" href="/admin/sheet-users">刷新</a>
+  </div>
+</div>
+
+{% if error %}
+  <div class="mb-4 p-3 border border-red-200 bg-red-50 text-red-700 rounded">
+    {{ error }}
+  </div>
+{% endif %}
+
+<form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4 bg-white p-4 rounded-xl border">
+  <label class="text-sm"><span class="block text-gray-500 mb-1">用户ID</span>
+    <input name="用户ID" value="{{ filters['用户ID'] }}" class="w-full border rounded px-3 py-2">
+  </label>
+  <label class="text-sm"><span class="block text-gray-500 mb-1">用户名</span>
+    <input name="用户名" value="{{ filters['用户名'] }}" class="w-full border rounded px-3 py-2">
+  </label>
+  <label class="text-sm"><span class="block text-gray-500 mb-1">聊天ID</span>
+    <input name="聊天ID" value="{{ filters['聊天ID'] }}" class="w-full border rounded px-3 py-2">
+  </label>
+  <label class="text-sm"><span class="block text-gray-500 mb-1">来源</span>
+    <input name="来源" value="{{ filters['来源'] }}" class="w-full border rounded px-3 py-2">
+  </label>
+  <div class="md:col-span-4 flex gap-2">
+    <button class="px-3 py-1.5 rounded bg-black text-white text-sm">筛选</button>
+    <a href="/admin/sheet-users" class="px-3 py-1.5 rounded border text-sm">重置</a>
+
+    <!-- 视图工具 -->
+    <div class="ml-auto flex items-center gap-2">
+      <details class="relative">
+        <summary class="px-3 py-1.5 border rounded text-sm bg-white hover:bg-gray-50 cursor-pointer">列显示</summary>
+        <div class="absolute right-0 mt-2 w-72 bg-white border rounded-lg shadow p-3 z-20">
+          <div class="flex items-center justify-between mb-2">
+            <button type="button" class="px-2 py-1 border rounded text-sm bg-white hover:bg-gray-50" id="col-all">全选</button>
+            <button type="button" class="px-2 py-1 border rounded text-sm bg-white hover:bg-gray-50" id="col-inv">反选</button>
+            <button type="button" class="px-2 py-1 border rounded text-sm bg-white hover:bg-gray-50" id="col-edit">只保留可编辑</button>
+          </div>
+          <div id="col-manager" class="max-h-64 overflow-auto space-y-1 text-sm"></div>
+          <div class="mt-3 text-right">
+            <button type="button" class="px-3 py-1.5 rounded bg-black text-white text-sm" id="col-save">保存</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="relative">
+        <summary class="px-3 py-1.5 border rounded text-sm bg-white hover:bg-gray-50 cursor-pointer">密度</summary>
+        <div class="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow p-2 z-20 text-sm">
+          <label class="flex items-center gap-2 px-2 py-1 cursor-pointer">
+            <input type="radio" name="density" value="compact"> 紧凑
+          </label>
+          <label class="flex items-center gap-2 px-2 py-1 cursor-pointer">
+            <input type="radio" name="density" value="normal" checked> 适中
+          </label>
+        </div>
+      </details>
+
+      <label class="px-3 py-1.5 border rounded text-sm bg-white hover:bg-gray-50 cursor-pointer">
+        <input type="checkbox" id="wrap-toggle" class="mr-2"> 文本换行
+      </label>
+    </div>
+  </div>
+</form>
+
+<div class="bg-white border rounded-xl shadow-sm overflow-hidden">
+  <div class="overflow-auto" id="table-scroll" style="max-height: 70vh">
+    <table class="min-w-full text-sm table-grid" id="sheet-table">
+      <thead class="bg-gray-50 text-gray-700 thead-sticky">
+        <tr>
+          <th class="px-3 py-2 text-left relative" data-col="__row">#<span class="th-resizer"></span></th>
+          {% for h in headers %}
+            <th class="px-3 py-2 text-left relative select-none" data-col="{{ loop.index0 }}">
+              <div class="flex items-center gap-2">
+                <span>{{ h }}</span>
+                {% if editable and h in editable %}
+                  <span class="text-xs text-blue-500">(可编辑)</span>
+                {% endif %}
+              </div>
+              <span class="th-resizer"></span>
+            </th>
+          {% endfor %}
+          <th class="px-3 py-2 text-left relative" data-col="__op">操作<span class="th-resizer"></span></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y">
+        {% for r in rows %}
+        <tr class="hover:bg-gray-50">
+          <td class="px-3 py-2 whitespace-nowrap" data-col="__row">{{ r["__row"] }}</td>
+          {% for h in headers %}
+            {% set is_edit = editable and (h in editable) %}
+            <td class="px-3 py-2 align-top {{ 'editable bg-white' if is_edit else '' }}"
+                data-col="{{ loop.index0 }}" title="{{ r.get(h, '') }}">
+              <span class="cell-text break-words">{{ r.get(h, "") }}</span>
+            </td>
+          {% endfor %}
+          <td class="px-3 py-2 whitespace-nowrap" data-col="__op">
+            <a class="text-blue-600 hover:underline" href="/admin/sheet-users/edit?row={{ r['__row'] }}">编辑</a>
+          </td>
+        </tr>
+        {% endfor %}
+        {% if rows|length == 0 %}
+        <tr><td class="px-3 py-6 text-center text-gray-500" colspan="{{ headers|length + 2 }}">没有数据</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="flex items-center justify-center gap-3 mt-4">
+  {% if page > 1 %}
+    <a class="px-3 py-1.5 border rounded text-sm bg-white hover:bg-gray-50" href="?page={{ page-1 }}{% for k,v in filters.items() if v %}&{{ k }}={{ v }}{% endfor %}">上一页</a>
+  {% endif %}
+  <span class="text-sm text-gray-600">{{ page }} / {{ total_pages }}</span>
+  {% if page < total_pages %}
+    <a class="px-3 py-1.5 border rounded text-sm bg-white hover:bg-gray-50" href="?page={{ page+1 }}{% for k,v in filters.items() if v %}&{{ k }}={{ v }}{% endfor %}">下一页</a>
+  {% endif %}
+</div>
+
+<script>
+(function () {
+  const table = document.getElementById('sheet-table');
+  if (!table) return;
+
+  const PAGE_KEY = 'sheet_users_' + location.pathname;
+  const COL_VIS_KEY = PAGE_KEY + '_visible_cols';
+  const COL_W_KEY = PAGE_KEY + '_col_widths';
+  const DENSITY_KEY = PAGE_KEY + '_density';
+  const WRAP_KEY = PAGE_KEY + '_wrap';
+
+  const headers = [...table.querySelectorAll('thead th')].filter(th => th.dataset.col !== '__row' && th.dataset.col !== '__op');
+  const manager = document.getElementById('col-manager');
+  const editableSet = new Set({% if editable %}[{% for e in editable %}"{{ e }}"{% if not loop.last %},{% endif %}{% endfor %}]{% else %}[] {% endif %});
+
+  const headerNames = {};
+  headers.forEach((th, idx) => {
+    const name = th.innerText.replace('(可编辑)','').trim();
+    headerNames[idx] = name;
+  });
+
+  let visible = JSON.parse(localStorage.getItem(COL_VIS_KEY) || 'null');
+  if (!visible) { visible = {}; headers.forEach((th, idx)=> visible[idx] = true); }
+
+  manager.innerHTML = '';
+  headers.forEach((th, idx) => {
+    const name = headerNames[idx];
+    const col = idx;
+    const checked = visible[col] !== false;
+    const isEditable = !!th.querySelector('.text-blue-500');
+    manager.insertAdjacentHTML('beforeend', `
+      <label class="flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-50">
+        <input type="checkbox" data-col="${col}" ${checked ? 'checked' : ''}>
+        <span class="truncate">${name}</span>
+        ${isEditable ? '<span class="text-xs text-blue-500 ml-auto">可编辑</span>' : ''}
+      </label>
+    `);
+  });
+
+  document.getElementById('col-all').onclick = () => manager.querySelectorAll('input[type=checkbox]').forEach(c => c.checked = true);
+  document.getElementById('col-inv').onclick = () => manager.querySelectorAll('input[type=checkbox]').forEach(c => c.checked = !c.checked);
+  document.getElementById('col-edit').onclick = () => {
+    manager.querySelectorAll('input[type=checkbox]').forEach(c => {
+      const col = c.getAttribute('data-col');
+      const name = headerNames[col];
+      c.checked = editableSet.has(name);
+    });
+  };
+  document.getElementById('col-save').onclick = () => {
+    const m = {};
+    manager.querySelectorAll('input[type=checkbox]').forEach(c => m[c.getAttribute('data-col')] = c.checked);
+    localStorage.setItem(COL_VIS_KEY, JSON.stringify(m));
+    applyVisibility();
+  };
+
+  function applyVisibility() {
+    const map = JSON.parse(localStorage.getItem(COL_VIS_KEY) || '{}');
+    table.querySelectorAll('thead th').forEach(th => {
+      const key = th.dataset.col;
+      if (key === '__row' || key === '__op') return;
+      const show = (map[key] !== false);
+      th.classList.toggle('col-hidden', !show);
+    });
+    table.querySelectorAll('tbody tr').forEach(tr => {
+      tr.querySelectorAll('td').forEach(td => {
+        const key = td.dataset.col;
+        if (key === '__row' || key === '__op') return;
+        const show = (map[key] !== false);
+        td.classList.toggle('col-hidden', !show);
+      });
+    });
+  }
+
+  function applyWidths() {
+    const widths = JSON.parse(localStorage.getItem(COL_W_KEY) || '{}');
+    Object.entries(widths).forEach(([key, w]) => {
+      const th = table.querySelector(`thead th[data-col="${key}"]`);
+      if (th) th.style.width = w + 'px';
+      table.querySelectorAll(`tbody td[data-col="${key}"]`).forEach(td => td.style.width = w + 'px');
+    });
+  }
+
+  function enableResize(th) {
+    const handle = th.querySelector('.th-resizer');
+    if (!handle) return;
+    let startX, startW, key = th.dataset.col;
+    handle.addEventListener('mousedown', (e) => {
+      startX = e.clientX;
+      startW = th.getBoundingClientRect().width;
+      document.body.style.userSelect = 'none';
+      const move = (ev) => {
+        const dx = ev.clientX - startX;
+        const w = Math.max(60, startW + dx);
+        const widths = JSON.parse(localStorage.getItem(COL_W_KEY) || '{}');
+        widths[key] = Math.round(w);
+        localStorage.setItem(COL_W_KEY, JSON.stringify(widths));
+        applyWidths();
+      };
+      const up = () => {
+        document.removeEventListener('mousemove', move);
+        document.removeEventListener('mouseup', up);
+        document.body.style.userSelect = '';
+      };
+      document.addEventListener('mousemove', move);
+      document.addEventListener('mouseup', up);
+    });
+  }
+  table.querySelectorAll('thead th').forEach(enableResize);
+
+  function applyDensity() {
+    const d = localStorage.getItem(DENSITY_KEY) || 'normal';
+    const pad = d === 'compact' ? 'px-2 py-1.5 text-[13px]' : 'px-3 py-2';
+    table.querySelectorAll('th, td').forEach(el => {
+      el.classList.remove('px-2','py-1.5','text-[13px]','px-3','py-2');
+      pad.split(' ').forEach(c => el.classList.add(c));
+    });
+    const radio = document.querySelector(`input[name="density"][value="${d}"]`);
+    if (radio) radio.checked = true;
+  }
+
+  function applyWrap() {
+    const w = localStorage.getItem(WRAP_KEY) === '1';
+    table.querySelectorAll('.cell-text').forEach(span => {
+      if (w) { span.classList.add('break-words', 'whitespace-normal'); }
+      else { span.classList.remove('whitespace-normal'); span.classList.add('truncate'); }
+    });
+    const ck = document.getElementById('wrap-toggle');
+    if (ck) ck.checked = w;
+  }
+
+  document.querySelectorAll('input[name="density"]').forEach(r => {
+    r.addEventListener('change', () => { localStorage.setItem(DENSITY_KEY, r.value); applyDensity(); });
+  });
+  document.getElementById('wrap-toggle').addEventListener('change', (e) => {
+    localStorage.setItem(WRAP_KEY, e.target.checked ? '1' : '0'); applyWrap();
+  });
+
+  // 行内编辑（双击）
+  table.addEventListener('dblclick', (e) => {
+    const td = e.target.closest('td.editable');
+    if (!td || td.classList.contains('editing')) return;
+    const span = td.querySelector('.cell-text');
+    const old = span ? span.textContent : '';
+    td.classList.add('editing');
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = old || '';
+    input.className = 'w-full border rounded px-2 py-1';
+    td.innerHTML = '';
+    td.appendChild(input);
+    input.focus(); input.select();
+
+    const cancel = () => { td.classList.remove('editing'); td.innerHTML = '<span class="cell-text break-words"></span>'; td.querySelector('.cell-text').textContent = old || ''; };
+    const commit = () => {
+      const tr = td.closest('tr');
+      const row = tr ? tr.querySelector('[data-col="__row"]').textContent.trim() : null;
+      const fieldIdx = td.getAttribute('data-col');
+      const field = headerNames[fieldIdx];
+      const value = input.value || '';
+      if (!row || fieldIdx===null) return cancel();
+      fetch('/admin/sheet-users/inline', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({row: Number(row), field, value})
+      }).then(r => r.json()).then(j => {
+        if (j && j.ok) {
+          td.classList.remove('editing');
+          td.innerHTML = '<span class="cell-text break-words"></span>';
+          td.querySelector('.cell-text').textContent = value;
+        } else {
+          alert('保存失败：' + (j && j.detail || ''));
+          cancel();
+        }
+      }).catch(e => { alert('网络错误：' + e); cancel(); });
+    };
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') cancel(); });
+    input.addEventListener('blur', commit);
+  });
+
+  // 首次应用偏好
+  applyVisibility();
+  applyWidths();
+  applyDensity();
+  applyWrap();
+})();
+</script>
+
+{% endblock %}

@@ -1,0 +1,402 @@
+diff --git a/services/sheet_users.py b/services/sheet_users.py
+new file mode 100644
+index 0000000..8b8b8b8
+--- /dev/null
++++ b/services/sheet_users.py
+@@ -0,0 +1,205 @@
++from __future__ import annotations
++from typing import List, Dict, Any, Optional, Tuple, Iterable
++
++import gspread
++import csv
++import io
++import os
++from datetime import datetime, timezone
++
++# 兼容两种工程放置：优先 services.google_logger，其次根模块 google_logger
++try:
++    from services.google_logger import _get_worksheet  # type: ignore
++except Exception:  # pragma: no cover
++    from google_logger import _get_worksheet  # type: ignore
++
++# 允许编辑的白名单字段（其余只读，避免误改主键/时间）
++EDITABLE_COLUMNS = {
++    "来源","用户名","名","姓","全名","语言代码","是否机器人",
++    "聊天名称","聊天类型","邀请者用户ID","是否通过邀请链接加入","备注",
++}
++
++def _header_index_map(ws) -> Dict[str, int]:
++    headers = ws.row_values(1)
++    return {(h or "").strip(): idx for idx, h in enumerate(headers, start=1)}
++
++def list_rows(
++    page: int = 1,
++    per_page: int = 50,
++    filters: Optional[Dict[str, str]] = None,
++) -> Tuple[List[Dict[str, Any]], int, List[str]]:
++    """
++    读取表数据并做内存过滤 + 分页。
++    返回 (当前页 rows, 总行数, 表头 headers)
++    行数据包含特殊键 "__row"（行号，从 2 起）。
++    """
++    ws = _get_worksheet()
++    headers: List[str] = [(h or "").strip() for h in ws.row_values(1)]
++    values = ws.get_all_values()[1:]  # 去掉首行
++    rows: List[Dict[str, Any]] = []
++
++    f = {k: (v or "").strip() for k, v in (filters or {}).items() if (v or "").strip()}
++    for i, line in enumerate(values, start=2):
++        item = {"__row": i}
++        for idx, h in enumerate(headers):
++            item[h] = line[idx] if idx < len(line) else ""
++        matched = True
++        for k, v in f.items():
++            if v not in str(item.get(k, "")):
++                matched = False
++                break
++        if matched:
++            rows.append(item)
++
++    total = len(rows)
++    start = max(0, (page - 1) * per_page)
++    end = start + per_page
++    return rows[start:end], total, headers
++
++def get_row(row_number: int) -> Tuple[Dict[str, Any], List[str]]:
++    ws = _get_worksheet()
++    header: List[str] = [(h or "").strip() for h in ws.row_values(1)]
++    values = ws.row_values(row_number)
++    data = {"__row": row_number}
++    for idx, h in enumerate(header):
++        data[h] = values[idx] if idx < len(values) else ""
++    return data, header
++
++def update_row(row_number: int, payload: Dict[str, str]) -> None:
++    """
++    只允许改白名单列；header 行不可改；其余列忽略。
++    """
++    if row_number <= 1:
++        raise ValueError("cannot edit header row")
++    ws = _get_worksheet()
++    idx_map = _header_index_map(ws)
++
++    requests = []
++    for col_name, new_val in payload.items():
++        name = (col_name or "").strip()
++        if name not in EDITABLE_COLUMNS:
++            continue
++        col = idx_map.get(name)
++        if not col:
++            continue
++        a1 = gspread.utils.rowcol_to_a1(row_number, col)
++        requests.append({"range": a1, "values": [[str(new_val)]]})
++
++    if requests:
++        ws.batch_update(requests, value_input_option="RAW")
++
++# =========================
++# 导出 & 审计
++# =========================
++def export_rows_as_csv(filters: Optional[Dict[str, str]] = None) -> Iterable[bytes]:
++    """将（可筛选的）全量数据导出为 CSV（流式）"""
++    rows, total, headers = list_rows(page=1, per_page=10**9, filters=filters or {})
++    buf = io.StringIO()
++    w = csv.writer(buf)
++    w.writerow(["__row", *headers])
++    for r in rows:
++        w.writerow([r.get("__row", "")] + [r.get(h, "") for h in headers])
++    yield buf.getvalue().encode("utf-8")
++
++_AUDIT_FILE = os.getenv("SHEET_USERS_AUDIT_FILE", "storage/audit_sheet_users.csv")
++_AUDIT_HEADERS = ["time_utc", "row", "field", "old", "new", "editor"]
++
++def _ensure_audit_file():
++    os.makedirs(os.path.dirname(_AUDIT_FILE), exist_ok=True)
++    if not os.path.exists(_AUDIT_FILE) or os.path.getsize(_AUDIT_FILE) == 0:
++        with open(_AUDIT_FILE, "w", encoding="utf-8", newline="") as f:
++            csv.writer(f).writerow(_AUDIT_HEADERS)
++
++def append_audit(*, row: int, field: str, old: str, new: str, editor: str):
++    """
++    追加一行审计记录到 CSV 文件。
++    若你想写入 DB，可在此处替换为 ORM insert，并复用导出接口。
++    """
++    _ensure_audit_file()
++    ts = datetime.now(timezone.utc).isoformat(timespec="seconds")
++    with open(_AUDIT_FILE, "a", encoding="utf-8", newline="") as f:
++        csv.writer(f).writerow([ts, row, field, old, new, editor])
++
++def export_audit_as_csv() -> Iterable[bytes]:
++    _ensure_audit_file()
++    with open(_AUDIT_FILE, "r", encoding="utf-8", newline="") as f:
++        for chunk in iter(lambda: f.read(64 * 1024), ""):
++            yield chunk.encode("utf-8")
+diff --git a/web_admin/controllers/sheet_users.py b/web_admin/controllers/sheet_users.py
+new file mode 100644
+index 0000000..7c7c7c7
+--- /dev/null
++++ b/web_admin/controllers/sheet_users.py
+@@ -0,0 +1,164 @@
++from __future__ import annotations
++from typing import Optional, Dict, Any
++
++from fastapi import APIRouter, Depends, Request, Query, Form, Body, HTTPException
++from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse, JSONResponse
++
++from web_admin.deps import require_admin
++from services.sheet_users import (
++    list_rows, get_row, update_row, EDITABLE_COLUMNS,
++    export_rows_as_csv, append_audit, export_audit_as_csv
++)
++
++router = APIRouter(prefix="/admin/sheet-users", tags=["admin-sheet-users"])
++PAGE_SIZE = 50
++
++def _nav(req: Request):
++    req.state.nav_active = "sheet_users"
++    return {"nav_active": "sheet_users", "title": "用户资料（Google Sheet）"}
++
++def _editor_from_session(sess: Any) -> str:
++    return getattr(sess, "username", None) or getattr(sess, "name", None) or str(getattr(sess, "id", "")) or "admin"
++
++@router.get("", response_class=HTMLResponse)
++@router.get("/", response_class=HTMLResponse)
++def page_list(
++    req: Request,
++    sess=Depends(require_admin),
++    page: int = 1,
++    per_page: int = PAGE_SIZE,
++    q_user_id: Optional[str] = Query(None, alias="用户ID"),
++    q_username: Optional[str] = Query(None, alias="用户名"),
++    q_chat_id: Optional[str] = Query(None, alias="聊天ID"),
++    q_source: Optional[str] = Query(None, alias="来源"),
++):
++    filters: Dict[str, str] = {}
++    if q_user_id: filters["用户ID"] = q_user_id
++    if q_username: filters["用户名"] = q_username
++    if q_chat_id: filters["聊天ID"] = q_chat_id
++    if q_source: filters["来源"] = q_source
++
++    rows, total, headers = list_rows(page=page, per_page=per_page, filters=filters)
++    total_pages = max(1, (total + per_page - 1) // per_page)
++
++    def _q(k, v):
++        return f"&{k}={v}" if v else ""
++    export_url = "/admin/sheet-users/export" \
++        f"?page={page}&per_page={per_page}" \
++        f"{_q('用户ID', q_user_id)}{_q('用户名', q_username)}{_q('聊天ID', q_chat_id)}{_q('来源', q_source)}"
++
++    ctx = {
++        "request": req,
++        "rows": rows,
++        "page": page,
++        "total_pages": total_pages,
++        "headers": headers,
++        "editable": EDITABLE_COLUMNS,
++        "export_url": export_url,
++        "filters": {
++            "用户ID": q_user_id or "",
++            "用户名": q_username or "",
++            "聊天ID": q_chat_id or "",
++            "来源": q_source or "",
++        },
++        **_nav(req),
++    }
++    return req.app.state.templates.TemplateResponse("sheet_users.html", ctx)
++
++@router.get("/edit", response_class=HTMLResponse)
++def page_edit(
++    req: Request,
++    sess=Depends(require_admin),
++    row: int = Query(..., ge=2),
++):
++    data, headers = get_row(row)
++    ctx = {
++        "request": req,
++        "row": row,
++        "data": data,
++        "headers": headers,
++        "editable": EDITABLE_COLUMNS,
++        **_nav(req),
++        "title": f"编辑第 {row} 行",
++    }
++    return req.app.state.templates.TemplateResponse("sheet_users_edit.html", ctx)
++
++@router.post("/edit")
++async def do_edit(
++    req: Request,
++    sess=Depends(require_admin),
++    row: int = Form(...),
++):
++    form = await req.form()
++    payload = {k: v for k, v in form.items() if k not in ("row",)}
++    before, _ = get_row(row)
++    update_row(row, payload)
++    editor = _editor_from_session(sess)
++    for k, new_v in payload.items():
++        old_v = before.get(k, "")
++        if str(old_v) != str(new_v):
++            append_audit(row=row, field=k, old=old_v, new=new_v, editor=editor)
++    return RedirectResponse(url="/admin/sheet-users?ok=updated", status_code=303)
++
++@router.post("/inline")
++async def inline_edit(
++    req: Request,
++    sess=Depends(require_admin),
++    body: Dict[str, Any] = Body(...),
++):
++    row = int(body.get("row") or 0)
++    field = str(body.get("field") or "").strip()
++    value = str(body.get("value") or "")
++    if row < 2:
++        raise HTTPException(status_code=400, detail="invalid row")
++    if field not in EDITABLE_COLUMNS:
++        raise HTTPException(status_code=400, detail="field not editable")
++    before, _ = get_row(row)
++    update_row(row, {field: value})
++    editor = _editor_from_session(sess)
++    old_v = before.get(field, "")
++    if str(old_v) != str(value):
++        append_audit(row=row, field=field, old=old_v, new=value, editor=editor)
++    return JSONResponse({"ok": 1, "row": row, "field": field, "value": value})
++
++@router.get("/export")
++def export_csv(
++    req: Request,
++    sess=Depends(require_admin),
++    page: int = 1,
++    per_page: int = PAGE_SIZE,
++    q_user_id: Optional[str] = Query(None, alias="用户ID"),
++    q_username: Optional[str] = Query(None, alias="用户名"),
++    q_chat_id: Optional[str] = Query(None, alias="聊天ID"),
++    q_source: Optional[str] = Query(None, alias="来源"),
++):
++    filters: Dict[str, str] = {}
++    if q_user_id: filters["用户ID"] = q_user_id
++    if q_username: filters["用户名"] = q_username
++    if q_chat_id: filters["聊天ID"] = q_chat_id
++    if q_source: filters["来源"] = q_source
++    stream = export_rows_as_csv(filters=filters)
++    return StreamingResponse(
++        stream, media_type="text/csv; charset=utf-8",
++        headers={"Content-Disposition": "attachment; filename=sheet_users.csv"},
++    )
++
++@router.get("/export-audit")
++def export_audit(sess=Depends(require_admin)):
++    stream = export_audit_as_csv()
++    return StreamingResponse(
++        stream, media_type="text/csv; charset=utf-8",
++        headers={"Content-Disposition": "attachment; filename=sheet_users_audit.csv"},
++    )
+diff --git a/templates/sheet_users.html b/templates/sheet_users.html
+new file mode 100644
+index 0000000..9d9d9d9
+--- /dev/null
++++ b/templates/sheet_users.html
+@@ -0,0 +1,127 @@
++{% extends "base.html" %}
++{% block content %}
++<div class="flex items-center justify-between mb-4">
++  <h1 class="text-xl font-semibold">用户资料（Google Sheet）</h1>
++  <div class="flex items-center gap-3">
++    <a class="text-sm text-gray-600 hover:text-black" href="{{ export_url }}">导出 CSV</a>
++    <a class="text-sm text-gray-600 hover:text-black" href="/admin/sheet-users/export-audit">导出审计</a>
++    <a class="text-sm text-gray-600 hover:text-black" href="/admin/sheet-users">刷新</a>
++  </div>
++  <div class="hidden">{{ nav_active|default('') }}</div>
++</div>
++
++<form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4 bg-white p-4 rounded-lg border">
++  <label class="text-sm">
++    <span class="block text-gray-500 mb-1">用户ID</span>
++    <input name="用户ID" value="{{ filters['用户ID'] }}" class="w-full border rounded px-3 py-2">
++  </label>
++  <label class="text-sm">
++    <span class="block text-gray-500 mb-1">用户名</span>
++    <input name="用户名" value="{{ filters['用户名'] }}" class="w-full border rounded px-3 py-2">
++  </label>
++  <label class="text-sm">
++    <span class="block text-gray-500 mb-1">聊天ID</span>
++    <input name="聊天ID" value="{{ filters['聊天ID'] }}" class="w-full border rounded px-3 py-2">
++  </label>
++  <label class="text-sm">
++    <span class="block text-gray-500 mb-1">来源</span>
++    <input name="来源" value="{{ filters['来源'] }}" class="w-full border rounded px-3 py-2">
++  </label>
++  <div class="md:col-span-4 flex gap-2">
++    <button class="px-4 py-2 rounded bg-black text-white text-sm">筛选</button>
++    <a href="/admin/sheet-users" class="px-4 py-2 rounded border text-sm">重置</a>
++  </div>
++</form>
++
++<div class="overflow-x-auto bg-white border rounded-lg">
++  <table class="min-w-full text-sm" id="sheet-table">
++    <thead class="bg-gray-50 text-gray-600 border-b">
++      <tr>
++        <th class="px-3 py-2 text-left">#</th>
++        {% for h in headers %}
++          <th class="px-3 py-2 text-left">{{ h }}{% if h in editable %}<span class="ml-1 text-xs text-gray-400">(可编辑)</span>{% endif %}</th>
++        {% endfor %}
++        <th class="px-3 py-2 text-left">操作</th>
++      </tr>
++    </thead>
++    <tbody class="divide-y">
++      {% for r in rows %}
++      <tr class="hover:bg-gray-50" data-row="{{ r['__row'] }}">
++        <td class="px-3 py-2">{{ r["__row"] }}</td>
++        {% for h in headers %}
++          {% set is_edit = h in editable %}
++          <td class="px-3 py-2 truncate max-w-[240px] {% if is_edit %}editable bg-white{% endif %}"
++              data-field="{{ h }}" title="{{ r.get(h, '') }}">
++            <span class="cell-text">{{ r.get(h, "") }}</span>
++          </td>
++        {% endfor %}
++        <td class="px-3 py-2">
++          <a class="text-blue-600 hover:underline" href="/admin/sheet-users/edit?row={{ r['__row'] }}">编辑</a>
++        </td>
++      </tr>
++      {% endfor %}
++      {% if rows|length == 0 %}
++      <tr><td class="px-3 py-6 text-center text-gray-500" colspan="{{ headers|length + 2 }}">没有数据</td></tr>
++      {% endif %}
++    </tbody>
++  </table>
++</div>
++
++<div class="flex items-center justify-center gap-3 mt-4">
++  {% if page > 1 %}
++    <a class="px-3 py-1 border rounded" href="?page={{ page-1 }}{% for k,v in filters.items() if v %}&{{ k }}={{ v }}{% endfor %}">上一页</a>
++  {% endif %}
++  <span class="text-sm text-gray-600">{{ page }} / {{ total_pages }}</span>
++  {% if page < total_pages %}
++    <a class="px-3 py-1 border rounded" href="?page={{ page+1 }}{% for k,v in filters.items() if v %}&{{ k }}={{ v }}{% endfor %}">下一页</a>
++  {% endif %}
++</div>
++
++<script>
++(function () {
++  const table = document.getElementById('sheet-table');
++  if (!table) return;
++  function toInput(td) {
++    if (!td.classList.contains('editable') || td.classList.contains('editing')) return;
++    const span = td.querySelector('.cell-text');
++    const old = span ? span.textContent : '';
++    td.classList.add('editing');
++    const input = document.createElement('input');
++    input.type = 'text';
++    input.value = old || '';
++    input.className = 'w-full border rounded px-2 py-1';
++    td.innerHTML = '';
++    td.appendChild(input);
++    input.focus();
++    input.select();
++    function cancel() {
++      td.classList.remove('editing');
++      td.innerHTML = '<span class="cell-text"></span>';
++      td.querySelector('.cell-text').textContent = old || '';
++    }
++    function commit() {
++      const tr = td.closest('tr');
++      const row = tr ? tr.getAttribute('data-row') : null;
++      const field = td.getAttri

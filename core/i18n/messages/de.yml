@@ -1,0 +1,613 @@
+welcome: "🎉 Willkommen, {username}! Wähle eine Funktion 👇"
+
+welcome_full:
+  title: "🎉 Willkommen, {username}!"
+  subtitle: |-
+    🧧 <b>Einführung ins Umschlag-Spiel</b>
+    Hier kannst du Umschläge senden, greifen, Ranglisten ansehen und deine Tagesbilanz checken – in Gruppen oder privat.
+    Unterstützt USDT / TON / ⭐ Punkte. Mehrere Modi, sofort startklar.
+  howto:
+    title: "🎮 So spielst du"
+    steps: |-
+      • 🧧 <b>Umschlag senden</b>: Währung wählen → Gesamtbetrag → Anzahl der Anteile → Glück (zufällig) → Senden.
+      • 🤲 <b>Greifen</b>: Auf der Karte auf 【Jetzt greifen】 tippen. Betrag ist zufällig, Glück entscheidet.
+      • 🏆 <b>Rangliste</b>: Nach Ende siehst du „Bestes Glück“ und die Historie.
+      • 📊 <b>Heutige Bilanz</b>: Heutige empfangene/gesendete Summe und Anzahl.
+      • 💳 <b>Aufladen/Auszahlen</b>: USDT / TON werden unterstützt. Warte auf On-Chain-Bestätigung.
+  rules:
+    title: "📜 Grundregeln"
+    points: |-
+      • ⏱ Greifen ist innerhalb der Gültigkeit möglich. Übrig gebliebene Anteile werden nach Ablauf erstattet.
+      • 👤 Pro Runde nur ein Greifen pro Person. Mehrfachklicks werden abgelehnt.
+      • 🧮 <b>Glück = Zufallsverteilung</b>. Nicht gleichmäßig. Du kannst das Meiste bekommen oder eben 0.
+      • 🔄 Weiterleiten der Karten dieser Runde ist möglich (falls aktiviert und erlaubt).
+      • 🧾 Alle Buchungen erscheinen im „Verlauf“ und sind nachvollziehbar.
+  fair:
+    title: "⚖️ Fairness und Transparenz"
+    points: |-
+      • 🎲 Zufall: basiert auf hochwertiger Pseudozufallsquelle (Python secrets/random). Jede Teilmenge wird unabhängig gezogen, die Summe entspricht dem Gesamtbetrag, <b>ohne Bevorzugung</b>.
+      • 🚫 Anti-Cheat: Pro Nutzer/Gerät zählt nur ein gültiger Griff. Anormale Frequenzen und Skripte werden erkannt.
+      • 💠 Nachvollziehbar: Jede Sendung/jeder Griff wird protokolliert (Zeit, Betrag, Währung). Auffälligkeiten sind prüfbar.
+      • 📨 Rechteprüfung: Nur in Gruppen mit Senderechten des Bots wird gepostet. Keine Geisterposts.
+      • 🛠 Fallback: Fehlgeschlagenes Posting → Erstattung oder erneuter Versuch. Kein Geldverlust.
+  cta: "🧭 Öffne das Menü und sende deinen ersten Umschlag."
+  tip_open_menu: "👉 Du kannst jederzeit /start senden, um das Menü zu öffnen."
+
+menu:
+  send: "🧧 Umschlag senden"
+  recharge: "💰 Aufladezentrum"
+  today: "📊 Heutige Bilanz"
+  assets: "💼 Meine Vermögenswerte"
+  welfare: "🎁 Vorteilscenter"
+  panel: "🛠 Admin-Panel"
+  admin: "🛠 Admin-Panel"
+  language: "🌐 Sprache"
+  help: "❓ Hilfezentrum"
+  back: "⬅️ Zurück"
+  bind_this_group: "Diese Gruppe binden und privat fortsetzen ➡️"
+  bind_hint_in_group: "Einstellung in einer Gruppe erkannt. Klicke unten, um diese Gruppe zu binden und privat fortzufahren."
+  bound_go_dm: "✅ Zielgruppe gesetzt. Bitte im Privatchat fortfahren."
+  bound_dm_tips: "Eine Zielgruppe ist verknüpft. Du kannst hier Umschläge senden."
+  bound_ok: "Gebunden und im Privatchat fortgesetzt"
+
+asset:
+  title: "💼 Meine Vermögenswerte"
+  usdt: "💵 USDT"
+  ton: "🪙 TON"
+  points: "⭐ Punkte"
+
+hongbao:
+  wizard_title: "🧧 Sende-Assistent"
+  buttons:
+    relay: "🔁 Weiterleiten"
+  summary:
+    title: "📊 <b>Rundenzusammenfassung</b>"
+    total: "💰 Gesamt: {amount} {token}, {shares} Anteil(e)"
+    left: "📦 Übrig: {left} Anteil(e)"
+  grab_now: "🤲 Jetzt greifen"
+  view_rank: "🏆 Rangliste ansehen"
+  grab_ok: "🎉 Du hast {amount} {token} gegriffen!"
+  grab_dup: "⚠️ Du hast diesen Umschlag bereits gegriffen."
+  errors:
+    only_mvp: "⚠️ Nur der Nutzer mit bestem Glück darf den nächsten Umschlag senden"
+  mvp:
+    success: "✅ Neuer Umschlag mit MVP-Daten erstellt"
+  cover:
+    pick_title: "🖼 Wähle ein Cover:"
+    used_ok: "✅ Cover angefügt und Karte gesendet"
+
+env:
+  title: "🧧 Sende-Assistent"
+  mode_title: "🔘 Wähle die Währung"
+  dm_hint: "🔒 Zum Schutz der Privatsphäre geht es im Privatchat weiter. Klicke unten den blauen Button."
+  continue_in_dm: "Im Privatchat fortsetzen ➡️"
+
+  mode:
+    usdt: "💵 USDT"
+    ton: "🪙 TON"
+    point: "⭐ Punkte"
+
+  amount:
+    ask: "💰 Bitte Gesamtbetrag eingeben (z. B. 12.34)"
+
+  shares:
+    ask: "📦 Bitte Anzahl der Anteile eingeben (z. B. 10)"
+
+  dist:
+    ask: "⚖️ Verteilungsart wählen"
+    random: "🎲 Glück (zufällig)"
+    fixed: "🟰 Gleichmäßig (fix)"
+
+  loc:
+    ask: "📍 Zielort wählen"
+    here: "📣 In dieser Gruppe"
+    dm: "💬 Privat senden"
+    pick: "🎯 Gruppe auswählen"
+    pick_tip: |-
+      ℹ️ Hinweis: Gruppen-chat_id beginnen oft mit -100. Du kannst auch einen Link oder @Namen senden:
+      • Beispiel 1: @deinegruppe oder https://t.me/deinegruppe
+      • Beispiel 2: Nachrichtenlink https://t.me/c/123456789/1 (ergibt -100123456789)
+      • Beispiel 3: -100123456789 (direkte chat_id)
+
+  memo:
+    ask: |-
+      📝 <b>Glückwunschtext (optional)</b>
+      • Schreibe unten, was du sagen willst
+      • Emojis und Zeilenumbrüche ok. Oder „Überspringen“ tippen
+      • Beispiel: Auf einen guten Tag zusammen! 🎉
+
+  open_group_btn: "➡️ Gruppe öffnen"
+
+  confirm:
+    title: "✅ Parameter bestätigen"
+    hint: "Danach wird eine Umschlagkarte erstellt und gesendet."
+
+  confirm_page:
+    title: "🧧 Umschlag bestätigen"
+    token_label: "🪙 Währung: "
+    amount_label: "💵 Betrag: "
+    shares_label: "📦 Anteile: "
+    dist_label: "⚖️ Verteilung: "
+    loc_label: "📍 Ort: "
+    memo_label: "📝 Nachricht: "
+    random_tip: "🎲 Zufällig"
+    fixed_tip: "🟰 Fix"
+    cover_label: "🖼 Cover: "
+
+  cancel: "✖️ Abbrechen"
+  back: "⬅️ Zurück"
+  send: "🚀 Bestätigen und senden"
+
+  success:
+    sent: "✅ Umschlag gesendet."
+
+  fail:
+    create: "❌ Erstellung fehlgeschlagen. Bitte später erneut versuchen."
+    post: "⚠️ Erstellt, aber Kartensendung fehlgeschlagen. Ziel prüfen."
+    quick_refund: "❌ Schnellsenden fehlgeschlagen, erstattet."
+
+  quick:
+    no_template: "📭 Kein Template vorhanden. Greife erst einen Umschlag und versuche es dann erneut."
+
+  relay:
+    only_lucky: "🍀 Nur der Glückliche dieser Runde darf weiterleiten."
+
+  errors:
+    invalid_amount: "❌ Ungültiger Betrag. Bitte erneut eingeben."
+    invalid_shares: "❌ Ungültige Anteilzahl. Bitte erneut eingeben."
+    insufficient: "💳 Unzureichendes Guthaben. Bitte aufladen oder Betrag senken."
+    not_ready: "⚠️ Parameter unvollständig. Bitte den Schritten folgen."
+    not_in_chat: "🚫 Bot ist nicht in dieser Gruppe. Bitte zuerst einladen."
+    no_rights: "🚫 Bot hat keine Senderechte in dieser Gruppe."
+    not_found: "❌ Gruppe nicht gefunden. chat_id oder Link prüfen."
+    unknown: "⚠️ Gruppe konnte nicht verifiziert werden. Später erneut versuchen."
+
+  copy:
+    hint: "🧩 Parameter des letzten Umschlags kopiert. Sende den 【Gesamtbetrag】, um fortzufahren (wird sofort belastet)."
+
+  cancelled: "✅ Abgebrochen. Betrag erstattet."
+
+  input_amount_tip: "✍️ Du kannst auch direkt eine Zahl senden"
+  input_shares_tip: "✍️ Du kannst auch direkt eine Zahl senden"
+  custom_input: "✏️ Eigene Eingabe"
+  memo_label: "📝 Nachricht: "
+
+  tg:
+    choose: "📌 Wähle die Zielgruppe:"
+    unbound_tip: "🔧 Noch keine Zielgruppe verknüpft. Erwähne den Bot in der Zielgruppe, oder nutze „🎯 Gruppe auswählen“ und gib eine -100-chat_id ein."
+    unbound: "🔧 Keine Zielgruppe verknüpft."
+    chosen: "✅ Gewählt: {title}"
+    current: "📌 Aktuelle Zielgruppe"
+    use_this: "👉 Diese Gruppe nutzen"
+    change: "🔄 Gruppe wechseln"
+    bind_help: "🧩 Lade den Bot in deine Gruppe ein und gib Senderechte. Wähle sie danach hier aus. Oder nutze „🎯 Gruppe auswählen“ und gib eine -100-chat_id ein."
+    bind_help_text: "🧩 Lade den Bot in deine Gruppe mit Senderechten ein und wähle sie hier. Oder nutze „🎯 Gruppe auswählen“."
+    manual_pick: "🎯 Gruppe manuell wählen"
+    bind_new: "➕ Neue Gruppe verknüpfen"
+    add_group: "➕ Gruppe hinzufügen"
+    go_bind: "🪄 In der Gruppe verknüpfen"
+    bind_in_group: "🪄 In der Gruppe verknüpfen"
+    preset: "📍 Voreingestellte Zielgruppe: {chat_id}"
+    chosen_bold: "🔖 <b>Gewählt: {title}</b>"
+    unbound_bold: "🧩 <b>Noch keine Zielgruppe</b>"
+    parse_ok: "✅ Erkannt und gespeichert: <b>{title}</b> (<code>{chat_id}</code>)"
+    parse_fail: |-
+      ❌ Link oder Nutzername nicht erkannt.
+      Sende eines der folgenden Formate:
+      • Öffentlicher Gruppenlink, z. B. https://t.me/deinegruppe
+      • Nachrichtenlink, z. B. https://t.me/c/123456789/1
+      • Direkte chat_id, z. B. -100123456789
+
+  cover:
+    change_btn: "🖼 Cover wechseln"
+    change: "🖼 Cover wechseln"
+    entry_tip: "Wähle ein Cover aus dem Medienkanal oder „Überspringen“."
+    open_list: "🖼 Cover wählen"
+    none: "🚫 Kein Cover"
+    prev: "« Zurück"
+    next: "Weiter »"
+    pick_title: "🖼 Cover wählen (Kanal)"
+    from_channel: "🖼 Aus dem Kanal"
+    use_this: "✅ Dieses Cover verwenden"
+    repick: "🔄 Neu wählen"
+    item: "Cover"
+
+env_send:
+  title: "🧧 Parameter wählen (optional)"
+  tips: "Schreibe deinen Text ins Eingabefeld.\n• Bitte keine reine Werbung.\n• Beispiel: Auf einen guten Tag! 🎉"
+  ok: "✅ Gesendet."
+  back: "⬅️ Zurück"
+  preview_btn: "👀 Vorschau"
+  previewed_ok: "✅ Umschlag gesendet."
+  go_group: "🔗 Gruppe öffnen"
+
+env_sent:
+  you_sent: "Du hast {amount} USDT gesendet."
+  mvp_line: "🏆 Du bist „Bestes Glück“ dieser Runde. Parameter wiederverwenden:"
+  mvp_send_btn: "🏆 Als MVP senden"
+
+hb:
+  grab: "🤲 Jetzt greifen"
+  rank_btn: "🏆 Rangliste ansehen"
+
+hongbao_summary:
+  title: "📊 <b>Rundenzusammenfassung</b>"
+  total: "💰 Gesamt: {amount} {token}, {shares} Anteil(e)"
+  left: "📦 Übrig: {left} Anteil(e)"
+
+hongbao_result:
+  ok: "🎉 Du hast {amount} {token} gegriffen!"
+  duplicate: "⚠️ Du hast diesen Umschlag bereits gegriffen."
+  dup: "⚠️ Du hast diesen Umschlag bereits gegriffen."
+
+rank:
+  title: "🏆 Bestes Glück"
+  meta_line: "💰 Gesamt: {amount} {token} · 📦 Anteile: {shares}"
+  round_title: "🏆 <b>Bestes Glück dieser Runde</b>"
+  lucky: "🏅 MVP: ✨ {name} ✨ ({amount} {token})"
+  none: "😅 Noch niemand"
+  global_offline: |-
+    📉 Globale Rangliste deaktiviert.
+    Sieh stattdessen 📊 Heutige Bilanz.
+  round_btn: "🏆 Runde ansehen"
+  mvp_send_btn: "🏅 Als MVP senden"
+  mvp_dm_tip: "🏅 Du bist MVP dieser Runde. Mit einem Klick erneut senden:"
+
+today:
+  button: "📊 Heutige Bilanz"
+  title: "📊 Heutige Bilanz (nur Greifvorgänge)"
+  date_local: "🕒 Lokales Datum: {start} ~ {end} ({tz})"
+  grabbed_only: "🤲 Heute gegriffen: {count}×"
+  empty: "📭 Keine Einträge."
+  income: "📈 Einnahmen: {amount} {token}"
+  outcome: "📉 Ausgaben: {amount} {token}"
+
+welfare:
+  title: "🎁 Vorteilscenter"
+  signin_btn: "✅ Täglicher Check-in"
+  invite_btn: "🎯 Einladen & Belohnung"
+  promo_btn: "📢 Ankündigungen"
+  rules_btn: "📜 Regeln"
+  signin_already: "⚠️ Heute bereits eingecheckt."
+  signin_ok: "✅ Erfolgreich. +{points} Punkte."
+  invite_share_ready: "✅ Dein Einladungslink ist bereit."
+  invite_share_link_label: "🔗 Einladungslink:"
+  invite_rules: "📘 Einladungs- und Umtauschregeln"
+  promo: "📢 Ankündigungen"
+  invite_share_btn: "🔗 Link generieren"
+  invite_redeem_btn: "♻️ Punkte einlösen"
+  invite_title: "🎯 Einladungsfortschritt"
+  invite_compact: |-
+    Fortschritt: {percent}%
+    {bar}
+    {phase_text}
+  exchange:
+    desc: |-
+      ♻️ <b>Umtausch</b>
+      • „Punkte → Fortschritt“: pro 1000 Punkte = +1%
+      • „Energie → Punkte“: fester Umrechnungssatz
+      • Prämien werden bei vollem Fortschritt freigeschaltet
+    not_enough: "🚫 {resource} unzureichend."
+    to_progress: "🔼 1000 Punkte ausgeben → +1% Fortschritt"
+    energy_to_points_btn: "⚡ Energie → ⭐ Punkte"
+    success_progress: "✅ +{value}% Fortschritt."
+    success_points: "✅ +{value} Punkte."
+
+phase:
+  "100": "🎉 Ziel erreicht!"
+  "99": "✨ Fast geschafft — Endspurt!"
+  "95_98": "🔥 Letzte Strecke."
+  "90_94": "⚡ Tolle Fortschritte, weiter so."
+  "80_89": "👍 Es wird."
+
+record:
+  title: "📜 Buchungsverlauf"
+  recent10: "🕑 Letzte 10:"
+  none: "📭 Keine Einträge."
+  fields:
+    time: "🕒 Zeit"
+    type: "🔖 Typ"
+    token: "🪙 Währung"
+    amount: "💵 Betrag"
+    note: "📝 Notiz"
+
+types:
+  RECHARGE: "💰 Aufladung"
+  WITHDRAW: "🏧 Auszahlung"
+  HONGBAO_SEND: "🧧 Gesendet"
+  HONGBAO_GRAB: "🤲 Gegriffen"
+  ADJUSTMENT: "🔧 Admin-Anpassung"
+  SIGNIN: "🗓️ Check-in"
+  INVITE_REWARD: "🎯 Einladungsprämie"
+
+lang:
+  title: "🌐 请选择语言"
+  zh: "🇨🇳 简体中文"
+  en: "🇺🇸 English"
+  fr: "🇫🇷 Français"
+  de: "🇩🇪 Deutsch"
+  es: "🇪🇸 Español"
+  hi: "🇮🇳 हिन्दी"
+  vi: "🇻🇳 Tiếng Việt"
+  th: "🇹🇭 ไทย"
+
+recharge:
+  title: "💰 Aufladezentrum"
+  choose_method: "Währung wählen"
+  choose_amount: "Betrag wählen"
+  custom: "✏️ Eigener Betrag"
+  refresh: "🔁 Status aktualisieren"
+  deposit_addr: "🔗 Einzahlungsadresse"
+  addr_instr: |-
+    💡 Sende einen beliebigen Betrag {token} an die obige Adresse (Netzwerk: {network}).
+    ⏱ Nach On-Chain-Bestätigung wird gutgeschrieben. Adresse ist dauerhaft gültig, mehrfach nutzbar.
+    🔁 Bereits bezahlt? Klicke „Status aktualisieren“.
+  fields:
+    id: "🧾 Bestell-ID"
+    token: "🪙 Währung"
+    amount: "💵 Betrag"
+    address: "🏦 Adresse"
+    status:
+      pending: "⏳ Ausstehend"
+      success: "✅ Erfolgreich"
+      failed: "❌ Fehlgeschlagen"
+      expired: "🕒 Abgelaufen"
+    created: "🗓️ Erstellt"
+    expires: "⏰ Läuft ab"
+    label: "Status"
+  link: "🔗 Zahlungslink"
+  created: "✅ Bestellung erstellt. Bitte den Anweisungen folgen."
+  input_custom: "✏️ Eigener Betrag (nur Zahlen) eingeben"
+  invalid_amount: "❌ Ungültiger Betrag."
+  invalid_amount_2dp: "❌ Maximal zwei Dezimalstellen."
+  success_text: "✅ Aufladung gutgeschrieben."
+  addr_missing: "Keine kopierbare Adresse"
+  copy_addr: "📋 Adresse kopieren"
+  copy_amount: "📋 Betrag kopieren"
+  loading: "⏳ Zahlungsinfos werden erstellt…"
+  tutorial:
+    title: "💰 Aufladezentrum"
+    step1: "1️⃣ Währung wählen"
+    step2: "2️⃣ Betrag"
+    step3: "3️⃣ Adresse"
+    step4: "4️⃣ QR (optional)"
+    step4_tip: "Mit Wallet diesen Beitrag scannen"
+    step5: "5️⃣ Bestätigung"
+    step5_tip: "Nach Zahlung auf 【Status aktualisieren】 tippen"
+    warn_amount: "⚠️ Betrag muss exakt stimmen, sonst keine Gutschrift."
+    network: "Netzwerk"
+    amount: "Betrag"
+    address: "Adresse"
+    expires: "Läuft ab"
+
+  invoice:
+    title: "Zahlungsinformation"
+    amount: "Betrag"
+    address: "Adresse"
+    network: "Netzwerk"
+    expires: "Läuft ab"
+
+balance:
+  title: "💼 Meine Vermögenswerte"
+  recharge: "💳 Aufladen"
+  withdraw: "🏧 Auszahlen"
+  template: |-
+    🧾 Aktuelles Guthaben
+    💵 USDT: {usdt}
+    🪙 TON: {ton}
+    ⭐ Punkte: {points}
+
+    🎯 Aktuelle Währung: <b>{token}</b>
+    🧾 Geplante Belastung: {real_amt}
+
+balance_page:
+  title: "💼 Gesamtübersicht"
+  usdt: "💵 USDT: {amount}"
+  ton: "🪙 TON: {amount}"
+  points: "⭐ Punkte: {amount}"
+
+withdraw:
+  title: "🏧 Auszahlung"
+  choose_token: "Währung wählen"
+  amount:
+    ask: "💵 Bitte Betrag eingeben (Dezimal erlaubt)"
+    min: "📉 Mindestbetrag {token}: {amount}"
+    fee: "🧾 Gebühr: {fee} {token} (pro Vorgang)"
+  balance: "💼 Guthaben: {balance} {token}"
+  errors:
+    invalid_amount: "❌ Ungültiger Betrag."
+    less_than_min: "❌ Unter dem Mindestbetrag."
+    insufficient: "💸 Unzureichendes Guthaben. Betrag senken oder aufladen."
+    bad_address: "❌ Ungültige Adresse."
+  address:
+    ask: "🏦 Bitte deine Auszahlungsadresse ({token}) eingeben"
+  confirm: "✅ Auszahlung bestätigen"
+  cancel: "✖️ Abbrechen"
+  cancelled: "Vorgang abgebrochen."
+  success: "✅ Auszahlungsanfrage übermittelt."
+  success_detail: "• Betrag: {amount} {token} (Gebühr {fee})"
+  success_next: "⛓ On-Chain-Transfer wird baldmöglichst verarbeitet."
+  fail: "❌ Fehlgeschlagen. Später erneut versuchen."
+  confirm_page:
+    title: "🧧 Auszahlung bestätigen"
+    token: "🪙 Währung: {token}"
+    amount: "💵 Betrag: {amount}"
+    fee: "🧾 Gebühr: {fee}"
+    total: "💳 Gesamtbelastung: {total}"
+    address: "🏦 Adresse: {address}"
+
+labels:
+  usdt: "💵 USDT"
+  ton: "🪙 TON"
+  point: "⭐ Sterne"
+  amount: "💵 Betrag"
+  token: "🪙 Währung"
+  user_id: "🆔 Benutzer-ID"
+  user_tg_id: "🆔 Telegram-ID"
+  energy: "⚡ Energie"
+  is_last: "🔚 Letzter"
+  last: "🔚 Letzter"
+
+admin:
+  settings: "⚙️ Einstellungen"
+  stats: "📈 Statistiken"
+  toggle_auto: "🔁 Automatik umschalten"
+  no_permission: "⛔ Keine Berechtigung."
+  adjust_success: "✅ {amount} {token} an Nutzer {uid} angepasst"
+  adjust_failed: "❌ Anpassung fehlgeschlagen: {reason}"
+  covers:
+    menu_title: "🎨 Cover verwalten"
+    menu_desc: "🎨 Coververwaltung\nBitte Aktion wählen:"
+    upload_btn: "➕ Cover hochladen"
+    list_btn: "📚 Coverliste"
+    delete_btn: "🗑 Cover löschen"
+    back_to_mgr: "⬅️ Zurück zur Verwaltung"
+    no_channel: "❌ COVER_CHANNEL_ID in settings nicht konfiguriert."
+    upload_ask: "Sende ein Bild als Cover. Optional mit Titel."
+    add_ok: "✅ Cover hinzugefügt ID={id}"
+    add_fail: "❌ Upload fehlgeschlagen: {reason}"
+    empty: "📭 Keine Cover vorhanden."
+    list_title: "📚 Coverliste"
+    delete_pick: "Wähle ein Cover zum Löschen:"
+    delete_ok: "✅ Cover #{id} gelöscht"
+    delete_fail: "❌ Cover #{id} nicht gefunden"
+    preview_fail: "❌ Vorschau fehlgeschlagen."
+    preview_fail_hint: |-
+      Mögliche Ursachen:
+      • Bot nicht im Kanal oder ohne Senderechte;
+      • Kanal-ID fehlerhaft;
+      • Eintrag ohne gültige file_id.
+    copy_fail_hint: |-
+      Mögliche Ursachen:
+      • Bot nicht im Kanal oder ohne Senderechte;
+      • Falsche Kanal-ID (sollte mit -100 beginnen).
+    preview_ok: "✅ Vorschau gesendet"
+  stats_total_env: "🧧 Umschläge gesamt: {n}"
+  stats_ongoing: "⏳ Laufend: {n}"
+  stats_users: "👥 Nutzer: {n}"
+  stats_recharge: "💰 Aufladungssumme:"
+  stats_active_today: "🔥 Heute aktive Nutzer: {n}"
+  export_service_missing: "❌ Exportdienst nicht verfügbar (services/export_service.py fehlt)"
+  export_failed: "❌ Fehlgeschlagen: {reason}"
+  send_file_failed: "❌ Dateiübertragung fehlgeschlagen: {reason}"
+  adjust:
+    button: "➕ Guthaben anpassen"
+    ask_user: "👤 Sende <code>ID</code> oder <code>@Nutzername</code>"
+    choose_asset: "💱 Vermögenswert wählen:"
+    balance_after: "💼 Aktuelles Guthaben"
+    amount:
+      ask_fx: "✍️ Betrag eingeben (positiv = hinzufügen, negativ = abziehen)"
+      hint_fx: "Bis zu 6 Dezimalstellen, z. B. 12.345678 oder -0.5"
+      ask_point: "✍️ Punkteänderung eingeben (z. B. 100 oder -50)"
+    memo:
+      ask: "📝 Optionale Notiz (oder ‚skip‘)"
+    confirm:
+      title: "✅ Anpassung bestätigen"
+      user: "• Nutzer: {user}"
+      asset: "• Asset: {token}"
+      amount: "• Änderung: {amount}"
+      memo: "• Notiz: {memo}"
+      ok: "✅ Ausführen"
+      cancel: "✖️ Abbrechen"
+    cancelled: "Vorgang abgebrochen."
+    success: "✅ Anpassung abgeschlossen"
+    fail: "❌ Anpassung fehlgeschlagen. Später erneut versuchen."
+    errors:
+      bad_user: "❌ Ungültiges Format. ID oder @Nutzername senden"
+      bad_amount: "❌ Ungültiger Betrag"
+      zero: "❌ Wert darf nicht 0 sein"
+  export:
+    button: "📤 Exportieren"
+    by_user: "👤 Nach Nutzer"
+    all: "📊 Komplett"
+    confirm_user: "✅ Nutzer bestätigen"
+  export_intro: "Exportumfang wählen"
+  export_user: "👤 Nach Nutzer"
+  export_all: "📊 Komplett"
+  export_done: "✅ Export fertig. Datei unten:"
+  export_empty: "📭 Keine Daten"
+
+common:
+  prev: "« Zurück"
+  next: "Weiter »"
+  invalid: "Ungültige Aktion"
+  not_available: "⛔ Funktion derzeit nicht verfügbar"
+  bad_request: "⚠️ Ungültige Anfrage. Bitte erneut versuchen."
+  not_found: "🔍 Nicht gefunden"
+  wait_emoji: "⏳"
+  ok_emoji: "👌"
+  custom_amount: "✏️ Eigener Betrag"
+  custom_shares: "✏️ Eigene Anteilzahl"
+  skip: "➡️ Überspringen"
+  copied_tip: "Kopierbarer Inhalt gesendet"
+  processing: "⏳ Guthaben wird geprüft…"
+  refresh: "🔄 Aktualisieren"
+  close: "Schließen"
+
+errors:
+  bad_request: "⚠️ Ungültige Anfrage. Bitte erneut versuchen."
+  not_found: "🔍 Nicht gefunden"
+  only_mvp: "⚠️ Nur für den MVP dieser Runde"
+
+balance_card:
+  template: |-
+    🧾 Aktuelles Guthaben
+    💵 USDT: {usdt}
+    🪙 TON: {ton}
+    ⭐ Punkte: {points}
+
+    🎯 Aktuelle Währung: <b>{token}</b>
+    🧾 Geplante Belastung: {real_amt}
+
+help:
+  title: "❓ Hilfezentrum"
+  subtitle: "Schnelle FAQ. Du kannst mir auch direkt schreiben."
+  ask_me: "Sende deine Frage (中文/English/Deutsch ok)."
+  ask_placeholder: "Z. B.: Wie sende ich in eine bestimmte Gruppe?"
+  thinking: "Ich denke nach. Einen Moment…"
+  ai_fallback: "Nicht ganz verstanden. Versuche: Umschlag senden, greifen, aufladen, auszahlen, Regeln, Fairness. Oder nutze die Buttons unten."
+  exit_ai_tip: "Zum Beenden „KI-Modus verlassen“ oder Zurück tippen."
+  exit_ai: "🚪 KI-Modus verlassen"
+  exit_ok: "KI-Modus beendet."
+  ai_empty: "Sende deine Frage direkt."
+  ask_ai_btn: "🤖 Mich fragen (KI)"
+  ask_ai: "💡 Mich fragen (KI)"
+  faq:
+    send: "🧧 Umschlag senden"
+    grab: "🤲 Umschlag greifen"
+    recharge: "💳 Aufladen & Auszahlung"
+    withdraw: "🏧 Auszahlung"
+    rank: "🏆 Rangliste/Bilanz"
+    rules: "⚖️ Regeln & Fairness"
+
+faq:
+  send:
+    title: "🧧 Umschlag senden"
+    body: |-
+      1. Menü → Umschlag senden;
+      2. Währung, Gesamtbetrag, Anteile wählen;
+      3. Ort wählen (Gruppe/privat), optionaler Text, bestätigen;
+      4. In Gruppen sicherstellen, dass der Bot anwesend ist und senden darf.
+  grab:
+    title: "🤲 Umschlag greifen"
+    body: |-
+      1. Auf der Karte 【Jetzt greifen】 tippen;
+      2. Betrag ist zufällig und wird verbucht;
+      3. Nach Ende „Bestes Glück“ ansehen.
+  recharge:
+    title: "💳 Aufladen & Auszahlung"
+    body: |-
+      · Nutze „Meine Vermögenswerte/Aufladen/Auszahlen“ und folge dem Assistenten;
+      · On-Chain-Bestätigungen brauchen Zeit;
+      · Bei Problemen Admin kontaktieren.
+  rank:
+    title: "🏆 Rangliste/Bilanz"
+    body: |-
+      · Nach jeder Runde Rangliste und „Glücksstern“ ansehen;
+      · „Heutige Bilanz“ kann je nach Version variieren.
+  rules:
+    title: "⚖️ Regeln & Fairness"
+    body: |-
+      · Ausschließlich Zufallsverteilung;
+      · Bot nimmt nicht teil;
+      · Für Details: Ankündigungskanal oder Admin.

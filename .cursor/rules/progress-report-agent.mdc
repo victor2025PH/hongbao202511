@@ -1,0 +1,33 @@
+---
+description: 当用户要求“生成开发进度报告/里程碑总结/下一步开发建议”时，遍历受允许的源代码与文档（见全局索引护栏），汇总模块现状、接口/路由、数据模型、测试覆盖、部署与健康检查；对比 README 与代码实现，给出差异与下一步 Roadmap
+globs:
+alwaysApply: false
+---
+
+# 进度报告（Agent）
+
+## 使用场景
+- 用户请求：生成进度报告、总结当前功能完成度、给出升级与优化建议
+
+## 关键规则
+- 仅遍历允许的包含路径，严格遵守全局排除清单
+- 读取：app.py、config/**、core/**、exports/**、locales/**、middlewares/**、models/**、routers/**、scripts/**、services/**、templates/**、static/**、tests/**、README.md、docs/**、project_tree.txt、star-groups-spec-v2.md
+- 输出内容至少包含：
+  1) 目录/模块清单与职责
+  2) 路由与健康检查（明确 /healthz）
+  3) 配置与环境变量来源（.env.example + zod 校验）
+  4) 数据模型/数据库迁移现状
+  5) 测试覆盖与空白点
+  6) 构建/部署/启动与 smoke（curl /healthz）
+  7) 与文档的差异
+  8) 风险、技术债与优先级路线图（1~3 周）
+- 报告前先给“将要读取的文件清单”；报告后给“可落地的具体建议清单”
+
+## 示例
+<example>
+读取 routers/** 路由文件并列出已实现的 GET/POST/…；确认 GET /healthz 存在并返回 200；读取 config/schema.ts 校验 .env.example 中的关键项；总结 tests/** 的现有用例并给出新增建议；最后产出 Roadmap（短期/中期）。
+</example>
+
+<example type="invalid">
+扫描 .venv/ 或 dist/ 并据此统计“完成度”；忽略 README 与 docs，缺少对文档差异的说明。
+</example>

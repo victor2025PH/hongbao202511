@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">
+  {% if executed %}{{ t("admin.adjust.execute") }}{% else %}{{ t("admin.adjust.preview") }}{% endif %}
+</h1>
+
+{% if missing and missing|length > 0 %}
+<div class="mb-4 p-3 bg-yellow-50 border rounded text-sm">
+  {{ t("admin.errors.not_found") or "Not found" }}：{{ ", ".join(missing) }}
+</div>
+{% endif %}
+
+{% if results %}
+  <!-- 执行结果模式 -->
+  <div class="bg-white shadow rounded-xl p-4">
+    <div class="text-sm text-gray-500 mb-3">
+      {{ t("admin.adjust.asset") }}: <b>{{ asset }}</b>，
+      {{ t("admin.adjust.amount") }}: <b>{{ amount }}</b>，
+      {{ t("admin.adjust.note") }}: <b>{{ note or "—" }}</b>
+    </div>
+
+    <div class="text-sm mb-3">
+      {{ t("admin.adjust.success_count") }}: <b>{{ success_count }}</b> /
+      {{ t("admin.adjust.fail_count") }}: <b>{{ fail_count }}</b>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead>
+          <tr class="text-left text-gray-500">
+            <th class="py-2 pr-4">{{ t("admin.table.user") }}</th>
+            <th class="py-2 pr-4">{{ t("admin.table.username") }}</th>
+            <th class="py-2 pr-4">{{ t("admin.table.amount") }}</th>
+            <th class="py-2 pr-4">{{ t("admin.table.result") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in results %}
+          <tr class="border-t">
+            <td class="py-2 pr-4">{{ r.u.tg_id }}</td>
+            <td class="py-2 pr-4">@{{ r.u.username or "—" }}</td>
+            <td class="py-2 pr-4">{{ amount }}</td>
+            <td class="py-2 pr-4">
+              {% if r.ok %}
+                <span class="text-green-600">{{ t("admin.toast.done") or "OK" }}</span>
+              {% else %}
+                <span class="text-red-600">{{ r.msg }}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <a href="/admin/adjust" class="inline-block mt-4 px-4 py-2 border rounded-md">{{ t("admin.common.back") }}</a>
+  </div>
+
+{% elif rows %}
+  <!-- 预览模式 -->
+  <form id="adjust-do-form" method="post" action="/admin/adjust/do" class="bg-white shadow rounded-xl p-4">
+    <!-- ✅ CSRF（由控制器 /preview 注入） -->
+    <input type="hidden" name="csrf_token" value="{{ csrf_token or '' }}"/>
+
+    <input type="hidden" name="asset" value="{{ asset }}"/>
+    <input type="hidden" name="amount" value="{{ amount }}"/>
+    <input type="hidden" name="note" value="{{ note }}"/>
+    <!-- 优先使用控制器传入的 users_raw，回退 querystring -->
+    <input type="hidden" name="users" value="{{ users_raw or request.query_params.get('users') or '' }}"/>
+
+    <div class="text-sm text-gray-500 mb-3">
+      {{ t("admin.adjust.asset") }}: <b>{{ asset }}</b>，
+      {{ t("admin.adjust.amount") }}: <b>{{ amount }}</b>，
+      {{ t("admin.adjust.note") }}: <b>{{ note or "—" }}</b>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead>
+          <tr class="text-left text-gray-500">
+            <th class="py-2 pr-4">{{ t("admin.table.user") }}</th>
+            <th class="py-2 pr-4">{{ t("admin.table.username") }}</th>
+            <th class="py-2 pr-4">{{ t("admin.table.before") or "Before" }}</th>
+            <th class="py-2 pr-4">{{ t("admin.table.delta") or "Delta" }}</th>
+            <th class="py-2 pr-4">{{ t("admin.table.after") or "After" }}</th>
+            <th class="py-2 pr-4">{{ t("admin.table.result") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+          <tr class="border-t">
+            <td class="py-2 pr-4">{{ r.user.tg_id }}</td>
+            <td class="py-2 pr-4">@{{ r.user.username or "—" }}</td>
+            <td class="py-2 pr-4">{{ r.before }}</td>
+            <td class="py-2 pr-4">{{ r.delta }}</td>
+            <td class="py-2 pr-4">{% if r.can %}{{ r.after }}{% else %}—{% endif %}</td>
+            <td class="py-2 pr-4">
+              {% if r.can %}
+                <span class="text-green-600">{{ t("admin.toast.done") or "OK" }}</span>
+              {% else %}
+                <span class="text-red-600">{{ r.reason }}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="flex gap-2 mt-4">
+      <a href="/admin/adjust" class="px-4 py-2 border rounded-md">{{ t("admin.common.back") }}</a>
+      <button id="btn-exec" class="px-4 py-2 bg-black text-white rounded-md">{{ t("admin.adjust.execute") }}</button>
+    </div>
+  </form>
+
+  <!-- 防重复提交 -->
+  <script>
+    (function () {
+      const form = document.getElementById('adjust-do-form');
+      const btn = document.getElementById('btn-exec');
+      if (!form || !btn) return;
+      form.addEventListener('submit', function () {
+        btn.disabled = true;
+        btn.textContent = '{{ (t("admin.common.processing") or "处理中…")|e }}';
+      });
+    })();
+  </script>
+{% endif %}
+{% endblock %}

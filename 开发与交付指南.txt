@@ -1,0 +1,227 @@
+覆盖环境搭建、配置、运行、测试、部署、二次开发要点与常见问题。
+
+# 🧧 RedPacket Bot 开发与交付指南
+
+本文档面向开发与运维同学，涵盖环境搭建、配置、运行、测试、部署、二次开发注意事项与常见问题。
+
+---
+
+## 1) 环境要求
+
+- Python 3.10+（建议 3.11）
+- Git、Make（可选）
+- 数据库：
+  - 开发：SQLite 默认开箱即用
+  - 生产：PostgreSQL 13+（推荐）
+- 可选：Redis 6+（用于并发扣减、缓存与队列）
+
+---
+
+## 2) 获取代码与安装依赖
+
+```bash
+git clone <your-repo-url> redpacket-bot
+cd redpacket-bot
+
+# 创建并激活虚拟环境（可选）
+python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
+
+# 安装依赖
+pip install -r requirements.txt
+
+3) 配置
+复制 .env.example 为 .env 并填写：
+BOT_TOKEN=123456:ABC-DEF_your_telegram_bot_token
+DATABASE_URL=sqlite:///./data.sqlite
+ADMIN_IDS=111111111,222222222
+DEFAULT_LANG=zh
+FALLBACK_LANG=en
+DEBUG=true
+
+# 生产使用 Postgres 时
+# DATABASE_URL=postgresql+psycopg2://redpacket:redpacket@db:5432/redpacket
+
+4) 运行
+
+4.1 本地运行
+
+make install     # 安装依赖
+make db-init     # 初始化数据库
+make run         # 启动机器人
+
+4.2 使用 Docker Compose
+
+docker compose up -d
+# 修改 .env 中 DATABASE_URL 指向 Postgres 容器：
+# DATABASE_URL=postgresql+psycopg2://redpacket:redpacket@db:5432/redpacket
+
+5) 目录结构（精简）
+
+project_root/
+├─ app.py                     # 入口：加载配置 / i18n / DB / 路由 / 中间件
+├─ config/                    # 配置（TOKEN、DB、管理员、特性开关）
+├─ core/                      # i18n、键盘、全局中间件
+├─ models/                    # SQLAlchemy 模型（用户/红包/流水/充值）
+├─ routers/                   # 交互路由（菜单/红包/充值/福利/排行等）
+├─ services/                  # 业务服务层（充值、邀请进度等）
+├─ core/i18n/messages/        # 语言包 zh.yml / en.yml
+├─ tests/                     # pytest 测试
+├─ scripts/                   # 开发工具脚本（造数/清库/演示流程）
+└─ docs/                      # 文档（本文件）
+
+6) 开发流程与关键约定
+6.1 多语言（i18n）
+
+文案集中于 core/i18n/messages/*.yml，通过 core/i18n/i18n.py 的 t(key, lang, **kwargs) 获取。
+
+新增语言：复制 zh.yml → xx.yml，保持键集合一致（tests/test_i18n.py 会校验）。
+
+所有按钮文本统一在 core/utils/keyboards.py 里调用 t()。
+
+6.2 按钮与路由约定
+
+回调数据格式：domain:action(:payload)，例如：
+
+hb:grab:123 / hb:rank:123
+
+recharge:main / recharge:new:USDT / recharge:refresh:999
+
+wf:invite / wf:invite:redeem
+
+所有键盘按钮 只从一个文件 生成：core/utils/keyboards.py。
+
+6.3 数据模型
+
+models/user.py：用户、余额（USDT/TON/POINT/ENERGY）、角色（admin/user）。
+
+models/envelope.py：红包主表与领取表；排行榜仅显示当轮。
+
+models/ledger.py：统一流水（充值、发放、领取、邀请奖励、兑换等）。
+
+models/recharge.py：充值订单，状态机 PENDING → SUCCESS/FAILED/EXPIRED。
+
+6.4 服务层
+
+services/recharge_service.py：创建/刷新订单、成功入账、构建订单展示文案。
+
+services/invite_service.py：邀请进度（拼多多模式）、积分↔进度↔能量的兑换、动态进度条文案。
+
+6.5 中间件
+
+ErrorsMiddleware：全局异常处理（DEBUG=true 时在聊天中显示详细错误）。
+
+UserBootstrapMiddleware：确保用户存在与资料更新。
+
+ThrottlingMiddleware：节流（默认 1s）。
+
+AntiEchoMiddleware：防回显。
+
+
+7) 测试
+make test
+# 或
+pytest -vv
+
+测试集包括：
+
+tests/test_i18n.py：多语言键一致性与格式化
+
+tests/test_models.py：模型与数据流（发/抢/排行/充值/流水）
+
+tests/test_services.py：服务层（邀请进度、充值）
+
+tests/test_end_to_end.py：红包完整链路（不依赖 Telegram API）
+
+8) 部署建议（生产）
+
+数据库：PostgreSQL + 定期备份；开启 statement_timeout 与连接池（例如 PgBouncer）。
+
+并发安全：高并发场景下，红包领取建议引入：
+
+数据行级锁（SELECT ... FOR UPDATE）或
+
+Redis 分布式锁 / Lua 原子脚本（可对 grab_share 进行加锁封装）。
+
+可观测性：
+
+标准化结构化日志（JSON），接入 ELK/Datadog。
+
+统计关键指标：发包数/抢包成功率/平均延迟/错误率。
+
+配置下发：
+
+config/feature_flags.py 仅在重启后生效；想热更新可改为 DB/Redis 存储 + 本地缓存。
+
+9) 二次开发指南
+
+新增功能：
+
+在 routers/ 添加新路由；
+
+在 core/utils/keyboards.py 增加相应按钮；
+
+在 core/i18n/messages/*.yml 添加文案；
+
+如涉及业务逻辑，抽到 services/，数据落库到 models/。
+
+新增币种：
+
+在 models/envelope.py 的枚举中加入；
+
+keyboards.py 充值入口添加；
+
+语言包补文案；settings.py/feature_flags.py 按需扩展。
+
+UI/文案：统一改动 i18n 与 keyboards，避免散落在各路由文件。
+
+10) 常见问题（FAQ）
+
+Q1：点击“排行榜”没反应？
+
+确认使用的回调是否为 hb:rank:{eid} 或 rank:round:{eid}；
+
+如果红包未结束，按我们逻辑也可查看当前领取明细；若失败，查看日志与中间件错误输出。
+
+Q2：多语言切换显示英文？
+
+检查 Telegram language_code；或强制指定 lang 传参；
+
+确认 zh.yml / en.yml 中存在对应键。
+
+Q3：积分兑换进度没有发能量？
+
+检查 config/feature_flags.py 中的阈值：ENERGY_REWARD_AT_PROGRESS 与 ENERGY_REWARD_AMOUNT；
+
+跨越阈值才会发放（例如从 1% → 3%，跨过 2%）。
+
+Q4：充值链接是什么？
+
+当前为 Mock；接三方支付后替换 services/recharge_service.py 的 _mock_payment_link()。
+
+Q5：如何仅显示“当次排行”？
+
+我们仅使用 EnvelopeShare 的明细生成“当次排行榜”，未实现全局排行。若需要全局榜，建议新建聚合表或物化视图，避免重查全表。
+
+11) 变更日志（简）
+
+v1.0.0
+
+初版：红包/排行（当轮）、充值中心、福利中心（邀请进度+兑换）、我的资产/记录、今日战绩
+
+多语言（zh/en），所有按钮与文案集中管理
+
+测试与演示脚本、Docker Compose、Makefile
+
+12) 许可证
+
+此项目可根据你的组织策略选择内部私有或开源许可。默认未附带开源许可证。
+
+
+如果你确认无误，回复 **1** 我继续补一个 **CI 示例（.github/workflows/ci.yml）**，自动化跑单测与 Lint。
+
+
+
+
+
+
+

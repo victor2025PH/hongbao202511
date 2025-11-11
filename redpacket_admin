@@ -1,0 +1,43 @@
+# 1) 写入最小可用站点配置
+sudo tee /etc/nginx/sites-available/redpacket_admin >/dev/null <<'NGX'
+server {
+    # 让这台机器的 80 端口默认进到这个站点（没有域名也能用）
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    # 没域名时先用 "_" 占位，这样公网IP访问也会命中本站点
+    server_name _;
+
+    # 可按需调大上传大小
+    client_max_body_size 10m;
+    keepalive_timeout 65;
+
+    # 反向代理到你已在本机监听的 uvicorn：127.0.0.1:8080
+    location / {
+        proxy_http_version 1.1;
+
+        # 传递真实源信息
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_read_timeout 300;
+        proxy_connect_timeout 60;
+        proxy_send_timeout 300;
+
+        proxy_pass http://127.0.0.1:8080/;
+    }
+}
+NGX
+
+# 2) 启用该站点（创建符号链接）
+sudo ln -sf /etc/nginx/sites-available/redpacket_admin /etc/nginx/sites-enabled/redpacket_admin
+
+# （可选）停用默认站点，避免命中 Welcome 页面
+if [ -e /etc/nginx/sites-enabled/default ]; then
+  sudo rm -f /etc/nginx/sites-enabled/default
+fi
+
+# 3) 检查语法并重载 Nginx
+sudo nginx -t && sudo systemctl reload nginx

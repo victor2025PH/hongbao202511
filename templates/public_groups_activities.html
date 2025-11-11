@@ -1,0 +1,401 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+  <div>
+    <h1 class="text-xl font-semibold">{{ t('admin.public_groups.activities_title') }}</h1>
+    <p class="text-sm text-gray-500">{{ t('admin.public_groups.activities_subtitle') }}</p>
+  </div>
+  <a href="/admin/public-groups/activities/report"
+     class="px-4 py-2 text-sm rounded bg-blue-500 text-white hover:bg-blue-600">
+    {{ t('admin.public_groups.activities_report_link') }}
+  </a>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <div class="bg-white border rounded-md p-4 shadow-sm">
+    <h2 class="text-sm font-semibold mb-3">{{ t('admin.public_groups.activities_create_title') }}</h2>
+    <form method="post" action="/admin/public-groups/activities" class="space-y-3">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div>
+        <label class="text-xs text-gray-600 block mb-1">{{ t('admin.public_groups.activities_name') }}</label>
+        <input name="name" type="text" required class="w-full border rounded px-2 py-1 text-sm" />
+      </div>
+      <div>
+        <label class="text-xs text-gray-600 block mb-1">{{ t('admin.public_groups.activities_description') }}</label>
+        <textarea name="description" rows="2" class="w-full border rounded px-2 py-1 text-sm"></textarea>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs text-gray-600 block mb-1">{{ t('admin.public_groups.activities_start_at') }}</label>
+          <input name="start_at" type="datetime-local" class="w-full border rounded px-2 py-1 text-sm" />
+        </div>
+        <div>
+          <label class="text-xs text-gray-600 block mb-1">{{ t('admin.public_groups.activities_end_at') }}</label>
+          <input name="end_at" type="datetime-local" class="w-full border rounded px-2 py-1 text-sm" />
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs text-gray-600 block mb-1">{{ t('admin.public_groups.activities_reward_points') }}</label>
+          <input name="reward_points" type="number" min="0" value="0" required class="w-full border rounded px-2 py-1 text-sm" />
+        </div>
+        <div>
+          <label class="text-xs text-gray-600 block mb-1">{{ t('admin.public_groups.activities_bonus_points') }}</label>
+          <input name="bonus_points" type="number" min="0" value="0" class="w-full border rounded px-2 py-1 text-sm" />
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs text-gray-600 block mb-1">{{ t('admin.public_groups.activities_daily_cap') }}</label>
+          <input name="daily_cap" type="number" min="1" class="w-full border rounded px-2 py-1 text-sm" />
+        </div>
+        <div>
+          <label class="text-xs text-gray-600 block mb-1">{{ t('admin.public_groups.activities_total_cap') }}</label>
+          <input name="total_cap" type="number" min="1" class="w-full border rounded px-2 py-1 text-sm" />
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs text-gray-600 block mb-1">{{ t('admin.public_groups.activities_highlight_slots') }}</label>
+          <input name="highlight_slots" type="number" min="0" value="0" class="w-full border rounded px-2 py-1 text-sm" />
+        </div>
+        <div class="flex items-center gap-2 mt-4 md:mt-6">
+          <input name="highlight_enabled" type="checkbox" value="true" id="highlightEnabled" class="border rounded">
+          <label for="highlightEnabled" class="text-xs text-gray-600">{{ t('admin.public_groups.activities_highlight_enabled') }}</label>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs text-gray-600 block mb-1">{{ t('admin.public_groups.activities_front_title') }}</label>
+          <input name="front_title" type="text" class="w-full border rounded px-2 py-1 text-sm" placeholder="{{ t('admin.public_groups.activities_front_title_hint') }}">
+        </div>
+        <div>
+          <label class="text-xs text-gray-600 block mb-1">{{ t('admin.public_groups.activities_front_badge') }}</label>
+          <input name="front_badge" type="text" class="w-full border rounded px-2 py-1 text-sm" placeholder="🌟 Featured">
+        </div>
+      </div>
+      <div>
+        <label class="text-xs text-gray-600 block mb-1">{{ t('admin.public_groups.activities_front_subtitle') }}</label>
+        <textarea name="front_subtitle" rows="2" class="w-full border rounded px-2 py-1 text-sm" placeholder="{{ t('admin.public_groups.activities_front_subtitle_hint') }}"></textarea>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs text-gray-600 block mb-1">{{ t('admin.public_groups.activities_front_cta_label') }}</label>
+          <input name="front_cta_label" type="text" class="w-full border rounded px-2 py-1 text-sm" placeholder="{{ t('admin.public_groups.activities_front_cta_label_hint') }}">
+        </div>
+        <div>
+          <label class="text-xs text-gray-600 block mb-1">{{ t('admin.public_groups.activities_front_cta_link') }}</label>
+          <input name="front_cta_link" type="url" class="w-full border rounded px-2 py-1 text-sm" placeholder="https://t.me/+example">
+        </div>
+      </div>
+      <div>
+        <label class="text-xs text-gray-600 block mb-1">{{ t('admin.public_groups.activities_front_priority') }}</label>
+        <input name="front_priority" type="number" min="0" value="100" class="w-full border rounded px-2 py-1 text-sm" />
+        <p class="text-[10px] text-gray-400 mt-1">{{ t('admin.public_groups.activities_front_priority_hint') }}</p>
+      </div>
+      <button type="submit" class="px-3 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600">
+        {{ t('admin.public_groups.activities_create_submit') }}
+      </button>
+    </form>
+  </div>
+
+  <div class="bg-white border rounded-md p-4 shadow-sm md:col-span-1">
+    <h2 class="text-sm font-semibold mb-3">{{ t('admin.public_groups.activities_existing') }}</h2>
+    {% set bulk_i18n = {
+      "selected_label": t('admin.public_groups.activities_bulk_selected_label', count='{count}'),
+      "processing": t('admin.public_groups.activities_bulk_processing'),
+      "success": t('admin.public_groups.activities_bulk_success', updated='{updated}'),
+      "partial": t('admin.public_groups.activities_bulk_partial', updated='{updated}', failed='{failed}'),
+      "error": t('admin.public_groups.activities_bulk_error'),
+      "no_selection": t('admin.public_groups.activities_bulk_no_selection'),
+      "export_selected": t('admin.public_groups.activities_bulk_export_selected'),
+      "export_all": t('admin.public_groups.activities_bulk_export_all')
+    } %}
+    <div id="activity-bulk-toolbar"
+         class="hidden mb-3 border border-blue-100 bg-blue-50 rounded-md p-4 space-y-3"
+         data-i18n='{{ bulk_i18n | tojson }}'>
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div class="text-sm font-medium text-blue-800" id="activity-bulk-count">{{ t('admin.public_groups.activities_bulk_selected_label', count=0) }}</div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button type="button"
+                  data-activity-action="pause"
+                  class="activity-bulk-action px-3 py-1.5 text-xs rounded bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-60">
+            {{ t('admin.public_groups.activities_bulk_pause') }}
+          </button>
+          <button type="button"
+                  data-activity-action="resume"
+                  class="activity-bulk-action px-3 py-1.5 text-xs rounded bg-green-500 text-white hover:bg-green-600 disabled:opacity-60">
+            {{ t('admin.public_groups.activities_bulk_resume') }}
+          </button>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-6 gap-2">
+        <div>
+          <label class="block text-[11px] text-gray-500 mb-1">{{ t('admin.public_groups.activities_reward_points') }}</label>
+          <input type="number" min="0" id="bulk-reward" class="w-full border rounded px-2 py-1 text-xs" placeholder="—">
+        </div>
+        <div>
+          <label class="block text-[11px] text-gray-500 mb-1">{{ t('admin.public_groups.activities_bonus_points') }}</label>
+          <input type="number" min="0" id="bulk-bonus" class="w-full border rounded px-2 py-1 text-xs" placeholder="—">
+        </div>
+        <div>
+          <label class="block text-[11px] text-gray-500 mb-1">{{ t('admin.public_groups.activities_highlight_slots') }}</label>
+          <input type="number" min="0" id="bulk-highlight-slots" class="w-full border rounded px-2 py-1 text-xs" placeholder="—">
+        </div>
+        <div>
+          <label class="block text-[11px] text-gray-500 mb-1">{{ t('admin.public_groups.activities_daily_cap') }}</label>
+          <input type="number" min="0" id="bulk-daily-cap" class="w-full border rounded px-2 py-1 text-xs" placeholder="—">
+        </div>
+        <div>
+          <label class="block text-[11px] text-gray-500 mb-1">{{ t('admin.public_groups.activities_total_cap') }}</label>
+          <input type="number" min="0" id="bulk-total-cap" class="w-full border rounded px-2 py-1 text-xs" placeholder="—">
+        </div>
+        <div>
+          <label class="block text-[11px] text-gray-500 mb-1">{{ t('admin.public_groups.activities_highlight_enabled') }}</label>
+          <select id="bulk-highlight-enabled" class="w-full border rounded px-2 py-1 text-xs">
+            <option value="keep">{{ t('admin.public_groups.activities_bulk_highlight_keep') }}</option>
+            <option value="true">{{ t('admin.public_groups.activities_bulk_highlight_on') }}</option>
+            <option value="false">{{ t('admin.public_groups.activities_bulk_highlight_off') }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div class="flex items-center gap-2 flex-wrap">
+          <button type="button"
+                  id="activity-bulk-apply"
+                  class="px-3 py-1.5 text-xs rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60">
+            {{ t('admin.public_groups.activities_bulk_apply') }}
+          </button>
+          <button type="button"
+                  id="activity-bulk-export"
+                  class="px-3 py-1.5 text-xs rounded border border-blue-400 text-blue-600 hover:bg-blue-50">
+            {{ t('admin.public_groups.activities_bulk_export_selected') }}
+          </button>
+          <a href="/admin/public-groups/activities/export"
+             class="px-3 py-1.5 text-xs rounded border text-gray-600 hover:bg-gray-100">
+            {{ t('admin.public_groups.activities_bulk_export_all') }}
+          </a>
+        </div>
+        <p class="text-xs text-gray-500" id="activity-bulk-status"></p>
+      </div>
+    </div>
+
+    <div class="space-y-3">
+      {% for activity in activities %}
+      <div class="border rounded px-3 py-2">
+        <div class="flex justify-between items-center gap-2">
+          <div class="flex items-start gap-3">
+            <div class="pt-1">
+              <input type="checkbox"
+                     class="activity-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-400"
+                     value="{{ activity.id }}">
+            </div>
+            <div>
+              <p class="text-sm font-semibold">{{ activity.name }}</p>
+              <p class="text-xs text-gray-500">{{ t('admin.public_groups.activities_type_join_bonus') }}</p>
+            </div>
+          </div>
+          <span class="text-xs px-2 py-1 rounded {% if activity.status.value == 'active' %}bg-green-100 text-green-700{% elif activity.status.value == 'paused' %}bg-yellow-100 text-yellow-700{% elif activity.status.value == 'draft' %}bg-blue-100 text-blue-700{% else %}bg-gray-200 text-gray-600{% endif %}">
+            {{ activity.status.value }}
+          </span>
+        </div>
+        <div class="mt-2 text-xs text-gray-600 space-y-1">
+          <p>{{ t('admin.public_groups.activities_reward_points') }}: {{ activity.reward_points }} (+{{ activity.bonus_points }})</p>
+          <p>{{ t('admin.public_groups.activities_time_range') }}: {{ activity.start_at or '-' }} ~ {{ activity.end_at or t('admin.public_groups.activities_no_end') }}</p>
+          <p>{{ t('admin.public_groups.activities_caps') }}: {{ t('admin.public_groups.activities_daily_cap') }} {{ activity.daily_cap or '-' }}, {{ t('admin.public_groups.activities_total_cap') }} {{ activity.total_cap or '-' }}</p>
+          <p>{{ t('admin.public_groups.activities_highlight_info') }}: {{ activity.highlight_slots or 0 }} / {{ 'ON' if activity.is_highlight_enabled else 'OFF' }}</p>
+          {% set card = activity.config.get('front_card') if activity.config else None %}
+          {% if card %}
+          <p>{{ t('admin.public_groups.activities_front_preview') }}: {{ card.title or activity.name }}{% if card.subtitle %} — {{ card.subtitle }}{% endif %}</p>
+          {% if card.badge %}<p>{{ t('admin.public_groups.activities_front_badge') }}: {{ card.badge }}</p>{% endif %}
+          {% if card.priority is not none %}<p>{{ t('admin.public_groups.activities_front_priority') }}: {{ card.priority }}</p>{% endif %}
+          {% endif %}
+        </div>
+        <form method="post" action="/admin/public-groups/activities/{{ activity.id }}/toggle" class="mt-3">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="active" value="{{ 'false' if activity.status.value == 'active' else 'true' }}">
+          <button class="px-3 py-1 text-xs rounded border {% if activity.status.value == 'active' %}border-gray-400 text-gray-600{% else %}border-green-500 text-green-600{% endif %}">
+            {{ t('admin.public_groups.activities_toggle_pause') if activity.status.value == 'active' else t('admin.public_groups.activities_toggle_resume') }}
+          </button>
+        </form>
+      </div>
+      {% else %}
+      <p class="text-sm text-gray-500">{{ t('admin.public_groups.activities_empty') }}</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+<script>
+(function () {
+  const toolbar = document.getElementById('activity-bulk-toolbar');
+  if (!toolbar) {
+    return;
+  }
+  const checkboxes = Array.from(document.querySelectorAll('.activity-checkbox'));
+  if (!checkboxes.length) {
+    return;
+  }
+  const countLabel = document.getElementById('activity-bulk-count');
+  const statusNode = document.getElementById('activity-bulk-status');
+  const pauseButton = toolbar.querySelector('[data-activity-action="pause"]');
+  const resumeButton = toolbar.querySelector('[data-activity-action="resume"]');
+  const applyButton = document.getElementById('activity-bulk-apply');
+  const exportButton = document.getElementById('activity-bulk-export');
+  const rewardInput = document.getElementById('bulk-reward');
+  const bonusInput = document.getElementById('bulk-bonus');
+  const highlightSlotsInput = document.getElementById('bulk-highlight-slots');
+  const dailyCapInput = document.getElementById('bulk-daily-cap');
+  const totalCapInput = document.getElementById('bulk-total-cap');
+  const highlightSelect = document.getElementById('bulk-highlight-enabled');
+  const i18n = JSON.parse(toolbar.dataset.i18n || '{}');
+
+  function setStatus(message, tone) {
+    if (!statusNode) {
+      return;
+    }
+    statusNode.textContent = message || '';
+    statusNode.className = 'text-xs ' + (tone || 'text-gray-500');
+  }
+
+  function getSelected() {
+    return checkboxes.filter(function (cb) { return cb.checked; });
+  }
+
+  function updateToolbar() {
+    const selected = getSelected();
+    if (!selected.length) {
+      toolbar.classList.add('hidden');
+      if (countLabel) {
+        countLabel.textContent = i18n.selected_label.replace('{count}', 0);
+      }
+      setStatus('', '');
+      return;
+    }
+    toolbar.classList.remove('hidden');
+    if (countLabel) {
+      countLabel.textContent = i18n.selected_label.replace('{count}', selected.length);
+    }
+  }
+
+  checkboxes.forEach(function (cb) {
+    cb.addEventListener('change', updateToolbar);
+  });
+  updateToolbar();
+
+  function buildPayload(action) {
+    const selected = getSelected().map(function (cb) { return Number(cb.value); });
+    if (!selected.length) {
+      setStatus(i18n.no_selection || '', 'text-red-500');
+      throw new Error('no-selection');
+    }
+    return { activity_ids: selected, action: action };
+  }
+
+  function gatherUpdates(payload) {
+    if (rewardInput.value !== '') {
+      payload.reward_points = Number(rewardInput.value);
+    }
+    if (bonusInput.value !== '') {
+      payload.bonus_points = Number(bonusInput.value);
+    }
+    if (highlightSlotsInput.value !== '') {
+      payload.highlight_slots = Number(highlightSlotsInput.value);
+    }
+    if (dailyCapInput.value !== '') {
+      payload.daily_cap = Number(dailyCapInput.value);
+    }
+    if (totalCapInput.value !== '') {
+      payload.total_cap = Number(totalCapInput.value);
+    }
+    if (highlightSelect && highlightSelect.value !== 'keep') {
+      payload.highlight_enabled = highlightSelect.value === 'true';
+    }
+  }
+
+  function sendBulk(payload) {
+    const actionButtons = toolbar.querySelectorAll('.activity-bulk-action');
+    const pendingButtons = Array.from(actionButtons);
+    if (applyButton) {
+      pendingButtons.push(applyButton);
+    }
+    pendingButtons.forEach(function (btn) { btn.disabled = true; });
+    setStatus(i18n.processing || '', 'text-gray-500');
+
+    const fetchFn = window.csrfFetch || fetch;
+    fetchFn('/admin/public-groups/activities/bulk', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+      .then(function (resp) {
+        if (!resp.ok) {
+          return resp.text().then(function (text) {
+            throw new Error(text || ('HTTP ' + resp.status));
+          });
+        }
+        return resp.json();
+      })
+      .then(function (data) {
+        const updated = Number(data.updated_count || 0);
+        const errors = Array.isArray(data.errors) ? data.errors : [];
+        if (updated > 0 && errors.length === 0) {
+          setStatus(i18n.success.replace('{updated}', updated), 'text-green-600');
+          window.setTimeout(function () { window.location.reload(); }, 600);
+        } else if (updated > 0 && errors.length > 0) {
+          setStatus(i18n.partial.replace('{updated}', updated).replace('{failed}', errors.length), 'text-yellow-600');
+        } else {
+          setStatus(i18n.error || 'Failed', 'text-red-500');
+        }
+      })
+      .catch(function (err) {
+        if (err.message !== 'no-selection') {
+          console.error('activity bulk update failed', err);
+          setStatus(i18n.error || 'Failed', 'text-red-500');
+        }
+      })
+      .finally(function () {
+        pendingButtons.forEach(function (btn) { btn.disabled = false; });
+      });
+  }
+
+  if (pauseButton) {
+    pauseButton.addEventListener('click', function () {
+      try {
+        const payload = buildPayload('pause');
+        sendBulk(payload);
+      } catch (_) { /* handled */ }
+    });
+  }
+  if (resumeButton) {
+    resumeButton.addEventListener('click', function () {
+      try {
+        const payload = buildPayload('resume');
+        sendBulk(payload);
+      } catch (_) { /* handled */ }
+    });
+  }
+  if (applyButton) {
+    applyButton.addEventListener('click', function () {
+      try {
+        const payload = buildPayload('update');
+        gatherUpdates(payload);
+        sendBulk(payload);
+      } catch (_) { /* handled */ }
+    });
+  }
+  if (exportButton) {
+    exportButton.addEventListener('click', function () {
+      const ids = getSelected().map(function (cb) { return cb.value; });
+      if (!ids.length) {
+        setStatus(i18n.no_selection || '', 'text-red-500');
+        return;
+      }
+      const query = encodeURIComponent(ids.join(','));
+      window.location.href = '/admin/public-groups/activities/export?activity_ids=' + query;
+    });
+  }
+})();
+</script>

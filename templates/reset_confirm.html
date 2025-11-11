@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">{{ t("admin.reset.confirm_title") }}</h1>
+
+{% if mode == "selected" %}
+  {% if missing and missing|length > 0 %}
+    <div class="mb-3 p-3 bg-yellow-50 border rounded text-sm">
+      {{ t("admin.errors.not_found") or "Not found" }}：{{ ", ".join(missing) }}
+    </div>
+  {% endif %}
+
+  <div class="mb-3 text-sm text-gray-600">
+    {{ t("admin.table.token") }}: <b>{{ asset }}</b>，
+    {{ t("admin.export.done") or "Total" }}: <b>{{ total }}</b>
+  </div>
+
+  <form id="form-do-selected" method="post" action="/admin/reset/do_selected" class="space-y-2" onsubmit="return __resetc_lock(this);">
+    <!-- ✅ CSRF（来自控制器 preview 注入） -->
+    <input type="hidden" name="csrf_token" value="{{ csrf_token or '' }}"/>
+
+    <input type="hidden" name="asset" value="{{ asset }}"/>
+    <!-- 优先使用控制器传入的 users_raw，其次回退到 querystring -->
+    <input type="hidden" name="users" value="{{ users_raw or request.query_params.get('users') or '' }}"/>
+    <input type="hidden" name="passphrase" value="{{ passphrase }}"/>
+
+    <div class="flex gap-2">
+      <button id="btn-dryrun-selected" name="dryrun" value="1" class="px-4 py-2 border rounded-md">
+        {{ t("admin.reset.dryrun") or "Dry Run" }}
+      </button>
+      <button id="btn-exec-selected" class="px-4 py-2 bg-black text-white rounded-md">
+        {{ t("admin.reset.execute") or "Execute" }}
+      </button>
+      <a href="/admin/reset" class="px-4 py-2 border rounded-md">{{ t("admin.common.back") }}</a>
+    </div>
+  </form>
+
+  <div class="bg-white shadow rounded-xl p-4 mt-4">
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead>
+          <tr class="text-left text-gray-500">
+            <th class="py-2 pr-4">{{ t("admin.table.user") }}</th>
+            <th class="py-2 pr-4">{{ t("admin.table.username") }}</th>
+            <th class="py-2 pr-4">{{ t("admin.table.balance") or "Balance" }}</th>
+            <th class="py-2 pr-4">{{ t("admin.table.delta") or "Delta" }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+          <tr class="border-t">
+            <td class="py-2 pr-4">{{ r.user.tg_id }}</td>
+            <td class="py-2 pr-4">@{{ r.user.username or "—" }}</td>
+            <td class="py-2 pr-4">{{ r.balance }}</td>
+            <td class="py-2 pr-4">{{ r.delta }}</td>
+          </tr>
+          {% endfor %}
+          {% if rows|length == 0 %}
+          <tr><td colspan="4" class="py-6 text-center text-gray-400">—</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+{% elif mode == "everyone" %}
+
+  <div class="mb-3 text-sm text-gray-600">
+    {{ t("admin.table.token") }}: <b>{{ asset }}</b>，
+    {{ t("admin.queue.running") or "Affected users" }}：<b>{{ total_users }}</b>，
+    {{ t("admin.export.done") or "Total" }}：<b>{{ total }}</b>
+  </div>
+
+  <form id="form-do-all" method="post" action="/admin/reset/do_all" class="space-y-2" onsubmit="return __resetc_lock(this);">
+    <!-- ✅ CSRF（来自控制器 preview_all 注入） -->
+    <input type="hidden" name="csrf_token" value="{{ csrf_token or '' }}"/>
+
+    <input type="hidden" name="asset" value="{{ asset }}"/>
+    <input type="hidden" name="passphrase" value="{{ passphrase }}"/>
+    <div class="flex gap-2">
+      <button id="btn-dryrun-all" name="dryrun" value="1" class="px-4 py-2 border rounded-md">
+        {{ t("admin.reset.dryrun") or "Dry Run" }}
+      </button>
+      <button id="btn-exec-all" class="px-4 py-2 bg-black text-white rounded-md">
+        {{ t("admin.reset.execute") or "Execute" }}
+      </button>
+      <a href="/admin/reset" class="px-4 py-2 border rounded-md">{{ t("admin.common.back") }}</a>
+    </div>
+  </form>
+
+{% endif %}
+
+<!-- 轻量防重复提交 -->
+<script>
+  function __resetc_lock(form) {
+    try {
+      const btns = form.querySelectorAll('button');
+      for (const b of btns) b.disabled = true;
+      const execBtn = form.querySelector('#btn-exec-selected, #btn-exec-all');
+      if (execBtn) execBtn.textContent = '{{ (t("admin.common.processing") or "处理中…")|e }}';
+    } catch (e) {}
+    return true;
+  }
+</script>
+{% endblock %}

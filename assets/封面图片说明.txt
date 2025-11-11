@@ -1,0 +1,5 @@
+assets/
+  cover_zh.jpg      # 中文封面（可用 .png/.webp）
+  cover_en.jpg      # 英文封面（可用 .png/.webp）
+  # 若上面不存在，则回退到：
+  cover.jpg

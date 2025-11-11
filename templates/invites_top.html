@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">Top Inviters</h1>
+
+<div class="bg-white shadow rounded-xl overflow-x-auto">
+  <table class="min-w-full text-sm">
+    <thead>
+      <tr class="text-left text-gray-500">
+        <th class="py-2 px-3">Inviter</th>
+        <th class="py-2 px-3">{{ t("admin.pagination.total") }}</th>
+        <th class="py-2 px-3">Reward Σ</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr class="border-t">
+        <td class="py-2 px-3">
+          {{ r.inviter_id }}
+          {% set u = users.get(r.inviter_id) %}
+          {% if u and u.username %}<span class="text-gray-400">@{{ u.username }}</span>{% endif %}
+        </td>
+        <td class="py-2 px-3">{{ r.cnt }}</td>
+        <td class="py-2 px-3">{{ r.reward }}</td>
+      </tr>
+      {% endfor %}
+      {% if rows|length == 0 %}
+      <tr><td colspan="3" class="py-6 text-center text-gray-400">No data</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

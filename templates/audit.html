@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">{{ t("admin.audit.title") or "审计记录" }}</h1>
+
+{# --------- 工具宏：日期与数字格式化 --------- #}
+{% macro fmt_dt(v) -%}
+  {%- if v is not none -%}
+    {%- if v is string -%}
+      {{ v }}
+    {%- else -%}
+      {{ v.strftime("%Y-%m-%d %H:%M:%S") }}
+    {%- endif -%}
+  {%- else -%}
+    —
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro fmt_num(v, max_places=8) -%}
+  {%- if v is none -%}—{%- else -%}
+    {%- if v is string -%}
+      {{ v }}
+    {%- else -%}
+      {%- set s = ("{:." ~ max_places ~ "f}").format(v)|trim -%}
+      {{ s.rstrip('0').rstrip('.') if '.' in s else s }}
+    {%- endif -%}
+  {%- endif -%}
+{%- endmacro %}
+
+{# --------- 筛选区 + 导出 --------- #}
+<form method="get" action="/admin/audit" class="bg-white shadow rounded-xl p-4 grid md:grid-cols-7 gap-3 mb-4 text-sm">
+  <div>
+    <label class="block text-gray-600 mb-1">Type</label>
+    {# 兼容后端：目前保留单选 ltype；若以后要多选，增加 name="types" 多值即可 #}
+    {% set _ltype = (filters.ltype if filters and filters.ltype is defined else (filters.type if filters and filters.type is defined else '')) %}
+    <select name="ltype" class="w-full border rounded-md p-2">
+      <option value="">{{ t("admin.common.status") }}: ALL</option>
+      {% set __opts = ["RESET","ADJUST","ADJUSTMENT","RECHARGE","CLAIM","ENVELOPE_CLAIM"] %}
+      {% for opt in __opts %}
+        <option value="{{ opt }}" {% if _ltype==opt %}selected{% endif %}>{{ opt }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div>
+    <label class="block text-gray-600 mb-1">{{ t("admin.table.token") }}</label>
+    <input name="token" value="{{ filters.token or '' }}" class="w-full border rounded-md p-2" placeholder="USDT/TON/POINT"/>
+  </div>
+
+  <div>
+    <label class="block text-gray-600 mb-1">{{ t("admin.table.user") }}</label>
+    <input name="user" value="{{ filters.user or '' }}" class="w-full border rounded-md p-2" placeholder="tg_id 或 @username"/>
+  </div>
+
+  <div>
+    <label class="block text-gray-600 mb-1">{{ t("admin.audit.operator") }}</label>
+    <input name="operator" value="{{ filters.operator or '' }}" class="w-full border rounded-md p-2" placeholder="操作人 tg_id"/>
+  </div>
+
+  <div>
+    <label class="block text-gray-600 mb-1">Min</label>
+    <input name="min_amount" value="{{ filters.min_amount or '' }}" class="w-full border rounded-md p-2" />
+  </div>
+
+  <div>
+    <label class="block text-gray-600 mb-1">Max</label>
+    <input name="max_amount" value="{{ filters.max_amount or '' }}" class="w-full border rounded-md p-2" />
+  </div>
+
+  <div>
+    <label class="block text-gray-600 mb-1">Start</label>
+    <input type="datetime-local" name="start" value="{{ filters.start or '' }}" class="w-full border rounded-md p-2" />
+  </div>
+
+  <div>
+    <label class="block text-gray-600 mb-1">End</label>
+    <input type="datetime-local" name="end" value="{{ filters.end or '' }}" class="w-full border rounded-md p-2" />
+  </div>
+
+  <div>
+    <label class="block text-gray-600 mb-1">每页</label>
+    {% set _pp = (per_page or request.query_params.get('per_page') or 50)|int %}
+    <select name="per_page" class="w-full border rounded-md p-2">
+      {% for n in [25,50,100,200] %}
+        <option value="{{ n }}" {% if _pp==n %}selected{% endif %}>{{ n }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div>
+    <label class="block text-gray-600 mb-1">{{ t("admin.common.search") }}</label>
+    <input name="q" value="{{ filters.q or '' }}" class="w-full border rounded-md p-2" placeholder="备注/订单/红包…"/>
+  </div>
+
+  <div class="md:col-span-7 flex items-center gap-2 mt-1">
+    <button class="px-4 py-2 bg-black text-white rounded-md">{{ t("admin.common.search") }}</button>
+    <a href="/admin/audit" class="px-4 py-2 border rounded-md text-gray-700">{{ t("admin.common.reset") or "重置" }}</a>
+
+    <span class="inline-block w-px h-5 bg-gray-200 mx-1"></span>
+
+    {# 导出按钮：自动继承当前筛选条件 #}
+    <a class="px-3 py-2 border rounded-md hover:bg-gray-50"
+       href="{{ request.url.replace(path='/admin/audit/export.csv') }}">
+      导出 CSV
+    </a>
+    <a class="px-3 py-2 border rounded-md hover:bg-gray-50"
+       href="{{ request.url.replace(path='/admin/audit/export.json') }}">
+      导出 JSON
+    </a>
+
+    <span class="text-gray-500 ml-3">Σ {{ fmt_num(sum_amount) }}</span>
+  </div>
+</form>
+
+{# --------- 列表 --------- #}
+<div class="bg-white shadow rounded-xl overflow-x-auto">
+  <table class="min-w-full text-sm">
+    <thead>
+      <tr class="text-left text-gray-500 border-b">
+        <th class="py-2 px-3">{{ t("admin.common.created_at") }}</th>
+        <th class="py-2 px-3">Type</th>
+        <th class="py-2 px-3">{{ t("admin.table.user") }}</th>
+        <th class="py-2 px-3">{{ t("admin.table.username") }}</th>
+        <th class="py-2 px-3">{{ t("admin.table.token") }}</th>
+        <th class="py-2 px-3">{{ t("admin.table.amount") }}</th>
+        <th class="py-2 px-3">{{ t("admin.audit.operator") }}</th>
+        <th class="py-2 px-3">{{ t("admin.table.note") }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+        <tr class="border-t">
+          <td class="py-2 px-3">{{ fmt_dt(r.created_at) if r.created_at is defined else fmt_dt(r['created_at'] if 'created_at' in r else none) }}</td>
+          <td class="py-2 px-3">{{ r.type if r.type is defined else r['type'] }}</td>
+          <td class="py-2 px-3">
+            {% if r.tg_id is defined and r.tg_id %}{{ r.tg_id }}
+            {% elif r['tg_id'] is defined and r['tg_id'] %}{{ r['tg_id'] }}
+            {% elif r.user_id is defined and r.user_id %}uid:{{ r.user_id }}
+            {% elif r['user_id'] is defined and r['user_id'] %}uid:{{ r['user_id'] }}
+            {% else %}—{% endif %}
+          </td>
+          <td class="py-2 px-3">
+            {% if r.username is defined and r.username %}@{{ r.username }}
+            {% elif r['username'] is defined and r['username'] %}@{{ r['username'] }}
+            {% else %}—{% endif %}
+          </td>
+          <td class="py-2 px-3">{{ r.token if r.token is defined else r['token'] }}</td>
+          <td class="py-2 px-3">{{ fmt_num(r.amount if r.amount is defined else r['amount']) }}</td>
+          <td class="py-2 px-3">
+            {% if r.operator_id is defined and r.operator_id %}{{ r.operator_id }}
+            {% elif r['operator_id'] is defined and r['operator_id'] %}{{ r['operator_id'] }}
+            {% else %}—{% endif %}
+          </td>
+          {% set _note = (r.note if r.note is defined else (r['note'] if 'note' in r else '')) %}
+          <td class="py-2 px-3 truncate max-w-[360px]" title="{{ _note or '' }}">{{ _note or "—" }}</td>
+        </tr>
+      {% endfor %}
+      {% if rows|length == 0 %}
+      <tr><td colspan="8" class="py-6 text-center text-gray-400">No data</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+{# --------- 分页 --------- #}
+{% set _page = page or 1 %}
+{% set _total_pages = total_pages or 1 %}
+<div class="flex justify-between mt-4 text-sm">
+  <div class="text-gray-500">
+    {{ t("admin.pagination.page") or "第" }} {{ _page }} {{ t("admin.pagination.of") or "页 / 共" }} {{ _total_pages }} {{ t("admin.pagination.pages") or "页" }}
+    {% if per_page %} · {{ per_page }} / page{% endif %}
+  </div>
+
+  <div class="flex items-center gap-2">
+    {% if _page > 1 %}
+      <a class="px-3 py-1 border rounded-md" href="{{ request.url.include_query_params(page=_page-1) }}">{{ t("admin.pagination.prev") or "上一页" }}</a>
+    {% else %}
+      <span class="px-3 py-1 border rounded-md text-gray-300 cursor-not-allowed">{{ t("admin.pagination.prev") or "上一页" }}</span>
+    {% endif %}
+
+    {% if _page < _total_pages %}
+      <a class="px-3 py-1 border rounded-md" href="{{ request.url.include_query_params(page=_page+1) }}">{{ t("admin.pagination.next") or "下一页" }}</a>
+    {% else %}
+      <span class="px-3 py-1 border rounded-md text-gray-300 cursor-not-allowed">{{ t("admin.pagination.next") or "下一页" }}</span>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,98 @@
+# 启动机器人
+python app.py
+
+进入虚拟环境
+.\.venv\Scripts\Activate.ps1
+
+.\.venv\Scripts\Activate.ps1
+python app.py
+
+python -m pip install psycopg2-binary
+
+& ".\.venv\Scripts\python.exe" -m pip install psycopg2-binary
+
+第一步：IP主机
+马尼拉
+ssh ubuntu@165.154.233.55
+洛杉矶
+ssh ubuntu@165.154.254.99
+用户名
+ubuntu
+第二步：密码
+Along2025!!!
+第三步：进入虚拟venv
+source .venv/bin/activate
+第四步：启动机器人
+sudo systemctl start telegram-bot.service
+第五步：实时查看日志
+journalctl -u telegram-bot.service -f
+
+ss -ltnp | grep 8080
+
+洛杉矶后台登陆
+http://165.154.254.99/admin
+
+
+第五步：查看状态
+systemctl status telegram-bot.service --no-pager
+第六步：实时查看日志
+journalctl -u telegram-bot.service -f
+| 操作           | 命令                                                                            |
+| ------------ | ----------------------------------------------------------------------------- |
+| 查看状态         | systemctl status telegram-bot.service --no-pager`                            |
+| 实时查看日志       | `journalctl -u telegram-bot.service -f`                                       |
+| 查看最近 100 行日志 | `journalctl -u telegram-bot.service -n 100 --no-pager`                        |
+| 重启服务（更新代码后）  | `sudo systemctl restart telegram-bot.service`                                 |
+| 停止服务         | `sudo systemctl stop telegram-bot.service`                                    |
+| 禁用开机自启       | `sudo systemctl disable telegram-bot.service`                                 |
+| 修改服务文件后重载    | `sudo systemctl daemon-reload && sudo systemctl restart telegram-bot.service` |
+
+----------- ---------------------------------------------------------------------------- -----------------
+# 终端 A：看 Nginx（如果你用的是 Caddy 就把 nginx 换成 caddy）
+sudo journalctl -u nginx -f
+
+# 终端 B：看访问/错误日志
+sudo tail -f /var/log/nginx/access.log /var/log/nginx/error.log
+
+----------- ---------------------------------------------------------------------------- -----------------
+# 1) 到项目目录
+cd /home/ubuntu
+
+# 2) 如果 venv 组件没装，先装一次（只需一次）
+sudo apt update
+sudo apt install -y python3-venv
+
+# 安装一次
+sudo apt install -y tmux
+
+# 3) 创建并激活虚拟环境（会生成 .venv 目录）
+python3 -m venv .venv
+source .venv/bin/activate
+
+# 4) 升级 pip（在 venv 里，不影响系统）
+pip install --upgrade pip
+
+# 5) 安装项目依赖
+pip install -r requirements.txt
+
+cd /home/ubuntu
+# 如果还没创建过 venv，就创建一个（只需做一次）
+python3 -m venv .venv || sudo apt update && sudo apt install -y python3-venv && python3 -m venv .venv
+
+# 激活 venv（激活后命令行前面会出现 (.venv)）
+source .venv/bin/activate
+
+# 确认此时用的是 venv 里的 pip（路径应在 /home/ubuntu/.venv 下）
+which python
+which pip
+
+# 升级 pip 并安装依赖
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+pip install pandas gspread gspread_asyncio gspread-formatting google-auth google-auth-oauthlib
+
+
+----------------------------------------------------
+读取目录树
+tree /F /A
+

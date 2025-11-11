@@ -1,0 +1,52 @@
+---
+description: 全局保护敏感环境变量；禁止修改 .env/.env.*.local；仅允许修改 .env.example 与 README；README 必须添加环境变量与验证步骤的锚点；追加注释而非覆盖现值；输出变更清单便于审查
+globs:
+alwaysApply: true
+---
+
+# 保护敏感环境变量（全局）
+
+## 使用场景
+- 任何涉及环境变量、配置或部署脚本的修改
+- 仓库包含 .env/.env.*.local 文件，且通过 zod 对环境变量做 fail-fast 校验
+- README 需要为“环境变量”和“验证步骤”提供可导航锚点
+
+## 关键规则
+- 绝不修改：.env、.env.local、.env.*.local
+- 仅修改：.env.example 与 README（新增键、注释说明、默认值示例）
+- 如需在 .env 中新增键：只在文件末尾**追加注释行**（不写入真实值）
+- README 必须添加以下锚点（若不存在则追加）：
+  - 在“环境变量”段落标题前添加：`<a id="env-vars"></a>`
+  - 在“验证步骤”段落标题前添加：`<a id="verify"></a>`
+  - 规则与文档中引用时使用：`[环境变量](#env-vars)` 与 `[验证步骤](#verify)`
+- 所有变更都要输出文件清单与 diff 摘要
+- 若用户显式授权写入 .env 的真实值，仍需：
+  1) 先备份为 `.env.bak-YYYYMMDD-HHmmss`
+  2) 仅**追加**新键值，不覆盖已有值
+  3) 将敏感值脱敏显示在变更说明中
+
+## 示例
+<example>
+用户请求：新增 REDIS_URL 并完善文档导航。
+
+行为（预期）：
+1) 在 .env.example 末尾追加：
+   # REDIS_URL：Redis 连接串（可选）
+   REDIS_URL=
+2) 在 README：
+   - 若无锚点，在“环境变量”标题上一行插入：`<a id="env-vars"></a>`
+   - 在“验证步骤”标题上一行插入：`<a id="verify"></a>`
+   - 在相关位置加入导航链接：
+     - 参见[环境变量](#env-vars)
+     - 参见[验证步骤](#verify)
+3) 输出修改文件与 diff 摘要。
+</example>
+
+<example type="invalid">
+用户请求：把生产库地址直接写入 .env 并覆盖现值。
+
+行为（禁止）：
+- 覆盖或删除 .env 中的任何既有键值
+- 在 .env.example 写入真实敏感地址
+- 未备份 .env 就写入
+</example>

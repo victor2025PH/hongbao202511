@@ -1,0 +1,613 @@
+welcome: "🎉 Bienvenue, {username} ! Choisis une fonction 👇"
+
+welcome_full:
+  title: "🎉 Bienvenue, {username} !"
+  subtitle: |-
+    🧧 <b>Présentation du jeu des enveloppes</b>
+    Ici, tu peux envoyer des enveloppes, en récupérer, voir les classements et ton bilan du jour, en groupe ou en privé.
+    Prend en charge USDT / TON / ⭐ Points. Plusieurs modes, prise en main en un clic.
+  howto:
+    title: "🎮 Comment jouer"
+    steps: |-
+      • 🧧 <b>Envoyer une enveloppe</b> : choisis la devise → montant total → nombre de parts → chance aléatoire → envoyer.
+      • 🤲 <b>Récupérer</b> : clique sur 【Récupérer maintenant】 sur la carte. Montant aléatoire, à la chance.
+      • 🏆 <b>Classement</b> : à la fin, consulte “meilleure chance” et l’historique.
+      • 📊 <b>Stats du jour</b> : total récupéré/envoyé et nombre d’actions aujourd’hui.
+      • 💳 <b>Recharger/Retirer</b> : USDT / TON pris en charge. Attends la confirmation on-chain, respire.
+  rules:
+    title: "📜 Règles de base"
+    points: |-
+      • ⏱ Récupérable pendant la période de validité. Les parts restantes sont remboursées après expiration.
+      • 👤 Une récupération par personne et par manche. Les clics répétés sont refusés.
+      • 🧮 <b>Chance = répartition aléatoire</b>. Non égalitaire. Tu peux tout rafler comme tu peux faire 0.
+      • 🔄 Tu peux transférer la carte de cette manche (si activé et autorisé pour la manche).
+      • 🧾 Tous les mouvements sont consignés dans “Historique”, pour vérification.
+  fair:
+    title: "⚖️ Équité et transparence"
+    points: |-
+      • 🎲 Aléa : basé sur une source pseudo-aléatoire de haute qualité (Python secrets/random). Chaque part est tirée indépendamment, la somme respecte le montant total, <b>sans favoritisme</b>.
+      • 🚫 Anti-triche : un seul enregistrement valide par utilisateur/appareil. Détection des fréquences anormales et scripts.
+      • 💠 Traçabilité : chaque envoi/récupération est journalisé (heure, montant, devise). Les anomalies sont auditables.
+      • 📨 Permissions : dépôt uniquement dans les groupes où le bot peut parler. Pas de post fantôme.
+      • 🛠 Rattrapage : échec d’envoi → remboursement ou demande de réessai. Pas d’argent disparu.
+  cta: "🧭 Ouvre le menu et envoie ta première enveloppe."
+  tip_open_menu: "👉 Tu peux envoyer /start à tout moment pour ouvrir le menu."
+
+menu:
+  send: "🧧 Envoyer une enveloppe"
+  recharge: "💰 Centre de recharge"
+  today: "📊 Bilan du jour"
+  assets: "💼 Mes actifs"
+  welfare: "🎁 Centre d’avantages"
+  panel: "🛠 Panneau d’admin"
+  admin: "🛠 Panneau d’admin"
+  language: "🌐 Langue"
+  help: "❓ Centre d’aide"
+  back: "⬅️ Retour"
+  bind_this_group: "Lier ce groupe et continuer en privé ➡️"
+  bind_hint_in_group: "Détecté un réglage en groupe. Clique ci-dessous pour lier ce groupe et continuer en privé."
+  bound_go_dm: "✅ Groupe défini comme cible. Continue en message privé."
+  bound_dm_tips: "Un groupe cible est lié. Tu peux commencer à envoyer des enveloppes ici."
+  bound_ok: "Lié et continuation en privé"
+
+asset:
+  title: "💼 Mes actifs"
+  usdt: "💵 USDT"
+  ton: "🪙 TON"
+  points: "⭐ Points"
+
+hongbao:
+  wizard_title: "🧧 Assistant d’envoi"
+  buttons:
+    relay: "🔁 Relayer"
+  summary:
+    title: "📊 <b>Résumé de la manche</b>"
+    total: "💰 Total : {amount} {token}, {shares} part(s)"
+    left: "📦 Restant : {left} part(s)"
+  grab_now: "🤲 Récupérer maintenant"
+  view_rank: "🏆 Voir le classement"
+  grab_ok: "🎉 Tu as récupéré {amount} {token} !"
+  grab_dup: "⚠️ Tu as déjà récupéré cette enveloppe."
+  errors:
+    only_mvp: "⚠️ Seul l’utilisateur meilleur chance peut envoyer la suivante"
+  mvp:
+    success: "✅ Nouvelle enveloppe créée avec les données du MVP"
+  cover:
+    pick_title: "🖼 Choisis une couverture :"
+    used_ok: "✅ Couverture ajoutée et carte envoyée"
+
+env:
+  title: "🧧 Assistant d’envoi"
+  mode_title: "🔘 Choisis la devise"
+  dm_hint: "🔒 Pour ta vie privée, on continue en privé. Clique le bouton bleu ci-dessous."
+  continue_in_dm: "Continuer en privé ➡️"
+
+  mode:
+    usdt: "💵 USDT"
+    ton: "🪙 TON"
+    point: "⭐ Points"
+
+  amount:
+    ask: "💰 Entre le montant total (ex. 12.34)"
+
+  shares:
+    ask: "📦 Entre le nombre de parts (ex. 10)"
+
+  dist:
+    ask: "⚖️ Choisis le mode de répartition"
+    random: "🎲 Chance (aléatoire)"
+    fixed: "🟰 Égalitaire (fixe)"
+
+  loc:
+    ask: "📍 Choisis l’emplacement"
+    here: "📣 Dans ce groupe"
+    dm: "💬 Message privé"
+    pick: "🎯 Choisir un groupe"
+    pick_tip: |-
+      ℹ️ Conseil : les chat_id de groupe commencent souvent par -100. Tu peux aussi envoyer un lien ou un @nom :
+      • Exemple 1 : @votregroupe ou https://t.me/votregroupe
+      • Exemple 2 : lien de message https://t.me/c/123456789/1 (sera résolu en -100123456789)
+      • Exemple 3 : -100123456789 (chat_id direct)
+
+  memo:
+    ask: |-
+      📝 <b>Message de vœux (optionnel)</b>
+      • Saisis ce que tu veux dire dans le champ ci-dessous
+      • Émojis et sauts de ligne ok. Sinon clique « Passer »
+      • Exemple : Belle journée à tous ! 🎉
+
+  open_group_btn: "➡️ Ouvrir le groupe"
+
+  confirm:
+    title: "✅ Confirme les paramètres"
+    hint: "Une carte d’enveloppe sera créée et envoyée."
+
+  confirm_page:
+    title: "🧧 Confirmation"
+    token_label: "🪙 Devise : "
+    amount_label: "💵 Montant : "
+    shares_label: "📦 Parts : "
+    dist_label: "⚖️ Répartition : "
+    loc_label: "📍 Emplacement : "
+    memo_label: "📝 Message : "
+    random_tip: "🎲 Aléatoire"
+    fixed_tip: "🟰 Fixe"
+    cover_label: "🖼 Couverture : "
+
+  cancel: "✖️ Annuler"
+  back: "⬅️ Retour"
+  send: "🚀 Confirmer et envoyer"
+
+  success:
+    sent: "✅ Enveloppe envoyée."
+
+  fail:
+    create: "❌ Échec de création, réessaie plus tard."
+    post: "⚠️ Créée, mais l’envoi de la carte a échoué. Vérifie la cible."
+    quick_refund: "❌ Envoi rapide échoué, remboursé."
+
+  quick:
+    no_template: "📭 Aucun modèle. Récupère une enveloppe puis reviens."
+
+  relay:
+    only_lucky: "🍀 Seul l’heureux gagnant peut relayer."
+
+  errors:
+    invalid_amount: "❌ Montant invalide. Réessaie."
+    invalid_shares: "❌ Nombre de parts invalide. Réessaie."
+    insufficient: "💳 Solde insuffisant. Recharge ou diminue le montant."
+    not_ready: "⚠️ Paramètres incomplets. Suis les étapes."
+    not_in_chat: "🚫 Le bot n’est pas dans ce groupe. Invite-le d’abord."
+    no_rights: "🚫 Le bot n’a pas le droit d’envoyer des messages ici."
+    not_found: "❌ Groupe introuvable. Vérifie le chat_id ou le lien."
+    unknown: "⚠️ Impossible de vérifier le groupe. Réessaie."
+
+  copy:
+    hint: "🧩 Paramètres de la dernière enveloppe copiés. Envoie le 【montant total】 pour continuer (débit immédiat)."
+
+  cancelled: "✅ Annulé. Remboursement effectué."
+
+  input_amount_tip: "✍️ Tu peux aussi envoyer un nombre directement"
+  input_shares_tip: "✍️ Tu peux aussi envoyer un nombre directement"
+  custom_input: "✏️ Saisie personnalisée"
+  memo_label: "📝 Message : "
+
+  tg:
+    choose: "📌 Choisis le groupe cible :"
+    unbound_tip: "🔧 Aucun groupe cible lié. Mentionne le bot dans le groupe cible pour lier, ou clique « 🎯 Choisir un groupe » et entre un chat_id -100..."
+    unbound: "🔧 Aucun groupe cible."
+    chosen: "✅ Sélectionné : {title}"
+    current: "📌 Groupe cible actuel"
+    use_this: "👉 Utiliser ce groupe"
+    change: "🔄 Changer de groupe"
+    bind_help: "🧩 Invite le bot dans ton groupe avec droit d’envoi, puis reviens ici pour le choisir. Ou clique « 🎯 Choisir un groupe » et saisis un chat_id -100."
+    bind_help_text: "🧩 Invite le bot dans ton groupe avec droit d’envoi, puis reviens ici pour le choisir. Ou utilise « 🎯 Choisir un groupe »."
+    manual_pick: "🎯 Choisir un groupe"
+    bind_new: "➕ Lier un nouveau groupe"
+    add_group: "➕ Ajouter un groupe"
+    go_bind: "🪄 Lier depuis le groupe"
+    bind_in_group: "🪄 Lier dans le groupe"
+    preset: "📍 Groupe cible présélectionné : {chat_id}"
+    chosen_bold: "🔖 <b>Sélectionné : {title}</b>"
+    unbound_bold: "🧩 <b>Aucun groupe cible lié</b>"
+    parse_ok: "✅ Reconnu et enregistré : <b>{title}</b> (<code>{chat_id}</code>)"
+    parse_fail: |-
+      ❌ Lien ou nom d’utilisateur non reconnu.
+      Envoie l’un des formats suivants :
+      • Lien public de groupe, ex. https://t.me/votregroupe
+      • Lien de message, ex. https://t.me/c/123456789/1
+      • chat_id direct, ex. -100123456789
+
+  cover:
+    change_btn: "🖼 Changer de couverture"
+    change: "🖼 Changer de couverture"
+    entry_tip: "Tu peux choisir une couverture depuis le canal de médias, ou « Passer »."
+    open_list: "🖼 Choisir une couverture"
+    none: "🚫 Pas de couverture"
+    prev: "« Précédent"
+    next: "Suivant »"
+    pick_title: "🖼 Choisis une couverture (canal)"
+    from_channel: "🖼 Depuis le canal"
+    use_this: "✅ Utiliser cette couverture"
+    repick: "🔄 Rechoisir"
+    item: "Couverture"
+
+env_send:
+  title: "🧧 Choisis les paramètres (optionnels)"
+  tips: "Saisis ton message dans le champ ci-dessous.\n• Évite la pub brute. \n• Ex : Belle journée à tous ! 🎉"
+  ok: "✅ Envoyé."
+  back: "⬅️ Retour"
+  preview_btn: "👀 Aperçu"
+  previewed_ok: "✅ Enveloppe envoyée."
+  go_group: "🔗 Ouvrir le groupe"
+
+env_sent:
+  you_sent: "Tu as envoyé {amount} USDT."
+  mvp_line: "🏆 Tu es « meilleure chance » de la manche. Réutilise ces paramètres :"
+  mvp_send_btn: "🏆 Envoyer en tant que MVP"
+
+hb:
+  grab: "🤲 Récupérer maintenant"
+  rank_btn: "🏆 Voir le classement"
+
+hongbao_summary:
+  title: "📊 <b>Résumé de la manche</b>"
+  total: "💰 Total : {amount} {token}, {shares} part(s)"
+  left: "📦 Restant : {left} part(s)"
+
+hongbao_result:
+  ok: "🎉 Tu as récupéré {amount} {token} !"
+  duplicate: "⚠️ Tu as déjà récupéré cette enveloppe."
+  dup: "⚠️ Tu as déjà récupéré cette enveloppe."
+
+rank:
+  title: "🏆 Meilleure chance"
+  meta_line: "💰 Total : {amount} {token} · 📦 Parts : {shares}"
+  round_title: "🏆 <b>Meilleure chance de la manche</b>"
+  lucky: "🏅 MVP : ✨ {name} ✨ ({amount} {token})"
+  none: "😅 Personne encore"
+  global_offline: |-
+    📉 Classement global désactivé.
+    Consulte plutôt 📊 Bilan du jour.
+  round_btn: "🏆 Voir la manche"
+  mvp_send_btn: "🏅 Envoyer en tant que MVP"
+  mvp_dm_tip: "🏅 Tu es le MVP de cette manche. Relance en un clic :"
+
+today:
+  button: "📊 Bilan du jour"
+  title: "📊 Bilan du jour (récupérations uniquement)"
+  date_local: "🕒 Dates locales : {start} ~ {end} ({tz})"
+  grabbed_only: "🤲 Récupérations aujourd’hui : {count} fois"
+  empty: "📭 Aucune donnée."
+  income: "📈 Reçu : {amount} {token}"
+  outcome: "📉 Envoyé : {amount} {token}"
+
+welfare:
+  title: "🎁 Centre d’avantages"
+  signin_btn: "✅ Connexion quotidienne"
+  invite_btn: "🎯 Parrainage"
+  promo_btn: "📢 Annonces"
+  rules_btn: "📜 Règles"
+  signin_already: "⚠️ Déjà validé aujourd’hui."
+  signin_ok: "✅ Succès. +{points} points."
+  invite_share_ready: "✅ Ton lien d’invitation est prêt."
+  invite_share_link_label: "🔗 Lien d’invitation :"
+  invite_rules: "📘 Règles de parrainage et d’échange"
+  promo: "📢 Annonces"
+  invite_share_btn: "🔗 Générer le lien"
+  invite_redeem_btn: "♻️ Échanger des points"
+  invite_title: "🎯 Progression d’invitation"
+  invite_compact: |-
+    Progression : {percent}%
+    {bar}
+    {phase_text}
+  exchange:
+    desc: |-
+      ♻️ <b>Échanges</b>
+      • “Points → Progression” : chaque 1000 points = +1%
+      • “Énergie → Points” : échange à ratio fixe
+      • Récompenses débloquées à progression pleine
+    not_enough: "🚫 {resource} insuffisant."
+    to_progress: "🔼 Dépenser 1000 points → +1% progression"
+    energy_to_points_btn: "⚡ Énergie → ⭐ Points"
+    success_progress: "✅ +{value}% progression."
+    success_points: "✅ +{value} points."
+
+phase:
+  "100": "🎉 Objectif atteint."
+  "99": "✨ Plus qu’un rien — fonce."
+  "95_98": "🔥 Dernière ligne droite."
+  "90_94": "⚡ Super avancée, continue."
+  "80_89": "👍 De mieux en mieux."
+
+record:
+  title: "📜 Historique"
+  recent10: "🕑 10 derniers :"
+  none: "📭 Aucune entrée."
+  fields:
+    time: "🕒 Heure"
+    type: "🔖 Type"
+    token: "🪙 Devise"
+    amount: "💵 Montant"
+    note: "📝 Note"
+
+types:
+  RECHARGE: "💰 Recharge"
+  WITHDRAW: "🏧 Retrait"
+  HONGBAO_SEND: "🧧 Envoi"
+  HONGBAO_GRAB: "🤲 Récupération"
+  ADJUSTMENT: "🔧 Ajustement admin"
+  SIGNIN: "🗓️ Connexion"
+  INVITE_REWARD: "🎯 Récompense parrainage"
+
+lang:
+  title: "🌐 请选择语言"
+  zh: "🇨🇳 简体中文"
+  en: "🇺🇸 English"
+  fr: "🇫🇷 Français"
+  de: "🇩🇪 Deutsch"
+  es: "🇪🇸 Español"
+  hi: "🇮🇳 हिन्दी"
+  vi: "🇻🇳 Tiếng Việt"
+  th: "🇹🇭 ไทย"
+
+recharge:
+  title: "💰 Centre de recharge"
+  choose_method: "Choisis la devise"
+  choose_amount: "Choisis le montant"
+  custom: "✏️ Montant personnalisé"
+  refresh: "🔁 Actualiser"
+  deposit_addr: "🔗 Adresse de dépôt"
+  addr_instr: |-
+    💡 Envoie n’importe quel montant de {token} à l’adresse ci-dessus (réseau : {network}).
+    ⏱ Après confirmations on-chain, les fonds sont crédités. Adresse valide en continu, réutilisable.
+    🔁 Si déjà payé, clique « Actualiser » pour mettre à jour.
+  fields:
+    id: "🧾 ID commande"
+    token: "🪙 Devise"
+    amount: "💵 Montant"
+    address: "🏦 Adresse"
+    status:
+      pending: "⏳ En attente"
+      success: "✅ Réussi"
+      failed: "❌ Échec"
+      expired: "🕒 Expiré"
+    created: "🗓️ Créé le"
+    expires: "⏰ Expire"
+    label: "Statut"
+  link: "🔗 Lien de paiement"
+  created: "✅ Commande créée. Suis les instructions."
+  input_custom: "✏️ Entre un montant (chiffres uniquement)"
+  invalid_amount: "❌ Montant invalide."
+  invalid_amount_2dp: "❌ Deux décimales max."
+  success_text: "✅ Recharge créditée."
+  addr_missing: "Aucune adresse copiable"
+  copy_addr: "📋 Copier l’adresse"
+  copy_amount: "📋 Copier le montant"
+  loading: "⏳ Génération des infos de paiement…"
+  tutorial:
+    title: "💰 Centre de recharge"
+    step1: "1️⃣ Choisir la devise"
+    step2: "2️⃣ Montant"
+    step3: "3️⃣ Adresse"
+    step4: "4️⃣ QR (optionnel)"
+    step4_tip: "Paie en scannant ce message"
+    step5: "5️⃣ Confirmation"
+    step5_tip: "Après paiement, clique 【Actualiser】"
+    warn_amount: "⚠️ Le montant doit correspondre exactement, sinon pas de crédit."
+    network: "Réseau"
+    amount: "Montant"
+    address: "Adresse"
+    expires: "Expire"
+
+  invoice:
+    title: "Infos de paiement"
+    amount: "Montant"
+    address: "Adresse"
+    network: "Réseau"
+    expires: "Expire"
+
+balance:
+  title: "💼 Mes actifs"
+  recharge: "💳 Recharger"
+  withdraw: "🏧 Retirer"
+  template: |-
+    🧾 Solde actuel
+    💵 USDT : {usdt}
+    🪙 TON : {ton}
+    ⭐ Points : {points}
+
+    🎯 Devise courante : <b>{token}</b>
+    🧾 Débit prévu : {real_amt}
+
+balance_page:
+  title: "💼 Vue d’ensemble"
+  usdt: "💵 USDT : {amount}"
+  ton: "🪙 TON : {amount}"
+  points: "⭐ Points : {amount}"
+
+withdraw:
+  title: "🏧 Retrait"
+  choose_token: "Choisis la devise"
+  amount:
+    ask: "💵 Entre le montant (décimal accepté)"
+    min: "📉 Min {token} : {amount}"
+    fee: "🧾 Frais : {fee} {token} (par opération)"
+  balance: "💼 Solde : {balance} {token}"
+  errors:
+    invalid_amount: "❌ Montant invalide."
+    less_than_min: "❌ En dessous du minimum."
+    insufficient: "💸 Solde insuffisant. Réduis le montant ou recharge."
+    bad_address: "❌ Adresse invalide."
+  address:
+    ask: "🏦 Entre ton adresse ({token})"
+  confirm: "✅ Confirmer le retrait"
+  cancel: "✖️ Annuler"
+  cancelled: "Opération annulée."
+  success: "✅ Demande de retrait soumise."
+  success_detail: "• Montant : {amount} {token} (frais {fee})"
+  success_next: "⛓ Le transfert on-chain sera traité dès que possible."
+  fail: "❌ Échec. Réessaie."
+  confirm_page:
+    title: "🧧 Confirme le retrait"
+    token: "🪙 Devise : {token}"
+    amount: "💵 Montant : {amount}"
+    fee: "🧾 Frais : {fee}"
+    total: "💳 Débit total : {total}"
+    address: "🏦 Adresse : {address}"
+
+labels:
+  usdt: "💵 USDT"
+  ton: "🪙 TON"
+  point: "⭐ Étoiles"
+  amount: "💵 Montant"
+  token: "🪙 Devise"
+  user_id: "🆔 ID utilisateur"
+  user_tg_id: "🆔 ID Telegram"
+  energy: "⚡ Énergie"
+  is_last: "🔚 Dernier"
+  last: "🔚 Dernier"
+
+admin:
+  settings: "⚙️ Paramètres"
+  stats: "📈 Statistiques"
+  toggle_auto: "🔁 Basculer mode auto"
+  no_permission: "⛔ Pas d’autorisation."
+  adjust_success: "✅ Ajusté {amount} {token} pour l’utilisateur {uid}"
+  adjust_failed: "❌ Échec : {reason}"
+  covers:
+    menu_title: "🎨 Gérer les couvertures"
+    menu_desc: "🎨 Gestion des couvertures\nChoisis une action :"
+    upload_btn: "➕ Importer une couverture"
+    list_btn: "📚 Voir la liste"
+    delete_btn: "🗑 Supprimer"
+    back_to_mgr: "⬅️ Retour"
+    no_channel: "❌ COVER_CHANNEL_ID non configuré dans settings."
+    upload_ask: "Envoie une image comme couverture. Tu peux ajouter un titre."
+    add_ok: "✅ Couverture ajoutée ID={id}"
+    add_fail: "❌ Échec d’upload : {reason}"
+    empty: "📭 Aucune couverture."
+    list_title: "📚 Liste des couvertures"
+    delete_pick: "Choisis la couverture à supprimer :"
+    delete_ok: "✅ Couverture #{id} supprimée"
+    delete_fail: "❌ Couverture #{id} introuvable"
+    preview_fail: "❌ Échec de l’aperçu."
+    preview_fail_hint: |-
+      Causes possibles :
+      • Bot absent du canal ou sans droit de publier ;
+      • ID de canal erroné ;
+      • Enregistrement sans file_id valide.
+    copy_fail_hint: |-
+      Causes possibles :
+      • Bot absent du canal ou sans droit de publier ;
+      • ID de canal incorrect (doit commencer par -100).
+    preview_ok: "✅ Aperçu envoyé"
+  stats_total_env: "🧧 Total d’enveloppes : {n}"
+  stats_ongoing: "⏳ En cours : {n}"
+  stats_users: "👥 Utilisateurs : {n}"
+  stats_recharge: "💰 Somme des recharges :"
+  stats_active_today: "🔥 Utilisateurs actifs aujourd’hui : {n}"
+  export_service_missing: "❌ Service d’export indisponible (services/export_service.py manquant)"
+  export_failed: "❌ Échec : {reason}"
+  send_file_failed: "❌ Envoi du fichier échoué : {reason}"
+  adjust:
+    button: "➕ Ajuster le solde"
+    ask_user: "👤 Envoie <code>ID</code> ou <code>@nom</code> de l’utilisateur"
+    choose_asset: "💱 Choisis l’actif :"
+    balance_after: "💼 Solde actuel"
+    amount:
+      ask_fx: "✍️ Entre le montant (positif = ajouter, négatif = retirer)"
+      hint_fx: "Jusqu’à 6 décimales. Ex. 12.345678 ou -0.5"
+      ask_point: "✍️ Entre la variation de points (ex. 100 ou -50)"
+    memo:
+      ask: "📝 Note optionnelle (ou ‘skip’)"
+    confirm:
+      title: "✅ Confirme l’ajustement"
+      user: "• Utilisateur : {user}"
+      asset: "• Actif : {token}"
+      amount: "• Variation : {amount}"
+      memo: "• Note : {memo}"
+      ok: "✅ Exécuter"
+      cancel: "✖️ Annuler"
+    cancelled: "Opération annulée."
+    success: "✅ Ajustement terminé"
+    fail: "❌ Échec. Réessaie."
+    errors:
+      bad_user: "❌ Format invalide. Envoie un ID ou @nom"
+      bad_amount: "❌ Montant invalide"
+      zero: "❌ La valeur ne peut pas être 0"
+  export:
+    button: "📤 Exporter"
+    by_user: "👤 Par utilisateur"
+    all: "📊 Complet"
+    confirm_user: "✅ Confirmer l’utilisateur"
+  export_intro: "Choisis une portée d’export"
+  export_user: "👤 Par utilisateur"
+  export_all: "📊 Complet"
+  export_done: "✅ Export terminé. Fichier ci-dessous :"
+  export_empty: "📭 Aucune donnée"
+
+common:
+  prev: "« Précédent"
+  next: "Suivant »"
+  invalid: "Action invalide"
+  not_available: "⛔ Fonction temporairement indisponible"
+  bad_request: "⚠️ Requête invalide. Réessaie."
+  not_found: "🔍 Introuvable"
+  wait_emoji: "⏳"
+  ok_emoji: "👌"
+  custom_amount: "✏️ Montant personnalisé"
+  custom_shares: "✏️ Parts personnalisées"
+  skip: "➡️ Passer"
+  copied_tip: "Contenu copiable envoyé"
+  processing: "⏳ Vérification du solde…"
+  refresh: "🔄 Actualiser"
+  close: "Fermer"
+
+errors:
+  bad_request: "⚠️ Requête invalide. Réessaie."
+  not_found: "🔍 Introuvable"
+  only_mvp: "⚠️ Réservé au MVP de la manche"
+
+balance_card:
+  template: |-
+    🧾 Solde actuel
+    💵 USDT : {usdt}
+    🪙 TON : {ton}
+    ⭐ Points : {points}
+
+    🎯 Devise courante : <b>{token}</b>
+    🧾 Débit prévu : {real_amt}
+
+help:
+  title: "❓ Centre d’aide"
+  subtitle: "FAQ rapide. Tu peux aussi me poser ta question directement."
+  ask_me: "Envoie ta question (中文/English/Français ok)."
+  ask_placeholder: "Ex. : comment envoyer vers un groupe précis ?"
+  thinking: "Je réfléchis. Patience…"
+  ai_fallback: "Je n’ai pas bien compris. Essaie : envoyer enveloppe, récupérer, recharge, retrait, règles, équité. Ou utilise les boutons ci-dessous."
+  exit_ai_tip: "Pour quitter, clique « Quitter le mode IA » ou Retour."
+  exit_ai: "🚪 Quitter le mode IA"
+  exit_ok: "Mode IA quitté."
+  ai_empty: "Envoie directement ta question."
+  ask_ai_btn: "🤖 Me demander (IA)"
+  ask_ai: "💡 Me demander (IA)"
+  faq:
+    send: "🧧 Envoyer une enveloppe"
+    grab: "🤲 Récupérer une enveloppe"
+    recharge: "💳 Recharge & Retrait"
+    withdraw: "🏧 Retrait"
+    rank: "🏆 Classement/Bilan"
+    rules: "⚖️ Règles & Équité"
+
+faq:
+  send:
+    title: "🧧 Envoyer une enveloppe"
+    body: |-
+      1. Menu → Envoyer ;
+      2. Choisir devise, total, parts ;
+      3. Choisir l’emplacement (groupe/privé), message optionnel, confirmer ;
+      4. Pour un groupe, assure-toi que le bot est présent avec droit d’envoi.
+  grab:
+    title: "🤲 Récupérer une enveloppe"
+    body: |-
+      1. Sur la carte, clique 【Récupérer maintenant】 ;
+      2. Montant aléatoire, comptabilisé automatiquement ;
+      3. À la fin, consulte “meilleure chance”.
+  recharge:
+    title: "💳 Recharge & Retrait"
+    body: |-
+      · Utilise “Mes actifs/Recharge/Retrait” et suis l’assistant ;
+      · Les confirmations réseau prennent du temps ;
+      · En cas d’anomalie, contacte un admin.
+  rank:
+    title: "🏆 Classement/Bilan"
+    body: |-
+      · Après chaque manche, consulte le classement et le “lucky star” ;
+      · L’entrée “Bilan du jour” peut dépendre de la version.
+  rules:
+    title: "⚖️ Règles & Équité"
+    body: |-
+      · Répartition uniquement aléatoire ;
+      · Le bot ne participe pas ;
+      · Pour plus de détails, vois le canal d’annonces ou contacte un admin.
