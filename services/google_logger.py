@@ -18,8 +18,10 @@ Google Sheets 用户资料记录工具（全表头版本）
 from __future__ import annotations
 
 import logging
+import os
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Optional, Dict, List
 
 import gspread
@@ -35,8 +37,29 @@ from models.db import (
 )
 
 # === 配置 ===
-SHEET_NAME = "红包群成员"                  # 表格名称（需与实际一致）
-CREDENTIAL_FILE = "service_account.json"  # 凭证 JSON 路径（相对项目根目录，或改为绝对路径）
+SHEET_NAME = "红包群成员"  # 表格名称（需与实际一致）
+
+
+def _resolve_credential_file() -> str:
+    """
+    解析凭证路径优先顺序：
+    1. 环境变量 GOOGLE_SERVICE_ACCOUNT_PATH
+    2. 项目根目录下 secrets/service_account.json
+    3. 回退至旧路径 service_account.json
+    """
+    env_path = os.getenv("GOOGLE_SERVICE_ACCOUNT_PATH")
+    if env_path:
+        return env_path
+
+    secrets_path = Path("secrets") / "service_account.json"
+    if secrets_path.exists():
+        return secrets_path.as_posix()
+
+    legacy_path = Path("service_account.json")
+    return legacy_path.as_posix()
+
+
+CREDENTIAL_FILE = _resolve_credential_file()  # 凭证 JSON 路径
 
 # 统一表头（中文）
 HEADERS: List[str] = [

@@ -26,3 +26,5 @@ coverage/
 *.sqlite
 *.xlsx
 *.xls
+service_account.json
+secrets/

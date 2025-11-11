@@ -100,6 +100,7 @@
 | `TZ` | `Asia/Manila` | 时区 |
 | `AI_PROVIDER` / `OPENAI_MODEL` 等 | `openai` / `gpt-4o-mini` | AI 辅助功能配置（可选） |
 | `HB_COVER_CHANNEL_ID` | `-1001234567890` | 红包封面素材频道 ID |
+| `GOOGLE_SERVICE_ACCOUNT_PATH` | `secrets/service_account.json` | Google service account 凭证路径（未设置时依序尝试 `secrets/service_account.json` → `service_account.json`） |
 
 更多键请参考 `.env.example`；新增键时需同步更新该文件与本节说明。
 
